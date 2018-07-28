@@ -46,7 +46,7 @@ function themify_theme_page_meta_box( $args = array() ){
 		array(
 			'name'=> 'content_width',
 			'title' => __('Content Width', 'themify'),
-			'description' => 'Select "Fullwidth" will remove the padding space on the content area.',
+			'description' => 'Select "Fullwidth" if the page is to be built with the Builder without the sidebar (it will make the Builder content fullwidth).',
 			'type' => 'layout',
 			'show_title' => true,
 			'meta' => array(
@@ -106,7 +106,7 @@ function themify_theme_query_post_meta_box($args = array()) {
 			'description' => '',
 			'type' => 'separator',
 			'meta' => array(
-				'html' => '<div class="themify-info-link">' . sprintf( __( '<a href="%s">Query Posts</a> allows you to query WordPress posts from any category on the page. To use it, select a Query Category.', 'themify' ), 'http://themify.me/docs/query-posts' ) . '</div>'
+				'html' => '<div class="themify-info-link">' . sprintf( __( '<a href="%s">Query Posts</a> allows you to query WordPress posts from any category on the page. To use it, select a Query Category.', 'themify' ), 'https://themify.me/docs/query-posts' ) . '</div>'
 			),
 		),
 		// Query Category
@@ -238,6 +238,14 @@ function themify_theme_query_post_meta_box($args = array()) {
 				array(
 					'value' => 'polaroid',
 					'name' => __( 'Polaroid', 'themify' ),
+				),
+				array(
+					'value' => 'boxed',
+					'name' => __( 'Boxed', 'themify' ),
+				),
+				array(
+					'value' => 'flip',
+					'name' => __( 'Flip', 'themify' ),
 				)
 			)
 		),
@@ -554,6 +562,14 @@ function themify_theme_query_product_meta_box($args = array()) {
 				array(
 					'value' => 'polaroid',
 					'name' => __( 'Polaroid', 'themify' ),
+				),
+				array(
+					'value' => 'boxed',
+					'name' => __( 'Boxed', 'themify' ),
+				),
+				array(
+					'value' => 'flip',
+					'name' => __( 'Flip', 'themify' ),
 				)
 			)
 		),

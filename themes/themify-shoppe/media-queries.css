@@ -6,6 +6,9 @@ MOBILE NAVIGATION
 /* 
 HEADER
 ================================================ */
+.mobile_menu_active #headerwrap {
+	min-height: 60px;
+}
 .mobile_menu_active #header {
 	height: auto;
 	text-align: initial;
@@ -127,9 +130,9 @@ body:not(.header-minbar-left):not(.header-minbar-right):not(.header-left-pane):n
 .mobile_menu_active #cart-link-mobile {
 	display: block;
 	position: absolute;
-	top: 1.2em;
-	right: 2.5em;
-	font-size: 1.1em;
+	top: 18px;
+	right: 48px;
+	font-size: 22px;
 	z-index: 9;
 }
 
@@ -638,12 +641,8 @@ ADMIN BAR
 		margin-left: 5%;
 		margin-right: 5%;
 	}
-	
 	.page-title,
-	h1,
-	.sidebar-none.single h1,
-	.sidebar-none .page-title,
-	.sidebar-none h1 {
+	h1 {
 		font-size: 4.5em;
 	}
 	.fancy-heading,
@@ -691,10 +690,8 @@ ADMIN BAR
 	HEADING
 	================================================ */
 	.page-title,
-	h1,
-	.sidebar-none .page-title,
-	.sidebar-none h1 {
-		font-size: 4em;
+	h1 {
+		font-size: 3em;
 	}
 	h2 {
 		font-size: 1.5em;

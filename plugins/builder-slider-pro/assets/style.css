@@ -514,6 +514,7 @@
 	-o-background-size: cover;
 	background-size: cover;
 	background-repeat: no-repeat;
+	background-position: center center;
 	display: table;
 	width: 100%;
 	table-layout: fixed;
@@ -556,7 +557,7 @@
 		width: auto;
 	}
 	.module-pro-slider .bsp-slide-post-title {
-		font-size: 4vw !important;
+		font-size: 4vw;
 	}
 	.module-pro-slider .sp-arrow {
 		font-size: 6vw;

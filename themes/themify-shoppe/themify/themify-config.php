@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Theme and Themify Framework Path and URI
- * @since 1.2.2 
+ * @since 1.2.2
  */
 defined( 'THEME_DIR' ) || define( 'THEME_DIR', get_template_directory() );
 defined( 'THEME_URI' ) || define( 'THEME_URI', get_template_directory_uri() );
@@ -51,7 +51,7 @@ function themify_config_init() {
 
 	/* 	Theme Config
  	****************************************************************************/
-	define( 'THEMIFY_VERSION', '3.4.8' );
+	define( 'THEMIFY_VERSION', '3.6.0' );
 
 	/* 	Run after update
  	***************************************************************************/
@@ -131,7 +131,9 @@ require_once THEMIFY_DIR . '/customizer/class-themify-customizer.php';
  * Load Schema.org Microdata
  * @since 2.6.5
  */
-require_once THEMIFY_DIR . '/themify-microdata.php';
+if ( 'on' !== themify_get( 'setting-disable_microdata' ) ) {
+	require_once THEMIFY_DIR . '/themify-microdata.php';
+}
 
 require_once THEMIFY_DIR . '/themify-wp-filters.php';
 require_once THEMIFY_DIR . '/themify-plugin-compatibility.php';
@@ -321,7 +323,7 @@ function themify_maybe_clear_legacy() {
 							$wp_filesystem->delete( $del_dir, true );
 						} else {
 							$extension = pathinfo( $subitem['name'], PATHINFO_EXTENSION );
-							if ( ! in_array( $extension, array( 'jpg', 'gif', 'png', 'jpeg', 'bmp' ) ) ) {
+							if ( ! in_array( $extension, array( 'jpg', 'gif', 'png', 'jpeg', 'bmp' ),true ) ) {
 								$del_file = THEME_DIR . '/uploads/' . $item['name'] . '/' . $subitem['name'];
 								$wp_filesystem->delete( $del_file );
 							}
@@ -329,7 +331,7 @@ function themify_maybe_clear_legacy() {
 					}
 				} else {
 					$extension = pathinfo( $item['name'], PATHINFO_EXTENSION );
-					if ( ! in_array( $extension, array( 'jpg', 'gif', 'png', 'jpeg', 'bmp' ) ) ) {
+					if ( ! in_array( $extension, array( 'jpg', 'gif', 'png', 'jpeg', 'bmp' ),true ) ) {
 						$del_file = THEME_DIR . '/uploads/' . $item['name'];
 						$wp_filesystem->delete( $del_file );
 					}
@@ -349,7 +351,7 @@ add_action( 'init', 'themify_maybe_clear_legacy', 9 );
 function themify_migrate_settings_name() {
 	$flag = 'themify_migrate_settings_name';
 	$change = get_option( $flag );
-	if ( ! isset( $change ) || ! $change ) {
+	if ( empty( $change )) {
 		if ( $themify_data = get_option( wp_get_theme()->display('Name') . '_themify_data' ) ) {
 			themify_set_data( $themify_data );
 		}
@@ -380,7 +382,7 @@ add_action( 'themify_updater_post_install', 'themify_theme_updater_post_install'
 function themify_flush_rewrite_rules_after_manual_update() {
 	$flag = 'themify_flush_rewrite_rules_after_manual_update';
 	$change = get_option( $flag );
-	if ( ! isset( $change ) || ! $change ) {
+	if (  empty( $change ) ) {
 		flush_rewrite_rules();
 		update_option( $flag, true );
 	}
@@ -393,7 +395,7 @@ add_action( 'init', 'themify_flush_rewrite_rules_after_manual_update', 99 );
  * @since 2.8.9
  */
 function themify_adjust_page_settings_for_layouts( $args ) {
-	if( 'custom' == $args['layout_group'] )
+	if( 'custom' === $args['layout_group'] )
 		return;
 	$post_id = $args['current_builder_id'];
 	$post = get_post( $post_id );
@@ -437,11 +439,6 @@ function themify_deprecated_shortcodes_init() {
 	 * Flush twitter transient data
 	 */
 	add_action( 'save_post', 'themify_twitter_flush_transient' );
-	/**
-	 * Fix empty auto paragraph in shortcodes
-	 */
-	add_filter( 'the_content', 'themify_fix_shortcode_empty_paragraph' );
-	add_filter( 'themify_builder_module_content', 'themify_fix_shortcode_empty_paragraph' );
 
 	/**
 	 * Assets required for the Themify shortcodes
@@ -519,8 +516,13 @@ add_action( 'after_setup_theme', 'themify_deprecated_shortcodes_init' );
  */
 function themify_load_theme_features() {
 	/* load megamenu feature */
-	if( current_theme_supports( 'themify-mega-menu' ) ) {
+	if ( current_theme_supports( 'themify-mega-menu' ) ) {
 		include( THEMIFY_DIR . '/megamenu/class-mega-menu.php' );
+	}
+
+	/* check if Google fonts are disabled */
+	if ( ! defined( 'THEMIFY_GOOGLE_FONTS' ) && themify_get( 'setting-webfonts_list' ) === 'disabled' ) {
+		define( 'THEMIFY_GOOGLE_FONTS', false );
 	}
 }
 add_action( 'after_setup_theme', 'themify_load_theme_features', 11 );

@@ -45,6 +45,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'builder_ps_text' => '',
         'builder_ps_text_color' => '',
         'builder_ps_text_link_color' => '',
+        'builder_ps_button_action_type' => '',
         'builder_ps_button_text' => '',
         'builder_ps_button_link' => '',
         'builder_ps_button_icon' => '',
@@ -184,10 +185,22 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
                                     <div class="sp-layer bsp-slide-excerpt" data-show-transition="<?php echo $timer_translation[$slide['builder_ps_ps_timer']]; ?>" data-show-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_ps_tranzition_duration']) * 1000 ?>" data-hide-transition="<?php echo $timer_translation[$slide['builder_ps_pe_timer']]; ?>" data-hide-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_pe_tranzition_duration']) * 1000 ?>">
                                         <?php echo apply_filters('themify_builder_module_content', $slide['builder_ps_text']); ?>
                                     </div>
-                                <?php endif; ?>
+								<?php endif; ?>
+								
+								<?php
+									$action_link = $slide['builder_ps_button_link'];
+									$action_type = $slide['builder_ps_button_action_type'];
 
-                                <?php if ('' !== $slide['builder_ps_button_text'] && '' !== $slide['builder_ps_button_link']) : ?>
-                                    <a class="sp-layer bsp-slide-button" href="<?php echo esc_url($slide['builder_ps_button_link']); ?>" data-show-transition="<?php echo $timer_translation[$slide['builder_ps_as_timer']]; ?>" data-show-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_as_tranzition_duration']) * 1000 ?>" data-hide-transition="<?php echo $timer_translation[$slide['builder_ps_ae_timer']]; ?>" data-hide-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_ae_tranzition_duration']) * 1000 ?>">
+									if( $action_type === 'next_slide' ) {
+										$action_link = '#next-slide';
+									} else if( $action_type === 'prev_slide' ) {
+										$action_link = '#prev-slide';
+									}
+								
+								?>
+
+                                <?php if ('' !== $slide['builder_ps_button_text'] && '' !== $action_link) : ?>
+                                    <a class="sp-layer bsp-slide-button" href="<?php echo esc_url( $action_link ); ?>" data-show-transition="<?php echo $timer_translation[$slide['builder_ps_as_timer']]; ?>" data-show-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_as_tranzition_duration']) * 1000 ?>" data-hide-transition="<?php echo $timer_translation[$slide['builder_ps_ae_timer']]; ?>" data-hide-duration="<?php echo Builder_Pro_Slider::get_speed($slide['builder_ps_ae_tranzition_duration']) * 1000 ?>">
                                         <?php if ('' !== $slide['builder_ps_button_icon']) echo sprintf('<i class="%s"></i>', themify_get_icon($slide['builder_ps_button_icon'])); ?> 
                                         <?php echo $slide['builder_ps_button_text']; ?>
                                     </a>

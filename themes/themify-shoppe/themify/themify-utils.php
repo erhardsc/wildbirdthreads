@@ -134,6 +134,14 @@ function themify_enqueue_scripts($page){
         if(themify_is_themify_theme()){
             wp_register_style ( 'themify-admin-widgets-css', themify_enque(THEMIFY_URI . '/css/themify-admin-widgets.css'), array(), THEMIFY_VERSION );
             wp_register_script( 'themify-admin-widgets-js', themify_enque(THEMIFY_URI . '/js/themify-admin-widgets.js'), array('jquery'), THEMIFY_VERSION, true );
+			wp_localize_script( 'themify-admin-widgets-js', 'themifyAdminWidget', array(
+				'labels' => array(
+					'errorUpdate' => esc_html__( 'Try again', 'themify' ),
+					'successUpdate' => esc_html__( 'Updated', 'themify' )
+				),
+				'nonce' => wp_create_nonce( 'ajax-admin-widget-nonce' )
+			)
+		);
         }
 	// Custom Write Panel
 	if( ($page === 'post.php' || $page === 'post-new.php') && in_array($typenow, $types,true) ){
@@ -2297,7 +2305,7 @@ function themify_enque( $url, $check = false ) {
 		 * Check if using minified script files in disabled by wp-config.
 		 * @ref: https://codex.wordpress.org/Debugging_in_WordPress#SCRIPT_DEBUG
 		 */
-		$is_disabled = themify_minified() || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
+		$is_disabled = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
 		if( ! $is_disabled ) {
 		   $is_disabled =  themify_builder_get( 'setting-script_minification-min','builder_minified' )===null?false:true; 
 		}

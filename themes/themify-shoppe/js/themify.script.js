@@ -95,7 +95,8 @@ var FixedHeader = {}, LayoutAndFilter = {};
 			this.layout();
         },
         layout: function () {
-                        var is_rtl = !$('body').hasClass('rtl');
+			var is_rtl = !$('body').hasClass('rtl');
+			
 			$('.loops-wrapper.masonry').each(function(){
 				var $item = $(this),
 					itemDisplay = $item.css( 'display' );
@@ -106,11 +107,10 @@ var FixedHeader = {}, LayoutAndFilter = {};
 				
 				$item.imagesLoaded().always(function(){
 					$item.addClass('masonry-done').isotope({
-						fitRows: {
+						masonry: {
 							columnWidth: '.grid-sizer',
 							gutter: '.gutter-sizer'
 						},
-						layoutMode: 'fitRows',
 						itemSelector: '.loops-wrapper > .post,.loops-wrapper > .product',
 						isOriginLeft: is_rtl
 					});
@@ -589,18 +589,43 @@ var FixedHeader = {}, LayoutAndFilter = {};
 		// Mobile cart
 		( function( $cart, $mobMenu ) {
 			if( $cart.length && $mobMenu.length && ! $body.is( '.header-left-pane, .header-right-pane, .header-minbar-left, .header-minbar-right' ) ) {
-				var $cloneCart = $cart.clone();
+				var $cartIcon = $cart.clone(),
+					$cartMenu = $( '#shopdock' ),
+					$cartMenuClone = $cartMenu.clone(),
+					isSlideCart = $( '#slide-cart' ).length,
+					id = $cartMenu.attr( 'id' ),
+					fakeId = id + '_',
+					toggleId = function() {
+						if( $cartIcon.is( ':visible' ) ) {
+							$cartMenu.attr( 'id', fakeId ).hide();
+							$cartMenuClone.attr( 'id', id ).show();
+						} else {
+							$cartMenu.attr( 'id', id ).show();
+							$cartMenuClone.attr( 'id', fakeId ).hide();
+						}
+					};
 
-				$cloneCart.attr( 'id', 'cart-link-mobile' );
-				$cloneCart.addClass( 'icon-menu' );
+				$cartIcon
+					.addClass( 'icon-menu' )
+					.find( '.tooltip' )
+					.remove()
+					.end()
+					.insertBefore( $mobMenu )
+					.wrap( '<div id="cart-link-mobile" />' );
 
-				$cloneCart.insertBefore( $mobMenu );
-				$cloneCart.find( '.tooltip' ).remove();
+				! isSlideCart && $( '#cart-link-mobile' ).append( $cartMenuClone );
 
-				if( $cart.is( '#cart-link' ) ) {
-					$cloneCart.on( 'click', function( e ) {
-						e.preventDefault();
-						$cart.trigger( 'click' );
+				$cartIcon.on( 'click', function( e ) {
+					e.preventDefault();
+					$cart.is( '#cart-link' ) && $cart.trigger( 'click' );
+				} );
+				
+				if( ! isSlideCart ) {
+					var slowResize;
+					toggleId();
+					$( window ).on( 'resize', function() {
+						clearTimeout( slowResize );
+						slowResize = setTimeout( toggleId, 300 );
 					} );
 				}
 			}
@@ -678,5 +703,60 @@ var FixedHeader = {}, LayoutAndFilter = {};
 	};
 	$( document ).on( 'ready',MegaMenuWidth );
 	$( window ).on( 'debouncedresize',MegaMenuWidth );
+
+	// Revealing footer
+	var revealingFooter = function() {
+		var currentColor, contentParents, isSticky,
+			$footer = $( '#footerwrap' ),
+			$footerInner = $footer.find( '#footer' ),
+			footerHeight = $footer.innerHeight(),
+			$content = $( '#body' ),
+			resizeCallback = function() {
+				footerHeight = $footer.innerHeight();
+				! isSticky && $footer.parent().css( 'padding-bottom', footerHeight );
+			},
+			scrollCallback = function() {
+				var contentPosition = $content.get( 0 ).getBoundingClientRect(),
+					footerVisibility = window.innerHeight - contentPosition.bottom;
+
+				$footer.toggleClass( 'active-revealing', contentPosition.top < 0 );
+
+				if( footerVisibility >= 0 && footerVisibility <= footerHeight ) {
+					$footerInner.css( 'opacity', footerVisibility / footerHeight + 0.2 );
+				} else if( footerVisibility > footerHeight ) {
+					$footerInner.css( 'opacity', 1 );
+				}
+			};
+
+		if( ! $footer.length && ! $content.length ) return;
+
+		// Check for content background
+		contentParents = $content.parents();
+
+		if( contentParents.length ) {
+			 $content.add( contentParents ).each( function() {
+				if( ! currentColor ) {
+					var elColor = $( this ).css( 'background-color' );
+					if( elColor && elColor !== 'transparent' && elColor !== 'rgba(0, 0, 0, 0)' ) {
+						currentColor = elColor;
+					}
+				}
+			} );
+		}
+
+		$content.css( 'background-color', currentColor || '#ffffff' );
+
+		// Sticky Check
+		isSticky = $footer.css( 'position' ) === 'sticky';
+		$( 'body' ).toggleClass( 'no-css-sticky', ! isSticky );
+
+		resizeCallback();
+		scrollCallback();
+		$( window ).on( 'resize', resizeCallback ).on( 'scroll', scrollCallback );
+	}
+
+	if( $( 'body' ).hasClass( 'revealing-footer' ) ) {
+		$( document ).on( 'ready', revealingFooter );
+	}
 
 })(jQuery);

@@ -177,7 +177,9 @@ function themify_shop_layout($data=array()){
 						themify_options_module( array(
 							array( 'name' => __( 'Default', 'themify' ), 'value' => '' ),
 							array( 'name' => __( 'Overlay', 'themify' ), 'value' => 'overlay' ),
-							array( 'name' => __( 'Polaroid', 'themify' ), 'value' => 'polaroid' )
+							array( 'name' => __( 'Polaroid', 'themify' ), 'value' => 'polaroid' ),
+							array( 'name' => __( 'Boxed', 'themify' ), 'value' => 'boxed' ),
+							array( 'name' => __( 'Flip', 'themify' ), 'value' => 'flip' )
 						), 'setting-product_content_layout' ) . '
 					</select>
 				</p>';
@@ -243,6 +245,15 @@ function themify_shop_layout($data=array()){
 						'.themify_options_module( $default_options, 'setting-product_archive_hide_cart_button' ).'
 					</select>
 				</p>';
+				
+	/**
+	 * 
+	 Disable Product Lightbox
+	 * @var String
+	 */
+	$output .= '<p><span class="label">' . __('Product Lightbox', 'themify') . '</span>
+				<label for="setting-disable_product_lightbox"><input type="checkbox" id="setting-disable_product_lightbox" name="setting-disable_product_lightbox" '.checked( themify_get( 'setting-disable_product_lightbox' ), 'on', false ).' /> ' . __('Disable Product Lightbox', 'themify') . '</label></p>';
+
 
 	/**
 	 * Hide Breadcrumbs
@@ -426,7 +437,7 @@ function themify_single_product($data=array()){
 					<label><input type="radio" name="setting-product_gallery_type" value="zoom" '.checked($gallery_type,'zoom',false).'/> ' . __('Zoom Image', 'themify') . '</label>
 					<label><input type="radio" name="setting-product_gallery_type" value="default" '.checked($gallery_type,'default',false).' />' . __('Default WooCommerce lightbox', 'themify') . '</label>
 				</p>';
-				
+	
 	/**
 	 * Hide Social Share
 	 * @var String
@@ -521,6 +532,27 @@ function themify_ajax_cart_style($data=array()){
 			<label><input type="radio" value="dropdown" name="'. $key.'" '.checked( $value, 'dropdown', false ).' /> ' . __('Dropdown cart', 'themify') . '</label>';
 	$output.='<label><input type="radio" value="slide-out" name="'. $key.'" '.checked( $value, 'slide-out', false ).' /> ' . __('Slide-out cart', 'themify') . '</label></p>';
 
+	$key = 'setting-cart_show_seconds';
+
+	$output .= '<p><span class="label">' . __( 'Show cart', 'themify' ) . '</span>
+					<select name="' . $key . '">'.
+						themify_options_module( array(
+							array( 'name' => 1, 'value' => 1000 ),
+							array( 'name' => 2, 'value' => 2000 ),
+							array( 'name' => 3, 'value' => 3000 ),
+							array( 'name' => 4, 'value' => 4000 ),
+							array( 'name' => 5, 'value' => 5000 )
+						), $key ) . '
+					</select> ' . esc_html__( 'seconds', 'themify' ) . '<br>
+					<small class="pushlabel">' . esc_html__( 'When an item is added, show cart for n second(s)', 'themify' ) . '</small>
+				</p>';
+
+	/**
+	 * Disable AJAX add to cart
+	 * @var String
+	 */
+	$output .= '<p>
+				<label for="setting-single_ajax_cart" class="pushlabel"><input type="checkbox" id="setting-single_ajax_cart" name="setting-single_ajax_cart" '.checked( themify_get( 'setting-single_ajax_cart' ), 'on', false ).' /> ' . __('Disable AJAX cart on single product page', 'themify') . '</label></p>';
 
 	return $output;
 }
@@ -590,7 +622,7 @@ if ( ! function_exists( 'themify_edit_link' ) ) {
 	 * Displays a link to edit the entry
 	 */
 	function themify_edit_link() {
-		edit_post_link(__('Edit', 'themify'), '[', ']');
+		edit_post_link(__('Edit', 'themify'), '<span class="edit-button">[', ']</span>');
 	}
 }
 

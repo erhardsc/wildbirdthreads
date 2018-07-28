@@ -137,25 +137,38 @@ class Themify_Builder_Stylesheet {
                          */
                     }
                 } elseif (in_array($type, array('border-top', 'border-bottom', 'border-left', 'border-right'), true)) {
-                    if (strpos($id, '_width', 2) === false) {
-                        continue;
-                    }
-                    $multi_id =  str_replace('_width', '', $id);
-                    $tmp_id = str_replace(str_replace('border-','_',$type),'',$multi_id);
-                    if (isset($settings['checkbox_' . $tmp_id . '_apply_all']) && $settings['checkbox_' . $tmp_id . '_apply_all'] !== '|') {
-                        if($type!=='border-top'){
-                            continue;
-                        }
-                        $type = explode('-',$type);
-                        $type = $type[0];
-                    }
-                    
-                    if (empty($settings[$multi_id . '_color'])) {
-                        continue;
-                    }
-                    $border_style = !empty($settings[$multi_id . '_style']) ? $settings[$multi_id . '_style'] : 'solid';
-                    $color = self::get_rgba_color($settings[$multi_id . '_color']);
-                    $selector = $border_style === 'none' ? sprintf('%s:%s; ', $type, 'none') : ($color !== false ? sprintf('%s:%spx %s %s; ', $type, $value, $border_style, $color) : false);
+					if ( strpos( $id, '_width', 2 ) === false ) {
+						continue;
+					}
+
+					$multi_id =  str_replace( '_width', '', $id );
+					$tmp_id = str_replace( str_replace( 'border-', '_', $type ), '', $multi_id );
+
+					if ( isset( $settings['checkbox_' . $tmp_id . '_apply_all'] ) 
+						&& $settings['checkbox_' . $tmp_id . '_apply_all'] !== '|' ) {
+						if( $type !== 'border-top') {
+							continue;
+						}
+
+						$type = explode( '-', $type );
+						$type = $type[0];
+					}
+
+					$border_style = ! empty( $settings[$multi_id . '_style'] )
+						? $settings[$multi_id . '_style'] : 'solid';
+					$color = ! empty( $settings[$multi_id . '_color'] )
+						? self::get_rgba_color( $settings[$multi_id . '_color'] ) : '';
+
+					if( $border_style === 'none' ) {
+						$selector = sprintf( '%s:%s; ', $type, 'none' );
+					} elseif ( $value ) {
+						if( $color ) {
+							$selector = sprintf( '%s:%spx %s %s; ', $type, $value, $border_style, $color );
+						} else {
+							$selector = sprintf( '%s-width:%spx; ', $type, $value );
+							$selector .= sprintf( '%s-style:%s; ', $type, $border_style );
+						}
+					}
                 } elseif (in_array($type, array('font-size', 'letter-spacing', 'line-height','padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left'), true)) {
                     if (in_array($type, array('padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left'), true)) {
                         $tmp_id = str_replace(array('_top','_left','_right','_bottom'),'',$id);

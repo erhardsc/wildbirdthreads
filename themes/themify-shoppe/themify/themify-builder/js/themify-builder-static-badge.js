@@ -20,7 +20,7 @@
 			if ( match ) {
 				return {
 					index: match.index,
-					content: this.contentPlaceholder( match[0] ),
+					content: match[0],
 					options: {}
 				};
 			}
@@ -92,6 +92,7 @@
 	$('body').on('themify_builder_save_data', function( event, jqxhr, textStatus ){
 		var editor;
 
+		if ( themifyBuilder.is_gutenberg_editor ) return true;
 		if ( _.isEmpty( jqxhr.data.static_content ) ) return true;
 
 		if( tinyMCE && tinyMCE.activeEditor ) {
@@ -116,9 +117,9 @@
 		timeout: undefined,
 		// Initialize
 		init: function () {
-			if ( 'undefined' !== typeof YoastSEO ) {
-				addEventListener( 'load', yoastReadBuilder.load );
-			}
+			$(window).on('YoastSEO:ready', function () {
+				yoastReadBuilder.load();
+			});
 		},
 
 		// Load plugin and add hooks.

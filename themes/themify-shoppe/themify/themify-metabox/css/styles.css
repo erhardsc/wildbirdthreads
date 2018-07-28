@@ -52,7 +52,6 @@
 ---------------------------------------------------------------*/
 #poststuff .inside .themify_write_panel {
 	border: 1px solid #dedede;
-	border-radius: 4px;	
 	margin: 0 0 5px 0;
 }
 
@@ -206,7 +205,7 @@ a.preview-icon {
 	pointer-events: none;
 }
 
-.themify_field {
+.themify_field_row .themify_field {
 	float: left;
 	width: 75%;
 	position: relative;
@@ -316,7 +315,7 @@ a.preview-icon {
 .themify_upload_preview img {
 	vertical-align: bottom;
 }
-.themify_field_title {
+.themify_field_row .themify_field_title {
 	width: 25%;
 	padding: 0 15px 10px 0;
 	float: left;
@@ -324,11 +323,16 @@ a.preview-icon {
 	max-width: 220px;
 }
 @media screen and (max-width: 600px) {
-	.themify_field_title {
+	.themify_field_row .themify_field_title {
 		width: auto;
 		max-width: 100%;
 		float: none;
 	}
+}
+
+.themify_field_row .themify_field input,
+.themify_field_row .themify_field select {
+	box-sizing: border-box;
 }
 	
 .themify_field_description {

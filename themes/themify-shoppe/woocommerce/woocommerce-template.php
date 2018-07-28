@@ -131,6 +131,7 @@ if ( ! function_exists( 'themify_template_single_breadcrumb' ) ) {
 if ( ! function_exists( 'themify_template_single_wishlist' ) ) {
 	
 	function themify_template_single_wishlist(){
+		remove_action( 'woocommerce_after_add_to_cart_button', 'themify_template_single_wishlist' );
 		?>
 			<div class="product-share-wrap">
 				<?php Themify_Wishlist::button()?>
@@ -338,7 +339,8 @@ if(!function_exists('themify_loop_add_to_cart_link')) {
 			$detect = new Themify_Mobile_Detect;
 			$isPhone = $detect->isMobile() && !$detect->isTablet();
 		}
-		if( ( 'variable' == $product->get_type() || 'grouped' == $product->get_type() ) && !$isPhone ) {
+		if( ( 'variable' == $product->get_type() || 'grouped' == $product->get_type() ) && !$isPhone
+			&& !( themify_check( 'setting-disable_product_lightbox' ) ) ) {
 
 			$url = add_query_arg( array('post_in_lightbox' => '1'), $product->add_to_cart_url() );
 			$replacement = 'class="variable-link themify-lightbox '; // add space at the end

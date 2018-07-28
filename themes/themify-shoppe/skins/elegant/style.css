@@ -147,6 +147,9 @@ HEADER
 }
 
 /* icon menu */
+.icon-menu {
+	text-decoration: none;
+}
 .icon-menu a {
 	line-height: inherit;
 	padding-top: 1.2em;

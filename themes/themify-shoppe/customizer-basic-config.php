@@ -455,7 +455,7 @@ function themify_theme_customizer_definition( $args ) {
 				'type'    => 'Themify_Logo_Control',
 				'label'   => __( 'Site Logo', 'themify' ),
 			),
-			'selector' => '#site-logo',
+			'selector' => 'body[class*="themify"] #site-logo a',
 			'prop' => 'logo',
 		),
 

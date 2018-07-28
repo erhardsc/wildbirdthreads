@@ -135,9 +135,9 @@ if ( ! function_exists( 'themify_make_image_size' ) ) {
 		setlocale( LC_CTYPE, get_locale() . '.UTF-8' );
 		$attached_file = get_attached_file( $attachment_id );
 
-		$use_large_not_full = apply_filters( 'themify_image_script_use_large_size', true );
-		if ( $use_large_not_full && isset( $meta['sizes']['large']['file'] ) )
-			$attached_file = str_replace( $meta['file'], trailingslashit( dirname( $meta['file'] ) ) . $meta['sizes']['large']['file'], $attached_file );
+		$source_size = apply_filters( 'themify_image_script_source_size', 'large' );
+		if ( $source_size !== 'full' && isset( $meta['sizes'][ $source_size ]['file'] ) )
+			$attached_file = str_replace( $meta['file'], trailingslashit( dirname( $meta['file'] ) ) . $meta['sizes'][ $source_size ]['file'], $attached_file );
 
 		$resized = image_make_intermediate_size( $attached_file, $width, $height, true );
 		if ( $resized && ! is_wp_error( $resized ) ) {

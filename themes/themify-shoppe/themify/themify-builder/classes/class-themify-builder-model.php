@@ -1366,4 +1366,31 @@ final class Themify_Builder_Model {
     public static function remove_edit_transient($post_id){
         return delete_transient(self::$transient_name.$post_id);
     }
+    
+    public static function get_icon($icon){
+        if(strpos($icon,'fa-')===0){
+                $icon='fa '.$icon;
+        }
+        return $icon;
+    }
+
+    /**
+     * Check if gutenberg active
+     * @return boolean
+     */
+    public static function is_gutenberg_active() {
+        if ( in_array( 'gutenberg/gutenberg.php', (array) get_option( 'active_plugins', array() ) ) ||
+            ( is_multisite() && array_key_exists( 'gutenberg/gutenberg.php', (array) get_site_option( 'active_sitewide_plugins' ) ) ) ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if we are gutenberg editor
+     * @return boolean
+     */
+    public static function is_gutenberg_editor() {
+        return ( self::is_gutenberg_active() && ! isset( $_GET['classic-editor'] ) );
+    }
 }

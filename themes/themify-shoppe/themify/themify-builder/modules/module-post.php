@@ -321,7 +321,7 @@ class TB_Post_Module extends Themify_Builder_Component_Module {
                         self::get_color(array( '.module-post .post-title:hover', '.module-post .post-title a:hover' ),'font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size('.module-post .post-title','font_size_title'),
                         self::get_text_transform('.module-post .post-title','text_transform_title'),
-                        self::get_font_style('.module-post .post-title','font_style_title'),
+                        self::get_font_style('.module-post .post-title','font_style_title', 'font_weight_title', 'text_decoration_regular_title'),
                         self::get_line_height('.module-post .post-title','line_height_title')
 		);
                 

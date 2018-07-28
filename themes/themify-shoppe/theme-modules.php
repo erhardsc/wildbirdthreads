@@ -6,7 +6,7 @@
  *	----------------------------------------------------------------------
  * 
  *  					Copyright (C) Themify
- * 						http://themify.me
+ * 						https://themify.me
  *
  *  To add custom modules to the theme, create a new 'custom-modules.php' file in the theme folder.
  *  They will be added to the theme automatically.
@@ -114,6 +114,12 @@ function themify_theme_design_controls( $data = array() ) {
 				'setting-exclude_cart',
 				checked( themify_get( 'setting-exclude_cart' ), 'on', false ),
 				__('Exclude Cart Icon.', 'themify')
+			);
+			
+			$html .= sprintf('<p class="hide-if none pushlabel"><label for="%1$s"><input type="checkbox" id="%1$s" name="%1$s" %2$s /> %3$s</label></p>',
+				'setting-exclude_wishlist',
+				checked( themify_get( 'setting-exclude_wishlist' ), 'on', false ),
+				__('Exclude Wishlist Icon.', 'themify')
 			);
 		}
 
@@ -226,6 +232,15 @@ function themify_theme_design_controls( $data = array() ) {
 			$key . 'footer_back',
 			checked( themify_get( $key . 'footer_back' ), 'on', false ),
 			__('Exclude Back to Top button', 'themify')
+		);
+
+		/**
+		 * Revealing footer
+		 */
+		$html .= sprintf('<p class="hide-if none pushlabel"><label for="%1$s"><input type="checkbox" id="%1$s" name="%1$s" %2$s /> %3$s</label></p>',
+			'setting-revealing_footer',
+			checked( themify_get( 'setting-revealing_footer' ), 'on', false ),
+			__( 'Enable Revealing Footer', 'themify' )
 		);
 
 	// End group of elements to hide
@@ -492,7 +507,9 @@ function themify_default_layout( $data = array() ){
 						themify_options_module( array(
 							array( 'name' => __( 'Default', 'themify' ), 'value' => '' ),
 							array( 'name' => __( 'Overlay', 'themify' ), 'value' => 'overlay' ),
-							array( 'name' => __( 'Polaroid', 'themify' ), 'value' => 'polaroid' )
+							array( 'name' => __( 'Polaroid', 'themify' ), 'value' => 'polaroid' ),
+							array( 'name' => __( 'Boxed', 'themify' ), 'value' => 'boxed' ),
+							array( 'name' => __( 'Flip', 'themify' ), 'value' => 'flip' )
 						), 'setting-post_content_layout' ) . '
 					</select>
 				</p>';

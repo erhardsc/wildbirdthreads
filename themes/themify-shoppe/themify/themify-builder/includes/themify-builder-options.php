@@ -220,7 +220,7 @@ function themify_builder_module_settings_field_builder($field) {
                             <?php echo esc_html($option['radio']['label']); ?>
                             <?php foreach ($option['radio']['options'] as $k => $v): ?>
                                 <input id="<?php echo $option['radio']['id'] . '_' . $k; ?>" type="radio" name="<?php echo $option['radio']['id']; ?>" class="themify-builder-radio-dnd" value="<?php echo $k; ?>" />
-                                <label for="<?php echo$option['radio']['id'] . '_' . $k; ?>" class="pad-right themify-builder-radio-dnd-label"><?php echo $k; ?></label>
+                                <label for="<?php echo $option['radio']['id'] . '_' . $k; ?>" class="pad-right themify-builder-radio-dnd-label"><?php echo $k; ?></label>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; // endif radio input    ?>

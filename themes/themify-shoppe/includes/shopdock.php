@@ -13,13 +13,7 @@
 		?>
 		<div id="cart-wrap">
 			<div id="cart-list">
-				<div class="jspContainer">
-					<div class="jspPane">
-						<?php get_template_part('includes/loop-product', 'cart'); ?>
-					</div>
-					<!-- /.jspPane -->
-				</div>
-				<!-- /.jspContainer -->
+				<?php get_template_part('includes/loop-product', 'cart'); ?>
 			</div>
 			<!-- /cart-list -->
 
@@ -51,7 +45,7 @@
 			: woocommerce_get_page_id( 'shop' );
 		echo '<span class="empty-shopdock">';
 		printf( __( 'Your cart is empty. Go to %s', 'themify' )
-			, '<a href="' . $shop_permalink . '">' . __( 'Shop', 'themify' ) . '</a>.' );
+			, '<a href="' . get_permalink( $shop_permalink ) . '">' . __( 'Shop', 'themify' ) . '</a>.' );
 		echo '</span">';
 	?>
 	<?php endif; // cart whether is not empty?>

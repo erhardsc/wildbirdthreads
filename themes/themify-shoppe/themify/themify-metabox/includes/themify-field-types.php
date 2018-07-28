@@ -937,8 +937,9 @@ function themify_get_uploader( $id = '', $args = array() ){
 			<?php if( $args['dragfiles'] ){ ?>
 					<small><?php _e(' or drag files here.', 'themify'); ?></small>
 				</div>
-			<?php } ?>
-			<?php
+			<?php } else { ?>
+				<span id="<?php echo esc_attr( $id . 'drag-drop-area' ); ?>" style="display: none;"></span>
+			<?php }
 
 			$html = ob_get_contents();
 			ob_end_clean();

@@ -97,7 +97,6 @@ body.page-loaded #headerwrap {
 	background: none;
 	border: none;
 	border-top: solid 1px rgba(0,0,0,.1);
-	color: #030301;
 	display: block;
 	font-size: 100%;
 	width: auto;
@@ -290,6 +289,7 @@ body.page-loaded #headerwrap {
 	transition: left 200ms ease-in-out;
 	overflow: hidden;
 	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 }
 .mobile-menu-visible .sidemenu-on {
 	left: 0px;

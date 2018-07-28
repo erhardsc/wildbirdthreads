@@ -44,7 +44,8 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 				'label' => __('Module Title', 'builder-maps-pro'),
 				'class' => 'large',
 				'render_callback' => array(
-					'binding' => 'live'
+                                    'binding' => 'live',
+                                    'live-selector'=>'.module-title'
 				)
 			),
 			array(

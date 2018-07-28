@@ -411,6 +411,10 @@ div.wpgdprc-consent-modal footer.wpgdprc-consent-modal__footer {
     }
 }
 
+abbr.wpgdprc-required + abbr.required {
+    display: none !important;
+}
+
 @keyframes wpgdprcFadeIn {
     from {
         opacity: 0;

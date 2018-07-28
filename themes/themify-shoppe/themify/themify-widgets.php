@@ -1864,6 +1864,87 @@ class Themify_Google_Maps extends WP_Widget {
 	}
 }
 
+///////////////////////////////////////////
+// Layout Parts Class
+///////////////////////////////////////////
+class Themify_Layout_Part extends WP_Widget {
+
+	///////////////////////////////////////////
+	// Layout Parts
+	///////////////////////////////////////////
+	function __construct() {
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => 'layout-parts', 'description' => __('Layout Parts widget', 'themify') );
+
+		/* Widget control settings. */
+		$control_ops = array( 'id_base' => 'themify-layout-parts' );
+
+		/* Create the widget. */
+		parent::__construct( 'themify-layout-parts', __('Themify - Layout Parts', 'themify'), $widget_ops, $control_ops );
+	}
+
+	///////////////////////////////////////////
+	// Widget
+	///////////////////////////////////////////
+	function widget( $args, $instance ) {
+
+		/* User-selected settings. */
+		$layout_part = isset( $instance['layout_part'] ) ? $instance['layout_part'] : false;
+
+		/* Before widget (defined by themes). */
+		echo $args['before_widget'];
+
+		echo do_shortcode('[themify_layout_part slug=' . $layout_part . ']');
+
+		/* After widget (defined by themes). */
+		echo $args['after_widget'];
+	}
+
+	///////////////////////////////////////////
+	// Update
+	///////////////////////////////////////////
+	function update( $new_instance, $old_instance ) {
+		$instance = $old_instance;
+
+		$instance['layout_part'] = $new_instance['layout_part'];
+
+		return $instance;
+	}
+
+	///////////////////////////////////////////
+	// Form
+	///////////////////////////////////////////
+	function form( $instance ) {
+
+		/* Set up some default widget settings. */
+		$defaults = array(
+			'layout_part' => ''
+		);
+		$instance = wp_parse_args( (array) $instance, $defaults ); ?>
+
+
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'layout_part' ) ); ?>"><?php _e('Layout Part:', 'themify'); ?></label>
+			<select id="<?php echo esc_attr( $this->get_field_id( 'layout_part' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'layout_part' ) ); ?>">
+				<?php
+				$layouts = get_posts( 'post_type=tbuilder_layout_part' );
+
+				foreach( $layouts as $layout ) {
+					echo '<option value="' . esc_attr( $layout->post_name ) . '"';
+
+					if ( $layout->post_name == $instance['layout_part'] ) echo ' selected="selected"';
+
+					echo '>' . esc_html( $layout->post_title );
+
+					echo '</option>';
+				}
+				?>
+			</select>
+		</p>
+
+		<?php
+	}
+}
 
 ///////////////////////////////////////////
 // Register Widgets
@@ -1881,6 +1962,7 @@ function themify_register_widgets() {
 	register_widget('Themify_Flickr');
 	register_widget('Themify_Most_Commented');
 	register_widget('Themify_Google_Maps');
+	register_widget('Themify_Layout_Part');
 }
 add_action('widgets_init', 'themify_register_widgets', 1);
 

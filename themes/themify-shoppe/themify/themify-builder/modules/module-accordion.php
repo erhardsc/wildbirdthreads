@@ -208,7 +208,7 @@ class TB_Accordion_Module extends Themify_Builder_Component_Module {
             self::get_margin(' .ui.module-accordion'),
             // Border
             self::get_seperator('border', __('Border', 'themify')),
-            self::get_border('.ui.module-accordion', 'border_accordion')
+            self::get_border(' .ui.module-accordion', 'border_accordion')
         );
 
         $accordion_title = array(

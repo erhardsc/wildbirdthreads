@@ -467,11 +467,18 @@ FOOTER
 BUILDER
 *************************************************************************************/
 /* UI Button */
+.module .module-buttons {
+	text-transform: uppercase;
+	font-family: 'Poppins', sans-serif;
+	font-weight: 600;
+}
 .ui.builder_button {
 	padding: 1.1875em 2em 1em;
-	font: 600 0.8em/2em 'Poppins', sans-serif;
-	text-transform: uppercase;
 	box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
+	font-size: 0.8em;
+}
+.ui.builder_button span {
+	line-height: 2em;
 }
 .module-buttons.outline a.blue,
 .ui.builder_button.blue {
@@ -825,7 +832,7 @@ BUILDER
 	color: #434789;
 	padding: 1.1875em 2em 1em;
 	margin: 0;
-	font-size: 0.9em;
+	font-size: 0.8em;
 	opacity: 0;
 	transform: translate(-50%, -50%);
 	-moz-transform: translate(-50%, -50%);

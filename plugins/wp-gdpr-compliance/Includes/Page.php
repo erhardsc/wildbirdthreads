@@ -228,6 +228,18 @@ class Page {
      */
     private static function renderChecklistPage() {
         ?>
+        <?php if(Helper::hasMailPluginInstalled()) : ?>
+            <div class="wpgdprc-message wpgdprc-message--notice">
+                <?php
+                printf(
+                    '<p><strong>%s:</strong> %s</p>',
+                    strtoupper(__('Note', WP_GDPR_C_SLUG)),
+                    __('We think you might have a mail plugin installed.', WP_GDPR_C_SLUG)
+                );
+                ?>
+                <p><?php _e('Do you know where you got your email database from? Did you ask all the people on your newsletter(s) if they consent to receiving it? GDPR requires that all of the people in your email software has given you explicit permission to mail them.', WP_GDPR_C_SLUG); ?></p>
+            </div>
+        <?php endif; ?>
         <p><?php _e('Below we ask you what private data you currently collect and provide you with tips to comply.', WP_GDPR_C_SLUG); ?></p>
         <ul class="wpgdprc-list">
             <?php
@@ -423,11 +435,13 @@ class Page {
             $snippet = (isset($_POST['snippet'])) ? stripslashes($_POST['snippet']) : $consent->getSnippet();
             $wrap = (isset($_POST['wrap']) && array_key_exists($_POST['wrap'], Consent::getPossibleCodeWraps())) ? esc_html($_POST['wrap']) : $consent->getWrap();
             $placement = (isset($_POST['placement']) && array_key_exists($_POST['placement'], Consent::getPossiblePlacements())) ? esc_html($_POST['placement']) : $consent->getPlacement();
+            $required = (isset($_POST['required'])) ? 1 : 0;
             $consent->setTitle($title);
             $consent->setDescription($description);
             $consent->setSnippet($snippet);
             $consent->setWrap($wrap);
             $consent->setPlacement($placement);
+            $consent->setRequired($required);
             $consent->setActive($active);
             $id = $consent->save();
             if (!empty($id)) {
@@ -435,19 +449,19 @@ class Page {
             }
         }
         ?>
-        <form method="post" action="" novalidate="novalidate">
+        <form method="post" action="">
             <?php wp_nonce_field('consent_create_or_update', 'consent_nonce'); ?>
             <p><strong><?php _e('Add New Consent', WP_GDPR_C_SLUG); ?></strong></p>
             <div class="wpgdprc-setting">
                 <label for="wpgdprc_active"><?php _e('Active', WP_GDPR_C_SLUG); ?></label>
                 <div class="wpgdprc-options">
-                    <input type="checkbox" name="active" id="wpgdprc_active" value="1" <?php checked(1, $consent->getActive()); ?> />
+                    <label><input type="checkbox" name="active" id="wpgdprc_active" value="1" <?php checked(1, $consent->getActive()); ?> /> <?php _e('Yes', WP_GDPR_C_SLUG); ?></label>
                 </div>
             </div>
             <div class="wpgdprc-setting">
                 <label for="wpgdprc_title"><?php _e('Title', WP_GDPR_C_SLUG); ?></label>
                 <div class="wpgdprc-options">
-                    <input type="text" name="title" class="regular-text" id="wpgdprc_title" value="<?php echo $consent->getTitle(); ?>" />
+                    <input type="text" name="title" class="regular-text" id="wpgdprc_title" value="<?php echo $consent->getTitle(); ?>" required="required" />
                     <div class="wpgdprc-information">
                         <p><?php _e('e.g. "Google Analytics" or "Advertising"', WP_GDPR_C_SLUG); ?></p>
                     </div>
@@ -519,6 +533,15 @@ class Page {
                     </div>
                 </div>
             </div>
+            <div class="wpgdprc-setting">
+                <label for="wpgdprc_active"><?php _e('Required', WP_GDPR_C_SLUG); ?></label>
+                <div class="wpgdprc-options">
+                    <label><input type="checkbox" name="required" id="wpgdprc-required" value="1" <?php checked(1, $consent->getRequired()); ?> /> <?php _e('Yes', WP_GDPR_C_SLUG); ?></label>
+                    <div class="wpgdprc-information">
+                        <p><?php _e('Ticking this checkbox means this Consent will always be triggered so users cannot opt-in or opt-out.', WP_GDPR_C_SLUG); ?></p>
+                    </div>
+                </div>
+            </div>
             <p class="submit">
                 <?php submit_button((!empty($consentId) ? __('Update', WP_GDPR_C_SLUG) : __('Add', WP_GDPR_C_SLUG)), 'primary', 'submit', false); ?>
                 <a class="button button-secondary" href="<?php echo Helper::getPluginAdminUrl('consents'); ?>"><?php _e('Back to overview', WP_GDPR_C_SLUG); ?></a>
@@ -545,7 +568,7 @@ class Page {
                 <tr>
                     <th scope="col" width="10%"><?php _e('Consent', WP_GDPR_C_SLUG); ?></th>
                     <th scope="col" width="16%"><?php _e('Title', WP_GDPR_C_SLUG); ?></th>
-                    <th scope="col" width="12%"><?php _e('Placement', WP_GDPR_C_SLUG); ?></th>
+                    <th scope="col" width="12%"><?php _e('Required', WP_GDPR_C_SLUG); ?></th>
                     <th scope="col" width="20%"><?php _e('Modified at', WP_GDPR_C_SLUG); ?></th>
                     <th scope="col" width="20%"><?php _e('Created at', WP_GDPR_C_SLUG); ?></th>
                     <th scope="col" width="14%"><?php _e('Action', WP_GDPR_C_SLUG); ?></th>
@@ -564,11 +587,11 @@ class Page {
                                     printf(
                                         '<a href="%s">%s</a>',
                                         Consent::getActionUrl($consent->getId()),
-                                        ((!empty($title)) ? $title : __('(no title)'))
+                                        ((!empty($title)) ? $title : __('(no title)', WP_GDPR_C_SLUG))
                                     );
                                 ?>
                             </td>
-                            <td><?php echo $consent->getPlacement(); ?></td>
+                            <td><?php echo ($consent->getRequired()) ? __('Yes', WP_GDPR_C_SLUG) : __('No', WP_GDPR_C_SLUG); ?></td>
                             <td><?php echo $consent->getDateModified(); ?></td>
                             <td><?php echo $consent->getDateCreated(); ?></td>
                             <td>

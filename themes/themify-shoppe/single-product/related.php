@@ -37,10 +37,11 @@ if ( $related_products ) : ?>
 				 	$post_object = get_post( $related_product->get_id() );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
-
-					wc_get_template_part( 'content', 'product' ); ?>
+					wc_get_template_part( 'content', 'product' );
+				?>
 
 			<?php endforeach; ?>
+			<?php wp_reset_postdata(); ?>
 
 		<?php woocommerce_product_loop_end(); ?>
 

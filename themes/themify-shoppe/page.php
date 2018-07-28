@@ -57,7 +57,7 @@ global $themify; ?>
 
 				<?php wp_link_pages(array('before' => '<p><strong>'.__('Pages:','themify').'</strong> ', 'after' => '</p>', 'next_or_number' => 'number')); ?>
 
-				<?php edit_post_link(__('Edit','themify'), '[', ']'); ?>
+				<?php edit_post_link(__('Edit','themify'), '<span class="edit-button">[', ']</span>'); ?>
 
 				<!-- comments -->
 				<?php if(!themify_check('setting-comments_pages') && $themify->query_category == ""): ?>

@@ -95,8 +95,9 @@ if (!class_exists('Themify_Builder')) :
                     add_filter('themify_image_make_responsive_image', 'wp_make_content_images_responsive');
                 }
                 // Actions
-                add_action('init', array($this, 'setup'), 10);
             }
+			
+			add_action('init', array($this, 'setup'), 10);
             new Themify_Builder_Include($this);
             if (Themify_Builder_Model::is_frontend_editor_page()) {
 
@@ -136,8 +137,11 @@ if (!class_exists('Themify_Builder')) :
                             // Filtered post types
                             add_filter('themify_post_types', array($this, 'extend_post_types'));
                             Themify_Builder_Model::load_general_metabox(); // setup metabox fields
-                            add_filter('themify_do_metaboxes', array($this, 'builder_write_panels'), 11);
-                            add_action('themify_builder_metabox', array($this, 'add_builder_metabox'), 10);
+                            
+                            if ( ! Themify_Builder_Model::is_gutenberg_editor() ) {
+                                add_filter('themify_do_metaboxes', array($this, 'builder_write_panels'), 11);
+                                add_action('themify_builder_metabox', array($this, 'add_builder_metabox'), 10);
+                            }
                             add_action('admin_enqueue_scripts', array($this, 'load_admin_interface'), 10);
                             add_action( 'load-post.php', array( $this, 'builder_static_badge_scripts' ) );
                             add_action( 'load-post-new.php', array( $this, 'builder_static_badge_scripts' ) );
@@ -337,6 +341,10 @@ if (!class_exists('Themify_Builder')) :
             include THEMIFY_BUILDER_CLASSES_DIR . '/class-themify-builder-plugin-compat.php';
             include THEMIFY_BUILDER_CLASSES_DIR . '/class-themify-builder-components-manager.php';
 			include THEMIFY_BUILDER_CLASSES_DIR . '/class-themify-builder-library-item.php';
+
+            if ( Themify_Builder_Model::is_gutenberg_active() ) {
+                include THEMIFY_BUILDER_CLASSES_DIR . '/class-themify-builder-gutenberg.php';
+            }
         }
 
         private function includes_editable() {
@@ -630,7 +638,8 @@ if (!class_exists('Themify_Builder')) :
 								'modules' => Themify_Builder_Model::get_modules_localize_settings(),
 								'i18n' => self::get_i18n(),
                                                                 'builder_url'=>THEMIFY_BUILDER_URI,
-                                                                'ticks'=>self::get_tick_options()
+                                                                'ticks'=>self::get_tick_options(),
+                                                                'is_gutenberg_editor' => Themify_Builder_Model::is_gutenberg_editor()
 							)));
 							wp_enqueue_script('themify-builder-backend-js');
 							wp_localize_script($script, 'themify_builder_plupload_init', Themify_Builder_Model::get_builder_plupload_init());
@@ -772,15 +781,7 @@ if (!class_exists('Themify_Builder')) :
 				$layout_part = wp_get_recent_posts( array( 'post_type' => 'tbuilder_layout_part', 'numberposts' => 1), OBJECT );
 				$post = $layout_part[0];
 			}
-			
-			if (Themify_Builder_Model::is_frontend_editor_page() && $_POST['page'] == 'visual'){
-				setup_postdata($post);
-				$data['markup'] = $this->builder_show_on_front('', 'layoutPart');
-				$data['pid'] = get_the_ID();
-				wp_reset_postdata();
-			} else {
-				$data["url"] = get_permalink($post->ID)."#builder_active";
-			}
+			$data["url"] = themify_https_esc(get_permalink($post->ID))."#builder_active";
 			echo wp_json_encode($data);
 			wp_die();
 		}
@@ -1024,6 +1025,13 @@ if (!class_exists('Themify_Builder')) :
                 add_action( 'themify_builder_frontend_enqueue', array( $this, 'enqueue_frontend_builder_data'));
 
                 $wrapper = sprintf('<div id="themify_builder_content-%1$d" data-postid="%1$d" class="themify_builder_content themify_builder_content-%1$d themify_builder"></div>', $post_id);
+
+                // Start builder block replacement
+                if ( Themify_Builder_Model::is_gutenberg_active() && $ThemifyBuilder_Data_Manager->has_builder_block( $content ) ) {
+                    $content = $ThemifyBuilder_Data_Manager->replace_builder_block_tag( $wrapper, $content );
+                    $content = $ThemifyBuilder_Data_Manager->update_static_content_string( '', $content ); // remove static content tag
+                    return $content;
+                }
 
                 // Start static content replacement
                 if ( $ThemifyBuilder_Data_Manager->has_static_content( $content ) ) {
@@ -1405,11 +1413,21 @@ if (!class_exists('Themify_Builder')) :
         public function print_static_content_badge_templates() { ?>
             <script type="text/html" id="tmpl-themify-builder-static-badge">
                 <div class="themify-builder-static-badge-box">
+                    <?php if( ! Themify_Builder_Model::is_gutenberg_editor() ): ?>
                     <h4><?php esc_html_e( 'Themify Builder Placeholder', 'themify' );?></h4>
                     <p><?php esc_html_e( 'This badge represents where the Builder content will append on the frontend. You can move this placeholder anywhere within the editor or add content before or after.', 'themify' );?></p>
                     <p><?php echo sprintf( '%s <a href="#" class="themify-builder-mce-view-frontend-btn">%s</a> | <a href="#" class="themify-builder-mce-view-backend-btn">%s</a>', esc_html__( 'Edit Builder:', 'themify' ), esc_html__( 'Frontend', 'themify' ), esc_html__( 'Backend', 'themify' ) ); ?></p>
+                    <?php endif; ?>
                 </div>
             </script>
+            
+            <?php if( Themify_Builder_Model::is_gutenberg_editor() ): ?>
+                <div style="display: none;">
+                    <?php
+                        wp_editor( ' ', 'tb_lb_hidden_editor' );
+                    ?>
+                </div>
+            <?php endif; ?>
         <?php
         }
 

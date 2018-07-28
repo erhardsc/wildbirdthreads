@@ -10,8 +10,8 @@
 
 global $post, $product;
 $dimensions = apply_filters( 'themify_mega_menu_image_dimensions', array(
-	'width'  => 180,
-	'height' => 120
+	'width'  => themify_get( 'setting-mega_menu_image_width', 180 ),
+	'height' => themify_get( 'setting-mega_menu_image_height', 120 )
 ) );
 ?>
 

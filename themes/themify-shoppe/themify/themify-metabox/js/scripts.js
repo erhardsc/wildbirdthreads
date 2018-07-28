@@ -152,25 +152,28 @@ window.Themify_Metabox = (function($){
 				dateformat = $self.data('dateformat' ),
 				timeformat = $self.data('timeformat' ),
 				timeseparator = $self.data('timeseparator' );
-			$self.datetimepicker({
-				showOn: 'both',
-				showButtonPanel: true,
-				closeButton: close,
-				buttonText: label,
-				dateFormat: dateformat,
-				timeFormat: timeformat,
-				stepMinute: 5,
-				firstDay: $self.data( 'first-day' ),
-				separator: timeseparator,
-				onClose: function( date ) {
-					if ( '' != date ) {
-						$( '#' + $self.data('clear') ).addClass('themifyFadeIn');
+			
+			( $.fn.themifyDatetimepicker 
+				? $.fn.themifyDatetimepicker 
+				: $.fn.datetimepicker ).call( $self, {
+					showOn: 'both',
+					showButtonPanel: true,
+					closeButton: close,
+					buttonText: label,
+					dateFormat: dateformat,
+					timeFormat: timeformat,
+					stepMinute: 5,
+					firstDay: $self.data( 'first-day' ),
+					separator: timeseparator,
+					onClose: function( date ) {
+						if ( '' != date ) {
+							$( '#' + $self.data('clear') ).addClass('themifyFadeIn');
+						}
+					},
+					beforeShow: function() {
+						$('#ui-datepicker-div').addClass( 'themifyDateTimePickerPanel' );
 					}
-				},
-				beforeShow: function() {
-					$('#ui-datepicker-div').addClass( 'themifyDateTimePickerPanel' );
-				}
-			});
+				});
 			$self.next().addClass('button');
 		});
 

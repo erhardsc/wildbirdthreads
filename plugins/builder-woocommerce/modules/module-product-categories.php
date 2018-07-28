@@ -27,7 +27,10 @@ class TB_Product_Categories_Module extends Themify_Builder_Component_Module {
 				'id' => 'mod_title',
 				'type' => 'text',
 				'label' => __('Module Title', 'builder-wc'),
-				'class' => 'large'
+				'class' => 'large',
+                                'render_callback' => array(
+                                    'live-selector'=>'.module-title'
+                                )
 			),
 			array(
 				'id' => 'columns',

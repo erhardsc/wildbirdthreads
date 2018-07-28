@@ -47,14 +47,17 @@ if ( ! is_wp_error( $terms ) && is_array( $terms ) ) {
 			<?php while ( $related->have_posts() ) : $related->the_post(); ?>
 				<article class="post type-post clearfix">
 
-					<?php
-					global $themify;
-					if ( ! themify_check( $key . '_hide_image' ) && ( has_post_thumbnail() || themify_check( 'setting-auto_featured_image' ) ) ) :
-						if ( $post_image = themify_get_image( $themify->auto_featured_image . 'setting=image_post_single&w=394&h=330&ignore=true' ) ) : ?>
+					<?php global $themify;
+					if ( ! themify_check( $key . '_hide_image' ) ) : ?>
+						<?php if ( themify_has_post_video() ) : ?>
+							<figure class="post-video clearfix">
+								<?php echo themify_post_video(); ?>
+							</figure>
+						<?php elseif( ( has_post_thumbnail() || themify_check( 'setting-auto_featured_image' ) ) && $post_image = themify_get_image( $themify->auto_featured_image . 'setting=image_post_single&w=394&h=330&ignore=true' ) ) : ?>
 							<figure class="post-image clearfix">
 								<a href="<?php echo themify_get_featured_image_link(); ?>"><?php echo $post_image; ?><?php themify_zoom_icon(); ?></a>
 							</figure>
-						<?php endif; // if there's a featured image?>
+						<?php endif;?>
 					<?php endif; ?>
 
 					<div class="post-content">

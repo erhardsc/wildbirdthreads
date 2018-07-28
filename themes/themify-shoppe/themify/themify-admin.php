@@ -105,7 +105,7 @@ function themify_page() {
 	$skins_and_demos = apply_filters( 'themify_show_skins_and_demos_admin', false );
 
 	/** whether the theme has sample data to import */
-	$sample_data = file_exists( THEME_DIR . '/sample/import.php' );
+	$sample_data = file_exists( THEME_DIR . '/sample/import.zip' );
 	?>
 	<!-- alerts -->
 	<div class="alert"></div>
@@ -518,8 +518,10 @@ function themify_get_skins(){
 							'name' => $info[0],
 							'version' => $info[1],
 							'description' => $info[2],
-							'screenshot' => is_file( $path . '/screenshot.png' ) ? get_template_directory_uri().'/skins/'. $dirTwo . '/screenshot.png' : get_template_directory_uri() . '/themify/img/screenshot-na.png',
-							'has_demo' => is_file( $path . '/import.php' ),
+							'screenshot' => is_file( $path . '/screenshot.jpg' ) ? get_template_directory_uri().'/skins/'. $dirTwo . '/screenshot.jpg'
+											: ( is_file( $path . '/screenshot.png' ) ? get_template_directory_uri().'/skins/'. $dirTwo . '/screenshot.png'
+											: get_template_directory_uri() . '/themify/img/screenshot-na.png' ),
+							'has_demo' => is_file( $path . '/import.zip' ),
 							'demo_uri' => $info[3],
 							'required_plugins' => $info[4]
 						);
@@ -987,17 +989,35 @@ function themify_updates_admin_widget() {
 					foreach( $installed_plugins as $key => $plugin ) {
 						if( strpos( $update['_a']['name'], dirname( $key ) ) !== false 
 							&& intval( str_replace( '.', '', trim( $plugin['Version'] ) ) ) < $latest_version ) {
+								$update_url = admin_url('/plugins.php');
+								$button_class = 'themify-update-button';
+
 							if ( isset($update['_a']['free']) ) {
+								if( ! function_exists( 'install_plugin_install_status' ) ) {
+									include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
+								}
+
+								$plugin_info = install_plugin_install_status( (object) array(
+									'slug' => $update['_a']['name'],
+									'version' => $latest_version
+								) );
+
+								if( ! empty( $plugin_info ) && $plugin_info['status'] === 'update_available' ) {
+									$update_url = $plugin_info['url'];
+									$button_class .= ' themify-update-ajax';
+								}
+
 								$update_items .= sprintf( '<li class="themify-update-plugins">
 									<h2>%s<span>V. %s</span></h2>
 									<a href="%s" target="_blank">%s</a>
-									<a href="%s" target="_blank" class="themify-update-button">%s</a>
+									<a href="%s" target="_blank" class="%s">%s</a>
 								</li>'
 								, $plugin['Name']
-								, $plugin['Version']
+								, preg_replace( '/\B/', '.', $latest_version )
 								, esc_url( '//themify.me/changelogs/' . $update['_a']['name'] . '.txt' )
 								, esc_html__( 'Changelog', 'themify' ) 
-								, esc_url( admin_url('/plugins.php') )
+								, esc_url( $update_url )
+								, esc_attr( $button_class )
 								, esc_html__( 'Update', 'themify' ) );
 							} else {
 								$update_items .= sprintf( '<li class="themify-update-plugins">
@@ -1006,10 +1026,10 @@ function themify_updates_admin_widget() {
 									<a href="%s" target="_blank" class="themify-update-button">%s</a>
 								</li>'
 								, $plugin['Name']
-								, $plugin['Version']
+								, preg_replace( '/\B/', '.', $latest_version )
 								, esc_url( '//themify.me/changelogs/' . $update['_a']['name'] . '.txt' )
 								, esc_html__( 'Changelog', 'themify' ) 
-								, esc_url( '//themify.me/member/member' )
+								, esc_url( admin_url( 'admin.php?page=themify&tfplugin=' . $update['_a']['name'] . '#update-check' ) )
 								, esc_html__( 'Update', 'themify' ) );
 							}
 						}
@@ -1032,7 +1052,14 @@ function themify_updates_admin_widget() {
 		printf( '<ul>%s</ul>', $cached_data );
 	}
 
-} 
+}
+
+function themify_admin_widget_delete_transient() {
+	check_admin_referer( 'ajax-admin-widget-nonce', 'nonce' );
+	delete_transient( 'themify_widget_current_updates' );
+	wp_die();
+}
+add_action( 'wp_ajax_themify_admin_widget_delete_transient', 'themify_admin_widget_delete_transient', 1 );
 
 ///////////////////////////////////////////
 // Site Logo
@@ -1328,6 +1355,26 @@ function themify_img_settings( $data = array() ) {
 			<label for="setting-img_settings_use"><input type="checkbox" id="setting-img_settings_use" name="setting-img_settings_use" class="disable_img_php" ' . $checked_use . '/> ' . __( 'Disable image script globally', 'themify' ) . '</label><br/>
 			<small class="pushlabel">' . __( 'Default WordPress image sizes or original images will be used.', 'themify' ) . '</small>
 			<br/>
+		</div>
+		<div class="show_if_enabled_img_php">
+			<div class="label">' . __('Base Image Size', 'themify') . '</div>
+			<div class="row">
+				<select name="setting-img_php_base_size">';
+					foreach ( $feature_sizes as $option ) {
+						if ( $option['value'] == themify_get( 'setting-img_php_base_size', 'large' ) ) {
+							$output .= '<option value="' . esc_attr( $option['value'] ) . '" selected="selected">';
+							$output .= $option['name'];
+							$output .= '</option>';
+						} else {
+							$output .= '<option value="' . esc_attr( $option['value'] ) . '">' . $option['name'] . '</option>';
+						}
+					}
+					$output .= '
+				</select>
+				<small class="pushlabel">
+				' . __( 'Select the image size that image script will resize thumbnails from. If you\'re not sure, leave it as "Large".', 'themify' ) . '
+				</small>
+			</div>
 		</div>
 		<div class="show_if_disabled_img_php">
 			<div class="label">' . __('Default Featured Image Size', 'themify') . '</div>
@@ -2875,12 +2922,17 @@ if(!function_exists('themify_webfonts_subsets')) {
 		$html = '<p>
 					<span class="label">' . __('Google Fonts List', 'themify') . '</span>';
 
+			// Disable Google fonts
+			$html .= '<label for="' . esc_attr( $key . '_disabled' ) . '">
+					<input ' . checked( themify_check( $key ) ? themify_get( $key ) : '', 'disabled', false ) . ' type="radio" id="' . esc_attr( $key . '_disabled' ) . '" name="' . esc_attr( $key ) . '" value="disabled" /> ' .  __( 'Disable Google fonts', 'themify' ) . '</label><br/>';
+
 			// Recommended list
-			$html .= '<label for="' . esc_attr( $key . '_recommended' ) . '">
+			$html .= '<span class="pushlabel">
+					<label for="' . esc_attr( $key . '_recommended' ) . '">
 					<input ' . checked( themify_check( $key )? themify_get( $key ) : 'recommended', 'recommended', false) . ' type="radio" id="' . esc_attr( $key . '_recommended' ) . '" name="' . esc_attr( $key ) . '" value="recommended" /> ' .  __( 'Show recommended Google Fonts only', 'themify' ) . '</label><br/>';
 
 			// Full list
-			$html .= '<span class="pushlabel">
+			$html .= '
 					<label for="' . esc_attr( $key . '_full' ) . '">
 					<input ' . checked( themify_check( $key )? themify_get( $key ) : '', 'full', false ) . ' type="radio" id="' . esc_attr( $key . '_full' ) . '" name="' . esc_attr( $key ) . '" value="full" /> ' . __( 'Show all Google Fonts (showing all fonts will take longer to load)', 'themify' ) . '</label>
 					</span>
@@ -3175,8 +3227,47 @@ function themify_feature_image_sizes_select($key = ''){
 	return $output;
 }
 
+if ( ! function_exists( 'themify_theme_mega_menu_controls' ) ) {
+/**
+ * Mega Menu Controls
+ * @param array $data Theme settings data
+ * @return string Markup for module.
+ * @since 3.5.8
+ */
+function themify_theme_mega_menu_controls( $data = array() ) {
+	/**
+	 * Theme Settings Option Key Prefix
+	 *
+	 * @var string
+	 */
+	$key = 'setting-mega_menu';
 
+	/**
+	 * Module markup
+	 * @var string
+	 */
+	 
+	$mega = themify_get( $key.'_posts', 5 );
+	$out .= '
+	<p>
+		<span class="label">' . __( 'Mega Menu Posts', 'themify' ) . '</span>
+		<input type="text" name="'.$key.'_posts" value="' . esc_attr( $mega ) . '" class="width2">' . __( 'Posts', 'themify' ) .'
+		<small class="pushlabel">'. __( 'Number of posts to show on mega menu.', 'themify' ) .'</small>
+	</p>';
+	
+	$width = themify_get( $key.'_image_width', 180 );
+	$height = themify_get( $key.'_image_height', 120 );
+	$out .= '
+	<p>
+		<span class="label">' . __( 'Mega Menu Posts', 'themify' ) . '</span>
+		<input type="text" name="'.$key.'_image_width" value="' . esc_attr( $width ) . '" class="width2"> X <input type="text" name="'.$key.'_image_height" value="' . esc_attr( $height ) . '" class="width2"> ' . __( 'px', 'themify' ) .'
+		<small class="pushlabel">'. __( 'Enter featured image size on mega menu', 'themify' ) .'</small>
+	</p>';
 
+	return $out;
+}
+
+}
 
 // Add Google Map Api page
 function themify_add_settings_page($themify_theme_config){
@@ -3204,4 +3295,29 @@ function themify_google_map_key($data=array()){
     $google_map_key = themify_get( 'setting-google_map_key' );
     return '<p><span class="label">' . __( 'Google Map Key', 'themify' ) . '</span> <input type="text" class="width10" name="setting-google_map_key" value="' . esc_attr( $google_map_key ) . '" /> <br />
 				<span class="pushlabel"><small>'.__('Google API key is required to use Builder Map module and Map shortcode.','themify').' <a href="//developers.google.com/maps/documentation/javascript/get-api-key#key" target="_blank">' . __( 'Generate an API key', 'themify' ) . '</a> and insert it here.</small></span></p>';
+}
+
+/**
+ * Adds option to disable schema.org markup to Settings > General page
+ *
+ * @return array
+ */
+function themify_framework_theme_microdata_config( $themify_theme_config ) {
+	$themify_theme_config['panel']['settings']['tab']['general']['custom-module'][] =
+		array(
+			'title' => __('Microdata support', 'themify'),
+			'function' => 'themify_framework_theme_microdata_config_callback'
+		)
+	;
+	return $themify_theme_config;
+};
+add_filter( 'themify_theme_config_setup', 'themify_framework_theme_microdata_config' );
+
+/**
+ * Callback for themify_framework_theme_microdata_config(), to display the options
+ *
+ * @return string
+ */
+function themify_framework_theme_microdata_config_callback() {
+	return '<p><span class="label">' . __('Disable Schema.org Microdata Support', 'themify') . '</span> <label for="setting-disable_microdata"><input type="checkbox" id="setting-disable_microdata" name="setting-disable_microdata" '. checked( 'on', themify_get( 'setting-disable_microdata' ), false ) .'/> ' . __('Do not output schema.org microdata.', 'themify') . '</label></p>';
 }

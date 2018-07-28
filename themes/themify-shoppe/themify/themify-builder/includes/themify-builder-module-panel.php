@@ -9,7 +9,7 @@ if(!is_object($post)){
 }
 ?>
 
-<div id="tb_toolbar" <?php if($post->post_status === 'auto-draft'):?>class="tb_auto_draft"<?php endif;?>>
+<div id="tb_toolbar">
 	<div class="tb_toolbar_add_modules_wrap" tabindex="-1">
             <span class="tb_toolbar_add_modules"></span>
             <div id="tb_module_panel" class="tb_modules_panel_wrap">
@@ -142,7 +142,7 @@ if(!is_object($post)){
 		<?php if( $post->post_status!=='auto-draft'): ?>
 			<div class="tb_toolbar_backend_edit">
 				<?php if(is_admin()):?>
-					<a href="<?php echo get_permalink()?>#builder_active" id="themify_builder_switch_frontend" class="themify_builder_switch_frontend"><i class="ti-arrow-left"></i><span><?php _e( 'Frontend', 'themify' ); ?></span></a>
+					<a href="<?php echo get_permalink()?>#builder_active" id="themify_builder_switch_frontend" class="themify_builder_switch_frontend"><i class="ti-arrow-right"></i><span><?php _e( 'Frontend', 'themify' ); ?></span></a>
 				<?php else:?>
 					<a href="<?php echo get_edit_post_link(); ?>" id="themify_builder_switch_backend"><i class="ti-arrow-left"></i><span><?php esc_html_e( 'Backend', 'themify' ); ?></span></a>
 				<?php endif;?>

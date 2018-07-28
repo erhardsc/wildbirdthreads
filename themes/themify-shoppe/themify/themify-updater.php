@@ -66,11 +66,6 @@ function themify_check_version( $area = 'top' ) {
 	$theme_notifications = '';
 	$fw_notifications = '';
 
-	// Try get member status from saved login
-	ob_start();
-	$themifyUserMember = themify_get_member_status_cached();
-	ob_end_clean();
-
 	// Setup variables for updater.
 	$theme = wp_get_theme();
 	$theme_name = $theme->get_template();
@@ -103,7 +98,7 @@ function themify_check_version( $area = 'top' ) {
 
 	// If $newT exists, double check the ->login attribute to verify if user is or not logged
 	if ( is_object( $newT ) ) {
-		$newT->login = ( $themifyUserMember && $newT->login != '' ) || !empty($newT->free) ? '' : ($newT->login?$newT->login:'login');
+		$newT->login = !empty($newT->free) ? '' : ($newT->login?$newT->login:'login');
 	}
 
 	// Check if one of them are objects. If they're not, the transient expired so we'll check again
@@ -200,7 +195,7 @@ log</a> for details.</p>', 'themify' ),
 		 * Utilizes WordPress HTTP API
 		 * http://codex.wordpress.org/Function_API/wp_remote_request
 		 */
-		$versions_url = 'http://themify.me/versions/versions.xml';
+		$versions_url = 'https://themify.me/versions/versions.xml';
 		$response = wp_remote_get( $versions_url, array( 'sslverify' => false ) );
 		if ( is_wp_error( $response ) ) {
 			//echo '<h4>Can\'t load ' . $versions_url . '</h4><p>' . $response->get_error_code(). '</p>';
@@ -229,7 +224,7 @@ log</a> for details.</p>', 'themify' ),
 						$login = '';
                                                 $is_free = 1;
 					} else {
-						$login = $themifyUserMember ? '' : 'login';	
+						$login = 'login';	
 					}
 					//Compares framework version
 					if ( str_replace( '.', '', trim( THEMIFY_VERSION ) ) < $latest ) {
@@ -242,7 +237,7 @@ log</a> for details.</p>', 'themify' ),
 							$class = 'upgrade-framework';
 							$target = '';
 						} else {
-							$url = 'http://themify.me/files/themify/themify.zip';
+							$url = 'https://themify.me/files/themify/themify.zip';
 							$class = '';
 							$target = '_blank';
 						}
@@ -281,7 +276,7 @@ log</a> for details.</p>', 'themify' ),
 						$login = '';
 						$is_free = 1;
 					} else {
-						$login = $themifyUserMember ? '' : 'login';	
+						$login = 'login';	
 					}
 
 					//Compares theme version
@@ -295,7 +290,7 @@ log</a> for details.</p>', 'themify' ),
 							$class = 'upgrade-theme';
 							$target = '';
 						} else {
-							$url = 'http://themify.me/files/'.$theme_name.'/'.$theme_name.'.zip';
+							$url = 'https://themify.me/files/'.$theme_name.'/'.$theme_name.'.zip';
 							$class = '';
 							$target = '_blank';
 						}
@@ -366,7 +361,7 @@ log</a> for details.</p>', 'themify' ),
 
 	if ( isset( $area ) && 'tab' === $area ) {
 		if ( '' == $theme_notifications ) {
-			$login = $is_free || $themifyUserMember ? '' : 'login';
+			$login = $is_free ? '' : 'login';
 			$latest_version = '';
                         if(! empty( $versions )){
                             foreach( $versions['versions']['_c']['version'] as $version ) {
@@ -391,7 +386,7 @@ log</a> for details.</p>', 'themify' ),
 				$class = 'upgrade-theme';
 				$target = '';
 			} else {
-				$url = 'http://themify.me/files/'.$theme_name.'/'.$theme_name.'.zip';
+				$url = 'https://themify.me/files/'.$theme_name.'/'.$theme_name.'.zip';
 				$class = '';
 				$target = '_blank';
 			}
@@ -479,58 +474,49 @@ function themify_updater(){
 	$type = $_GET['type'];
 	$themeversion = isset( $_GET['themeversion'] ) ? ( $_GET['themeversion'] === 'latest' ? '' : ( '-' . $_GET['themeversion'] ) ) : ''; // 'latest' > '' // 'x.x.x' > '-x.x.x'
 	//are we going to update a theme?
-	$url = $type === 'theme'?'http://themify.me/files/' . $theme_name . '/' . $theme_name . $themeversion . '.zip':'http://themify.me/files/themify/themify.zip';
-
-	if ( $_GET['login'] != 'true' ) {
-		$_POST['username'] = themify_get_member_username_cached();
-		$_POST['password'] = themify_get_member_password_cached();
-
-		if ( ! empty( $_POST['username'] ) && ! empty( $_POST['password'] ) ) {
-			$_GET['login'] = 'true';
-		}
-	}
+	$url = $type === 'theme'?'https://themify.me/files/' . $theme_name . '/' . $theme_name . $themeversion . '.zip':'https://themify.me/files/themify/themify.zip';
 	
 	//If login is required
 	if($_GET['login'] == 'true'){
-
-			$response = wp_remote_post(
-				'https://themify.me/member/login',
-				array(
-					'timeout' => 300,
-					'headers' => array(),
-					'body' => array(
-						'amember_login' => $_POST['username'],
-						'amember_pass'  => $_POST['password']
-					),
-					'sslverify' => false,
-			    )
-			);
-
-			//Was there some error connecting to the server?
-			if( is_wp_error( $response ) ) {
-				$errorCode = $response->get_error_code();
-				echo 'Error: ' . $errorCode;
-				themify_clean_member_status_cached();
-				die();
-			}
-			
-                        if(isset( $response['response']['code'] ) && $response['response']['code'] !== 200 ) {
-                            die( 'Login URL failed. Please contact Themify (https://themify.me/contact). Error code: ' . $response['response']['code']);
-                        }
-
-			//Connection to server was successful. Test login cookie
 			$amember_nr = false;
-			foreach($response['cookies'] as $cookie){
-				if($cookie->name === 'amember_nr'){
-                                    $amember_nr = true;
-                                    break;
+			if(isset($_POST['username'],$_POST['password'])){
+				$response = wp_remote_post(
+					'https://themify.me/member/login',
+					array(
+						'timeout' => 300,
+						'headers' => array(),
+						'body' => array(
+							'amember_login' => $_POST['username'],
+							'amember_pass'  => $_POST['password']
+						),
+						'sslverify' => false,
+					)
+				);
+
+				//Was there some error connecting to the server?
+				if( is_wp_error( $response ) ) {
+					$errorCode = $response->get_error_code();
+					echo 'Error: ' . $errorCode;
+					die();
 				}
+				
+                                if(isset( $response['response']['code'] ) && $response['response']['code'] !== 200 ) {
+                                        die( 'Login URL failed. Please contact Themify (https://themify.me/contact). Error code: ' . $response['response']['code']);
+                                }
+
+				//Connection to server was successful. Test login cookie
+				
+				foreach($response['cookies'] as $cookie){
+					if($cookie->name === 'amember_nr'){
+                                            $amember_nr = true;
+                                            break;
+					}
+                            }
 			}
-			if(!$amember_nr){
-				_e('You are not a Themify Member.', 'themify');
-				themify_clean_member_status_cached();
-				die();
-			}
+                         if(!$amember_nr){
+                                _e('You are not a Themify Member.', 'themify');
+                                die();
+                        }
 
 	}
 	
@@ -573,118 +559,11 @@ function themify_updater(){
 }
 
 /**
- * Get member status from cache
- */
-function themify_get_member_status_cached() {
-	$status = false;
-
-	if ( isset( $_COOKIE['themify_user_m_v2'] ) ) {
-		$status = decrypt_cookie( $_COOKIE['themify_user_m_v2'], 'themify_user_m_v2' ); // 'member_themify_check' == success
-	}
-
-	$username = themify_get_member_username_cached();
-	$password = themify_get_member_password_cached();
-
-	if ( empty( $username ) || empty( $password ) ) {
-		$status = false;
-	}
-
-	if ( empty( $status ) ) {
-		themify_clean_member_status_cached();
-	}
-
-	return $status === 'member_themify_check';
-}
-
-/**
- * Get member username from cache
- */
-function themify_get_member_username_cached() {
-	return isset( $_COOKIE['themify_user_u_v2'] )?decrypt_cookie( str_replace(chr(0),'', $_COOKIE['themify_user_u_v2']), 'themify_user_u_v2' ):'';
-}
-
-/**
- * Get member password from cache
- */
-function themify_get_member_password_cached() {
-	return isset( $_COOKIE['themify_user_p_v2'] )?decrypt_cookie( str_replace(chr(0),'', $_COOKIE['themify_user_p_v2']), 'themify_user_p_v2' ):'';
-}
-
-/**
- * Encrypt cookie
- */
-function encrypt_cookie( $value, $key ) {
-	$cookie = '';
-	$h_key = hash( 'sha256', $key, TRUE );
-
-	if( version_compare( phpversion(), '7.1', '>' ) && extension_loaded( 'openssl' ) ) {
-		$nonceSize = openssl_cipher_iv_length( 'aes-256-ctr' );
-		$nonce = openssl_random_pseudo_bytes( $nonceSize );
-		$ciphertext = openssl_encrypt( $value, 'aes-256-ctr', $h_key, OPENSSL_RAW_DATA, $nonce );
-		$cookie = $nonce . $ciphertext;
-
-	} else {
-		$iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB );
-		$iv = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
-		$cookie = mcrypt_encrypt( MCRYPT_RIJNDAEL_256, $h_key, $value, MCRYPT_MODE_ECB, $iv );
-	}
-	
-	return rawurlencode( $cookie );
-}
-
-/**
- * Decrypt cookie
- */
-function decrypt_cookie( $value, $key ) {
-	$cookie = '';
-	$value = rawurldecode( $value );
-	$h_key = hash( 'sha256', $key, TRUE );
-
-	if( version_compare( phpversion(), '7.1', '>' ) && extension_loaded( 'openssl' ) ) {
-		$nonceSize = openssl_cipher_iv_length( 'aes-256-ctr' );
-		$nonce = mb_substr( $value, 0, $nonceSize, '8bit' );
-		$ciphertext = mb_substr( $value, $nonceSize, null, '8bit' );
-		$cookie = trim( openssl_decrypt( $ciphertext, 'aes-256-ctr', $h_key, OPENSSL_RAW_DATA, $nonce ) );
-
-	} else {
-		$iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB );
-		$iv = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
-		$cookie = trim( mcrypt_decrypt( MCRYPT_RIJNDAEL_256, $h_key, $value, MCRYPT_MODE_ECB, $iv ) );
-	}
-
-	return $cookie;
-}
-
-/**
- * Save member username and password // 'member_themify_check' == success
- */
-function themify_set_member_status_cached( $username, $password ) {
-	setrawcookie( 'themify_user_m_v2', encrypt_cookie( 'member_themify_check', 'themify_user_m_v2' ), strtotime( '+15 days' ), '/' );
-	setrawcookie( 'themify_user_u_v2', encrypt_cookie( str_replace(chr(0),'', $username), 'themify_user_u_v2' ), strtotime( '+15 days' ), '/' );
-	setrawcookie( 'themify_user_p_v2', encrypt_cookie( str_replace(chr(0),'', $password), 'themify_user_p_v2' ), strtotime( '+15 days' ), '/' );
-}
-
-/**
- * Clean member username and password
- */
-function themify_clean_member_status_cached() {
-	
-	$script = '<script id="themify_clean_member_status_cached">';
-	$script .= 'jQuery(function() {';
-	$script .= 'document.cookie = "themify_user_m_v2=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT";';
-	$script .= 'document.cookie = "themify_user_u_v2=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT";';
-	$script .= 'document.cookie = "themify_user_p_v2=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT";';
-	$script .= '});';
-	$script .= '</script>';
-	echo $script;
-}
-
-/**
  * Validate login credentials against Themify's membership system
  */
 function themify_validate_login(){
 	$response = wp_remote_post(
-		'http://themify.me/files/themify-login.php',
+		'https://themify.me/files/themify-login.php',
 		array(
 			'timeout' => 300,
 			'headers' => array(),
@@ -711,10 +590,6 @@ function themify_validate_login(){
 	}
 	if(!$amember_nr){
 		die('invalid');
-	}
-	else {
-		// Save member username and password
-		themify_set_member_status_cached( $_POST['username'], $_POST['password'] );
 	}
 
 	$subs = json_decode($response['body'], true);
@@ -774,7 +649,7 @@ function themify_updater_notice_allowed_tags() {
 //Check Free if a theme is free for reinstall
 function themify_check_theme_is_free(){
     check_admin_referer('ajax-nonce', 'nonce');
-    $response = wp_remote_get( 'http://themify.me/versions/versions.xml', array( 'sslverify' => false ) );
+    $response = wp_remote_get( 'https://themify.me/versions/versions.xml', array( 'sslverify' => false ) );
     if ( is_wp_error( $response ) ) {
         die('error');
     }

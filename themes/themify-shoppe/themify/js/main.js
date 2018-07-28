@@ -28,6 +28,7 @@ var Themify, ThemifyGallery;
         jsLazy: [],
         is_builder_active: false,
         is_builder_loaded:false,
+		body : $( 'body' ),
         triggerEvent: function (a, b) {
             var c;
             document.createEvent ? (c = document.createEvent('HTMLEvents'), c.initEvent(b, !0, !0)) : document.createEventObject && (c = document.createEventObject(), c.eventType = b), c.eventName = b, a.dispatchEvent ? a.dispatchEvent(c) : a.fireEvent && htmlEvents["on" + b] ? a.fireEvent("on" + c.eventType, c) : a[b] ? a[b]() : a["on" + b] && a["on" + b]()

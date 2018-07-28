@@ -3224,6 +3224,14 @@ BUTTONS MODULE (.module_column is added for higher priority)
 	background: transparent !important;
 	border-color: transparent;
 }
+.module_column .module-buttons.transparent a.ui.builder_button {
+    padding-left: 0;
+    padding-right: 0;
+}
+.module_column .module-buttons.transparent a.ui.builder_button span {
+    margin-left: 0;
+    margin-right: 0;
+}
 
 .module_column .module-buttons.transparent a.black { color: #000000; }
 .module_column .module-buttons.transparent a.gray { color: #666666; }
@@ -4747,7 +4755,7 @@ MEDIA QUERIES
 }
 
 @media screen and (max-width: 680px) {
-    .module_row.fullheight .row_inner > .module_column,
+    .module_row.fullheight .row_inner > .module_column:not(.col-full),
     .module_row.fullheight .sub_column,
     .module_row.fullheight > .row_inner {
         min-height: 0 !important;

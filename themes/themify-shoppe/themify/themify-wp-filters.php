@@ -396,12 +396,12 @@ add_filter( 'body_class', 'themify_body_classes' );
 function themify_post_class( $classes ) {
 	global $themify;
 
-	$classes[] = ( ! isset($themify->hide_title) || ( isset( $themify->hide_title ) && $themify->hide_title !== 'yes' ) ) ? 'has-post-title' : 'no-post-title';
-	$classes[] = ( ! isset( $themify->hide_date ) || ( isset( $themify->hide_date ) && $themify->hide_date !== 'yes' ) ) ? 'has-post-date' : 'no-post-date';
-	$classes[] = ( ! isset( $themify->hide_meta_category ) || ( isset( $themify->hide_meta_category ) && $themify->hide_meta_category !== 'yes' ) ) ? 'has-post-category' : 'no-post-category';
-	$classes[] = ( ! isset( $themify->hide_meta_tag ) || ( isset( $themify->hide_meta_tag ) && $themify->hide_meta_tag !== 'yes' ) ) ? 'has-post-tag' : 'no-post-tag';
-	$classes[] = ( ! isset( $themify->hide_meta_comment ) || ( isset( $themify->hide_meta_comment ) && $themify->hide_meta_comment !== 'yes' ) ) ? 'has-post-comment' : 'no-post-comment';
-	$classes[] = ( ! isset( $themify->hide_meta_author ) || ( isset( $themify->hide_meta_author ) && $themify->hide_meta_author !== 'yes' ) ) ? 'has-post-author' : 'no-post-author';
+	$classes[] = ( ! isset($themify->hide_title) || ( $themify->hide_title !== 'yes' ) ) ? 'has-post-title' : 'no-post-title';
+	$classes[] = ( ! isset( $themify->hide_date ) || (  $themify->hide_date !== 'yes' ) ) ? 'has-post-date' : 'no-post-date';
+	$classes[] = ( ! isset( $themify->hide_meta_category ) || (  $themify->hide_meta_category !== 'yes' ) ) ? 'has-post-category' : 'no-post-category';
+	$classes[] = ( ! isset( $themify->hide_meta_tag ) || (  $themify->hide_meta_tag !== 'yes' ) ) ? 'has-post-tag' : 'no-post-tag';
+	$classes[] = ( ! isset( $themify->hide_meta_comment ) || (  $themify->hide_meta_comment !== 'yes' ) ) ? 'has-post-comment' : 'no-post-comment';
+	$classes[] = ( ! isset( $themify->hide_meta_author ) || (  $themify->hide_meta_author !== 'yes' ) ) ? 'has-post-author' : 'no-post-author';
 	$classes[] = ( is_admin() && get_post_type() === 'product' ) ? 'product' : '';
 
 	return apply_filters( 'themify_post_classes', $classes );
@@ -621,7 +621,9 @@ add_action( 'wp_head', 'themify_favicon_action' );
  * @param array $data
  */
 function themify_header_html_action( $data = array() ) {
-	echo "\n\n" . themify_get( 'setting-header_html' );
+	if( ! Themify_Builder_Model::is_front_builder_activate() ) {
+		echo "\n\n" . themify_get( 'setting-header_html' );
+	}
 }
 add_action( 'wp_head','themify_header_html_action' );
 
@@ -630,9 +632,11 @@ add_action( 'wp_head','themify_header_html_action' );
  * @param array $data
  */
 function themify_footer_html_action( $data = array() ) {
-	echo "\n\n" . themify_get( 'setting-footer_html' );
+	if( ! Themify_Builder_Model::is_front_builder_activate() ) {
+		echo "\n\n" . themify_get( 'setting-footer_html' );
+	}
 }
-add_action( 'wp_footer','themify_footer_html_action' );
+add_action( 'wp_footer','themify_footer_html_action', 9999 );
 
 if ( ! function_exists( 'themify_search_excludes_cpt' ) ) :
 /**
@@ -729,7 +733,7 @@ function themify_feed_settings_action($query){
 add_filter('pre_get_posts','themify_feed_settings_action');
 
 $themify_data = themify_get_data();
-if( !isset($themify_data['setting-exclude_img_rss']) || '' == $themify_data['setting-exclude_img_rss'] ) {
+if( empty($themify_data['setting-exclude_img_rss'])) {
 	add_filter('the_content', 'themify_custom_fields_for_feeds');
 
 /* Firefox doesn't render images to feed when select full text from admin > Settings > Reading But IE does automatically for full text.
@@ -761,7 +765,7 @@ function themify_feed_custom_posts( $qv ) {
 	$feed_custom_posts = explode( ',', trim( themify_get( 'setting-feed_custom_post' ) ) );
 
 	if( ! empty( $feed_custom_posts ) && isset( $qv['feed'] ) && ! isset( $qv['post_type'] ) ) {
-		if( in_array( 'all', $feed_custom_posts ) ) {
+		if( in_array( 'all', $feed_custom_posts,true ) ) {
 			$post_types = get_post_types( array('public' => true, 'publicly_queryable' => 'true' ) );
 			$qv['post_type'] = array_diff( $post_types, array('attachment', 'tbuilder_layout', 'tbuilder_layout_part', 'section') );
 		} else {
@@ -828,7 +832,7 @@ function themify_404_display_static_page_result( $posts ) {
 			add_action( 'wp', 'themify_404_header' );
 			add_filter( 'body_class', 'themify_404_body_class' );
 			
-		} elseif ( 'page' === $posts[0]->post_type && 1 == count( $posts )) {
+		} elseif ( 'page' === $posts[0]->post_type && 1 === count( $posts )) {
 			
 			$curpageid = $posts[0]->ID;
 			
@@ -1106,7 +1110,8 @@ add_filter( 'after_setup_theme', 'themify_setup_wp_features' );
  * @since 3.2.3
  */
 function themify_defer_js($tag,$handle,$src){
-    if(!Themify_Builder_Model::is_front_builder_activate() && TFCache::is_themify_file($src,$handle)){
+	$exclude_handles = apply_filters( 'themify_defer_js_exclude', array() );
+    if(!Themify_Builder_Model::is_front_builder_activate() && TFCache::is_themify_file($src,$handle) && !in_array( $handle, $exclude_handles ) ){
         $tag = str_replace(' src', ' defer="defer" src', $tag);
     }
     return $tag;
@@ -1123,39 +1128,33 @@ function themify_setup_cpt_post_options( $metaboxes ){
 	global $typenow;
 
 	/* list of post types that already have defined options */
-	$excludes = array();
+	$exclude = false;
 	foreach( $metaboxes as $metabox ) {
-		if( $metabox['id'] === 'page-builder' ) {
-			// skip the panel from Builder
-			continue;
+		if( $metabox[ 'id' ] === $typenow . '-options' ) {
+			$exclude = true;
+			break;
 		}
 
-		// deal with different ways the "pages" parameter can be defined in Themify Metabox
-		$pages = isset( $metabox['pages'] )
-					? is_array( $metabox['pages'] )
-						? $metabox['pages']
-						: array_map( 'trim', explode( ',', $metabox['pages'] ) )
-					: array();
-
-		$excludes = array_merge( $excludes, $pages );
+		if( ! empty( $metabox['options'] ) ) {
+			foreach( $metabox['options'] as $option ) {
+				if( in_array( $typenow . '_layout', $option, true ) ) {
+					$exclude = true;
+					break 2;
+				}
+			}
+		}
 	}
-	$excludes = array_unique( $excludes );
 
-	$types = get_post_types( array(
-		'publicly_queryable' => true,
-		'_builtin' => false,
-	) );
-
-	if( ! ( in_array( $typenow, $types,true ) && ! in_array( $typenow, $excludes,true ) ) ) {
+	if( $exclude ) {
 		return $metaboxes;
 	}
 
 	$post_options = apply_filters( 'themify_post_type_default_options', array(
 		array(
-			'name' => 'page_layout',	
-			'title' => __('Sidebar Option', 'themify'), 	
-			'description' => '', 				
-			'type' => 'layout',			
+			'name' => 'page_layout',
+			'title' => __('Sidebar Option', 'themify'),
+			'description' => '',
+			'type' => 'layout',
 			'show_title' => true,
 			'meta' => array(
 				array('value' => 'default', 'img' => 'images/layout-icons/default.png', 'selected' => true, 'title' => __('Default', 'themify')),
@@ -1193,11 +1192,11 @@ function themify_setup_cpt_post_options( $metaboxes ){
 			'name' => __( 'Post Options', 'themify' ),
 			'id' => $typenow . '-options',
 			'options' => $post_options,
-			'pages'	=> $typenow
+			'pages' => $typenow
 		),
 	), $metaboxes );
 }
-add_filter( 'themify_metabox_panel_options', 'themify_setup_cpt_post_options', 100 );
+add_filter( 'themify_metabox/fields/themify-meta-boxes', 'themify_setup_cpt_post_options', 98 );
 
 /**
  * Set proper sidebar layout for post types' single post view
@@ -1205,9 +1204,19 @@ add_filter( 'themify_metabox_panel_options', 'themify_setup_cpt_post_options', 1
  * @uses global $themify
  */
 function themify_cpt_set_post_options() {
-	if(is_single() && ($layout = themify_get( 'page_layout' ) )) {
-            global $themify;
-            $themify->layout = $layout;
-        }
+	if( is_single() && ( $layout = themify_get( 'page_layout' ) ) ) {
+		global $themify;
+		$themify->layout = $layout;
+	}
 }
 add_action( 'template_redirect', 'themify_cpt_set_post_options', 100 );
+
+/**
+ * Set the base image size that img.php will resize thumbnails from
+ *
+ * @return string
+ */
+function themify_image_script_source_size( $size ) {
+	return themify_get( 'setting-img_php_base_size', 'large' );
+}
+add_filter( 'themify_image_script_source_size', 'themify_image_script_source_size', 1 );

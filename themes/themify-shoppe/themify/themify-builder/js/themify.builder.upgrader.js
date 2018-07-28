@@ -9,13 +9,12 @@
     function showLogin(status) {
         $('.prompt-box .show-login').show();
         $('.prompt-box .show-error').hide();
+		$('.prompt-box .prompt-error').remove();
         if (status === 'error') {
-            if ($('.prompt-box .prompt-error').length === 0) {
-                $('.prompt-box .prompt-msg').after('<p class="prompt-error">' + themify_lang.invalid_login + '</p>');
-            }
-        } else {
-            $('.prompt-box .prompt-error').remove();
-        }
+			$('.prompt-box .prompt-msg').after('<p class="prompt-error">' + themify_lang.invalid_login + '</p>');
+		} else if ('unsuscribed' === status) {
+			$('.prompt-box .prompt-msg').after('<p class="prompt-error">' + themify_lang.unsuscribed + '</p>');
+		}
         $('.prompt-box').addClass('update-plugin');
         $('.overlay, .prompt-box').fadeIn(500);
     }
@@ -48,16 +47,31 @@
         //
         // Upgrade Theme / Framework
         //
-        $('.themify-builder-upgrade-plugin').on('click', function (e) {
+        $('.tb_upgrade_plugin').on('click', function (e) {
             e.preventDefault();
-            _updater_el = $(this);
+            $('.themify-builder-upgrade-plugin').removeClass('themify-builder-upgrade-plugin');
+            _updater_el = $(this).addClass('themify-builder-upgrade-plugin');
             showLogin();
         });
+
+		// Update By Link
+		( function() {
+			var url = window.location.search;
+
+			if( url.indexOf( 'tfplugin' ) > -1 ) {
+				var plugin = url.match( /tfplugin=([^&,#]+)/ );
+
+				if( plugin[1] ) {
+					plugin = plugin[1];
+					$( '.tb_upgrade_plugin[data-plugin*=' + plugin + ']' ).trigger( 'click' );
+				}
+			}
+		} )();
 
         //
         // Login Validation
         //
-        $('.themify-builder-upgrade-login').on('click', function (e) {
+        $('.tb_upgrade_login').on('click', function (e) {
             e.preventDefault();
             if ($('.prompt-box').hasClass('update-plugin')) {
                 var el = $(this),
@@ -83,10 +97,13 @@
                         if (data === 'true') {
                             hideAlert();
                             $('#themify_update_form').append('<input type="hidden" name="plugin" value="' + _updater_el.data('plugin') + '" /><input type="hidden" name="package_url" value="' + _updater_el.data('package_url') + '" />').submit();
-                        } else if (data === 'false' || 'invalid' === data) {
+                        } else if (data === 'unsuscribed') {
                             hideAlert('error');
+                            showLogin('unsuscribed');
+                        } else {
+							hideAlert('error');
                             showLogin('error');
-                        }
+						}
                     }
                     );
                 } else {

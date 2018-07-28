@@ -213,7 +213,7 @@
     padding: 0 10px;
 }
 .tb_module_panel_modules_wrap a, .tb_module_panel_library_wrap a.remove_item_btn{
-    background: #6d55a0;
+    background: #52bb33;
     color: #fff;
     display: block;
     width: 22px;
@@ -367,7 +367,8 @@ div.tb_module_panel_search input[type="text"]:focus{
 }
 
 /* Builder Toolbar Pre-designed and Library rows lists default display */
-ul.tb_module_types, ul.tb_library_types{
+.tb_modules_panel_wrap ul.tb_module_types,
+.tb_modules_panel_wrap ul.tb_library_types{
     list-style: none;
     margin: 10px 0 10px 17px;
     padding:0;
@@ -431,6 +432,7 @@ ul.tb_module_types li, ul.tb_library_types li{
 .tb_row_filter li {
     margin: 0;
     padding: 0;
+	list-style: none;
 }
 .tb_row_filter li a {
     color: #707070;
@@ -484,7 +486,7 @@ ul.tb_module_types li, ul.tb_library_types li{
 }
 .tb_premade_rows_grid .tb_rows_grid li {
     padding: 0;
-    margin: 0 0 5px;
+    margin: 0 0 10px;
 }
 
 #tb_toolbar .tb_premade_rows_grid .tb_rows_grid li div{
@@ -855,4 +857,10 @@ Simple Bar
 }
 .tb_predesigned_rows_list .predesigned_row[data-slug="empty-6"] figure {
 	background-position: -283px -3px;
+}
+
+@media screen and (max-width: 680px) {
+	#tb_plus_btn_popover .tb_premade_rows_grid .tb_rows_grid li {
+		width: 33%;
+	}
 }

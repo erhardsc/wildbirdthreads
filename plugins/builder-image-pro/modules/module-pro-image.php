@@ -492,6 +492,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 		#>
 		
 		<div class="module module-<?php echo $this->slug; ?> {{ moduleSettings }}" data-entrance-effect="{{ data.overlay_effect }}" data-exit-effect="">
+                        <!--insert-->
 			<# if( data.mod_title_image ) { #>
 				<?php echo $module_args['before_title']; ?>
 				{{{ data.mod_title_image }}}

@@ -3,7 +3,7 @@
 /*
   Plugin Name:  Builder Maps Pro
   Plugin URI:   http://themify.me/addons/maps-pro
-  Version:      1.2.6
+  Version:      1.2.7 
   Author:       Themify
   Description:  Maps Pro module allows you to insert Google Maps with multiple location markers with custom icons, tooltip text, and various map styles. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
   Text Domain:  builder-maps-pro
@@ -35,6 +35,7 @@ class Builder_Maps_Pro {
         $this->constants();
         $this->i18n();
         add_action('themify_builder_setup_modules', array($this, 'register_module'));
+		add_filter( 'plugin_row_meta', array( $this, 'themify_plugin_meta'), 10, 2 );
         if (is_admin()) {
             add_action('themify_builder_admin_enqueue', array($this, 'admin_enqueue'));
             add_action('init', array($this, 'updater'));
@@ -51,6 +52,16 @@ class Builder_Maps_Pro {
         $this->dir = trailingslashit(plugin_dir_path(__FILE__));
     }
 
+	public function themify_plugin_meta( $links, $file ) {
+		if ( plugin_basename( __FILE__ ) == $file ) {
+			$row_meta = array(
+			  'changelogs'    => '<a href="' . esc_url( 'https://themify.me/changelogs/' ) . basename( dirname( $file ) ) .'.txt" target="_blank" aria-label="' . esc_attr__( 'Plugin Changelogs', 'builder-maps-pro' ) . '">' . esc_html__( 'View Changelogs', 'builder-maps-pro' ) . '</a>'
+			);
+	 
+			return array_merge( $links, $row_meta );
+		}
+		return (array) $links;
+	}
     public function i18n() {
         load_plugin_textdomain('builder-maps-pro', false, '/languages');
     }

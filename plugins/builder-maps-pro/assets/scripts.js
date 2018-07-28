@@ -148,17 +148,18 @@ var do_maps;
         });
     };
 
-    function loader(el, type) {
+    function loader(e,el, type) {
         if (typeof google === 'object' && typeof google.maps === 'object') {
             do_maps(el);
         } else {
-            Themify.LoadAsync('//maps.google.com/maps/api/js?sensor=false&callback=do_maps&key=' + themify_vars.map_key, false, true, true, function () {
+            Themify.LoadAsync('//maps.google.com/maps/api/js?sensor=false&callback=do_maps&key=' + themify_vars.map_key, false, false, false, function () {
                 return typeof google === 'object' && typeof google.maps === 'object';
             });
         }
     }
-    loader();
+   
     if (!Themify.is_builder_active) {
+        loader();
         /* reload the map when switching tabs (Builder Tabs module) */
         $('body').on('tb_tabs_switch', function (e, activeTab, tabs) {
             if ($(activeTab).find('.module-maps-pro').length > 0) {
@@ -172,9 +173,10 @@ var do_maps;
         });
     }
     else {
-        $('body').on('builder_load_module_partial', function (e, el, type) {
-            loader(el, type);
-        });
+        $( 'body' ).on( 'builder_load_module_partial',loader);
+        if(Themify.is_builder_loaded){
+            loader();
+        }
     }
 
 })(jQuery);

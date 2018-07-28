@@ -274,7 +274,7 @@ class Themify_Control extends WP_Customize_Control {
         <?php if ($args['show_lineheight']) : ?>
             <div class="themify-customizer-brick">
                 <!-- LINE HEIGHT -->
-                <input type="text" class="font_line_num" value="<?php echo esc_attr(empty($font_line_num) ? '' : $font_size_num ); ?>" />
+                <input type="text" class="font_line_num" value="<?php echo esc_attr(empty($font_line_num) ? '' : $font_line_num ); ?>" />
                 <div class="custom-select">
                     <select class="font_line_unit">
                         <?php foreach ($units as $unit) : ?>

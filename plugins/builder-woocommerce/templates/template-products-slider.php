@@ -37,6 +37,7 @@ $speed = $settings['speed_opt_slider']==='slow'?4:($settings['speed_opt_slider']
 			data-arrow="<?php echo $settings['show_arrow_slider'] ; ?>"
 			data-pagination="<?php echo $settings['pagination']; ?>"
 			data-effect="<?php echo $settings['effect_slider']; ?>" 
+			data-height="<?php echo $settings['height_slider'] ?>"
 			data-pause-on-hover="<?php echo $settings['pause_on_hover_slider']; ?>" >
 
 		<?php do_action( 'themify_builder_before_template_content_render' ); ?>

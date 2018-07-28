@@ -1285,23 +1285,33 @@ object {
 .update-check a:before {
 	content: "\e619";
 }
+.notifications:empty {
+	display: none;
+}
 .notifications a {
 	color: #bf3b06;
 	text-decoration: none;
 	font-weight: bold;
 	vertical-align: inherit;
 }
-.notifications p {
-	display: inline-block;
-	margin: 15px 0 0 5px;
-	padding: 10px;
+.notifications {
+	display: block;
+	margin: 5px;
+	padding: 12px;
 	border-radius: 4px;
-}
-.notifications p.update {
 	background: #f9f2c6;
 	border: 1px solid #f2de5b;
 	font-size: 15px;
-}	
+}
+.notifications p{
+	margin: 0;
+	padding: 0;
+}
+#themify .updater-message,
+.notifications .updater-message {
+	margin: 5px 0 0;
+	color: #d26767;
+}
 .notifications p.error {
 	background:	#f8bcb9;
 	border: 1px solid #ee463e;

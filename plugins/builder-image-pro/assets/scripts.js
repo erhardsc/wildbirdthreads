@@ -80,7 +80,7 @@
 			}
 		} );
 
-	function builder_image_pro_init( el, type ) {
+	function builder_image_pro_init(e, el, type ) {
 		if ('undefined' !== typeof $.fn.magnificPopup) {
 			var items = $( selector, el );
 
@@ -89,14 +89,17 @@
 		}
 	}
 
-	builder_image_pro_init();
-
-	if ( Themify.is_builder_active ) {
-		$( 'body' ).on( 'builder_load_module_partial', function(e,el,type){
-			builder_image_pro_init( el, type );
-		} ).on( 'click', '.module-pro-image a',function( e ) {
-			! $( this ).is( '.themify_lightbox[target="_blank"]' ) && e.preventDefault();
-		} );
-	}
+        
+        if ( Themify.is_builder_active ) {
+           $( 'body' ).on( 'builder_load_module_partial',builder_image_pro_init ).on( 'click', '.module-pro-image a',function( e ) {
+                    ! $( this ).is( '.themify_lightbox[target="_blank"]' ) && e.preventDefault();
+            } );
+            if(Themify.is_builder_loaded){
+                builder_image_pro_init();
+            }
+        }
+        else{
+            builder_image_pro_init();
+        }
 	
 }( jQuery ) );

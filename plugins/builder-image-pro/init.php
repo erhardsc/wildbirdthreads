@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Builder Image Pro
 Plugin URI:   http://themify.me/addons/image-pro
-Version:      1.2.0 
+Version:      1.2.4
 Author:       Themify
 Description:  Builder addon to display cool image effects with overlay animation. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
 Text Domain:  builder-image-pro
@@ -36,6 +36,7 @@ class Builder_Image_Pro {
 		add_action( 'themify_builder_setup_modules', array( $this, 'register_module' ) );
 		add_filter( 'themify_builder_script_vars', array( $this, 'themify_builder_script_vars' ) );
 		add_action( 'init', array( $this, 'updater' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'themify_plugin_meta'), 10, 2 );
 	}
 
 	public function constants() {
@@ -45,6 +46,16 @@ class Builder_Image_Pro {
 		$this->dir = trailingslashit( plugin_dir_path( __FILE__ ) );
 	}
 
+	public function themify_plugin_meta( $links, $file ) {
+		if ( plugin_basename( __FILE__ ) == $file ) {
+			$row_meta = array(
+			  'changelogs'    => '<a href="' . esc_url( 'https://themify.me/changelogs/' ) . basename( dirname( $file ) ) .'.txt" target="_blank" aria-label="' . esc_attr__( 'Plugin Changelogs', 'builder-image-pro' ) . '">' . esc_html__( 'View Changelogs', 'builder-image-pro' ) . '</a>'
+			);
+	 
+			return array_merge( $links, $row_meta );
+		}
+		return (array) $links;
+	}
 	public function i18n() {
 		load_plugin_textdomain( 'builder-image-pro', false, '/languages' );
 	}

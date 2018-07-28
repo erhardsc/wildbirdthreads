@@ -4,7 +4,7 @@
  Plugin Name: WP GDPR Compliance
  Plugin URI:  https://www.wpgdprc.com/
  Description: This plugin assists website and webshop owners to comply with European privacy regulations known as GDPR. By May 24th, 2018 your website or shop has to comply to avoid large fines.
- Version:     1.4.1
+ Version:     1.4.2
  Author:      Van Ons
  Author URI:  https://www.van-ons.nl/
  License:     GPL2
@@ -64,6 +64,8 @@ define('WP_GDPR_C_URI_SVG', WP_GDPR_C_URI_ASSETS . '/svg');
 // Let's do this!
 spl_autoload_register(__NAMESPACE__ . '\\autoload');
 add_action('plugins_loaded', array(WPGDPRC::getInstance(), 'init'));
+register_activation_hook(__FILE__, array(Action::getInstance(), 'addTagsToFields'));
+register_deactivation_hook(__FILE__, array(Action::getInstance(), 'removeTagsFromFields'));
 
 /**
  * Class WPGDPRC
@@ -114,10 +116,8 @@ class WPGDPRC {
             if (Consent::getInstance()->getTotal(array('active' => array('value' => 1))) > 0) {
                 add_action('wp_footer', array(Action::getInstance(), 'addConsentBar'), 998);
                 add_action('wp_footer', array(Action::getInstance(), 'addConsentModal'), 999);
-                if (!empty($_COOKIE['wpgdprc-consent'])) {
-                    add_action('wp_head', array(Action::getInstance(), 'addConsentsToHead'), 999);
-                    add_action('wp_footer', array(Action::getInstance(), 'addConsentsToFooter'), 999);
-                }
+                add_action('wp_head', array(Action::getInstance(), 'addConsentsToHead'), 999);
+                add_action('wp_footer', array(Action::getInstance(), 'addConsentsToFooter'), 999);
             }
         }
         add_filter('wpgdprc_the_content', 'wptexturize');
@@ -130,7 +130,7 @@ class WPGDPRC {
 
     public static function handleDatabaseTables() {
         $dbVersion = get_option('wpgdprc_db_version', 0);
-        if (version_compare($dbVersion, '1.1', '==')) {
+        if (version_compare($dbVersion, '1.2', '==')) {
             return;
         }
 
@@ -163,6 +163,14 @@ class WPGDPRC {
             ADD column `wrap` tinyint(1) DEFAULT '1' NOT NULL AFTER `snippet`;";
             $wpdb->query($query);
             update_option('wpgdprc_db_version', '1.1');
+        }
+
+        // Add column 'required' to 'Consents' table
+        if (version_compare($dbVersion, '1.2', '<')) {
+            $query = "ALTER TABLE `" . Consent::getDatabaseTableName() . "`
+            ADD column `required` tinyint(1) DEFAULT '0' NOT NULL AFTER `plugins`;";
+            $wpdb->query($query);
+            update_option('wpgdprc_db_version', '1.2');
         }
     }
 

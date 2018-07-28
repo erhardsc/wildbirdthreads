@@ -310,6 +310,18 @@ class Helper {
     }
 
     /**
+     * @return bool
+     */
+    public static function hasMailPluginInstalled() {
+        foreach(self::getActivePlugins() as $activePlugin) {
+            if(strpos(strtolower($activePlugin), 'mail') !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param $data
      * @return string
      */
@@ -498,31 +510,67 @@ class Helper {
     }
 
     /**
+     * @return array
+     */
+    public static function getRequiredConsentIds() {
+        $output = array();
+        $requiredConsents = Consent::getInstance()->getList(array(
+            'required' => array(
+                'value' => 1,
+            ),
+            'active' => array(
+                'value' => 1
+            ),
+        ));
+        if (!empty($requiredConsents)) {
+            foreach ($requiredConsents as $requiredConsent) {
+                $output[] = intval($requiredConsent->getId());
+            }
+        }
+        return $output;
+    }
+
+    /**
      * @return array|bool
      */
     public static function getConsentIdsByCookie() {
         $output = array();
-        $consents = (!empty($_COOKIE['wpgdprc-consent'])) ? $_COOKIE['wpgdprc-consent'] : '';
+        $requiredConsents = Consent::getInstance()->getList(array(
+            'required' => array(
+                'value' => 1
+            ),
+            'active' => array(
+                'value' => 1
+            )
+        ));
+        $consents = (!empty($_COOKIE['wpgdprc-consent'])) ? esc_html($_COOKIE['wpgdprc-consent']) : '';
+        if (!empty($requiredConsents)) {
+            foreach ($requiredConsents as $requiredConsent) {
+                $output[] = intval($requiredConsent->getId());
+            }
+        }
         if (!empty($consents)) {
             switch ($consents) {
                 case 'decline' :
-                    return false;
                     break;
                 case 'accept' :
                     $consents = Consent::getInstance()->getList(array(
-                        'active' => array('value' => 1)
+                        'required' => array(
+                            'value' => 0
+                        ),
+                        'active' => array(
+                            'value' => 1
+                        )
                     ));
                     foreach ($consents as $consent) {
-                        $output[] = $consent->getId();
+                        $output[] = intval($consent->getId());
                     }
                     break;
                 default :
                     $consents = explode(',', $consents);
                     foreach ($consents as $id) {
-                        if (!is_numeric($id)) {
-                            return false;
-                        } else if (Consent::getInstance()->exists($id)) {
-                            $output[] = $id;
+                        if (is_numeric($id) && Consent::getInstance()->exists($id)) {
+                            $output[] = intval($id);
                         }
                     }
                     break;

@@ -61,8 +61,56 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 					'rule' => 'email',
 					'message' => esc_html__( 'Please enter valid email address.', 'builder-contact' )
 				),
-                                'render_callback' => array(
-					'binding' => ''
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'post_type',
+				'type' => 'checkbox',
+				'label' => ' ',
+				'options' => array(
+					array( 'name' => 'enable', 'value' => __('Enable submissions as Contact posts', 'builder-contact') )
+				),
+				'binding' => array(
+					'checked' => array( 'show' => array( 'post_author', 'gdpr', 'gdpr_label' ) ),
+					'not_checked' => array( 'hide' => array( 'post_author', 'gdpr', 'gdpr_label' ) ),
+				),
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'post_author',
+				'type' => 'checkbox',
+				'label' => ' ',
+				'wrap_with_class' => '_tf-hide',
+				'options' => array(
+					array( 'name' => 'add', 'value' => __('Assign "send to" email address as post author', 'builder-contact') )
+				),
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'gdpr',
+				'type' => 'checkbox',
+				'label' => ' ',
+				'option_js' => true,
+				'options' => array(
+					array( 'name' => 'accept', 'value' => __('Show required consent checkbox to comply with GDPR', 'builder-contact') )
+				),
+				'render_callback' => array(
+					'binding' => 'live'
+				)
+			),
+			array(
+				'id' => 'gdpr_label',
+				'type' => 'textarea',
+				'label' => __( 'GDPR Message', 'builder-contact' ),
+				'option_js' => true,
+				'render_callback' => array(
+					'binding' => 'live'
 				)
 			),
 			array(
@@ -70,9 +118,51 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __( 'Success URL', 'builder-contact' ),
 				'class' => 'large',
-				'after' => '<br><small>' . __( 'Redirect to this URL when the form is successfully sent.', 'builder-contact' ) . '</small>', 
-                                'render_callback' => array(
-					'binding' => ''
+				'after' => '<br><small>' . __( 'Redirect to this URL when the form is successfully sent.', 'builder-contact' ) . '</small>',
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'success_message_text',
+				'type' => 'text',
+				'label' => __( 'Success Message', 'builder-contact' ),
+				'class' => 'large',
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'auto_respond',
+				'type' => 'checkbox',
+				'label' => ' ',
+				'options' => array(
+					array( 'name' => 'enable', 'value' => __( 'Enable auto respond to submission', 'builder-contact' ) )
+				),
+				'binding' => array(
+					'checked' => array( 'show' => array( 'auto_respond_message', 'auto_respond_subject' ) ),
+					'not_checked' => array( 'hide' => array( 'auto_respond_message', 'auto_respond_subject' ) ),
+				),
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'auto_respond_subject',
+				'type' => 'text',
+				'label' => __( 'Auto Respond Subject', 'builder-contact' ),
+				'class' => 'large',
+				'render_callback' => array(
+					'binding' => false
+				)
+			),
+			array(
+				'id' => 'auto_respond_message',
+				'type' => 'textarea',
+				'label' => __( 'Auto Respond Message', 'builder-contact' ),
+				'class' => 'large',
+				'render_callback' => array(
+					'binding' => false
 				)
 			),
 			array(
@@ -80,9 +170,20 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __( 'Default Subject', 'builder-contact' ),
 				'class' => 'large',
-				'after' => '<br><small>' . __( 'This will be used as the subject of the mail if the Subject field is not shown on the contact form.', 'builder-contact' ) . '</small>', 
+				'after' => '<br><small>' . __( 'This will be used as the subject of the mail if the Subject field is not shown on the contact form.', 'builder-contact' ) . '</small>',
                                 'render_callback' => array(
 					'binding' => ''
+				)
+			),
+			array(
+				'id' => 'contact_sent_from',
+				'type' => 'checkbox',
+				'label' => __( 'Contact Sent From', 'builder-contact' ),
+				'options' => array(
+					array( 'name' => 'enable', 'value' => __( 'In email content, state where the contact sent from (URL)', 'builder-contact' ) )
+				),
+				'render_callback' => array(
+					'binding' => false
 				)
 			),
 			array(
@@ -104,7 +205,7 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'builder-contact'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'builder-contact') ),
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'builder-contact') ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -119,115 +220,117 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 			'field_subject_label' => esc_html__( 'Subject', 'builder-contact' ),
 			'field_subject_active' => 'yes',
 			'field_subject_require' => 'yes',
+			'field_message_active' => '',
 			'field_message_label' => esc_html__( 'Message', 'builder-contact' ),
 			'field_sendcopy_label' => __( 'Send a copy to myself', 'builder-contact' ),
 			'field_send_label' => esc_html__( 'Send', 'builder-contact' ),
 			'field_send_align' => 'left',
 			'field_extra' => '{ "fields": [] }',
 			'field_order' => '{}',
+			'gdpr_label' => __( 'I consent to my submitted data being collected and stored', 'builder-contact' ),
 		);
 	}
 
 	public function get_styling() {
 		$general = array(
                         //bacground
-                        self::get_seperator('image_bacground', __('Background', 'themify'), false),
-                        self::get_color('.module-contact', 'background_color', __('Background Color', 'themify'), 'background-color'),
+                        self::get_seperator('image_bacground', __('Background', 'builder-contact'), false),
+                        self::get_color('.module-contact', 'background_color', __('Background Color', 'builder-contact'), 'background-color'),
 			// Font
-                        self::get_seperator('font', __('Font', 'themify')),
+                        self::get_seperator('font', __('Font', 'builder-contact')),
                         self::get_font_family('.module-contact'),
-                        self::get_color('.module-contact', 'font_color', __('Font Color', 'themify')),
+                        self::get_color('.module-contact', 'font_color', __('Font Color', 'builder-contact')),
                         self::get_font_size('.module-contact'),
                         self::get_line_height('.module-contact'),
                         self::get_text_align('.module-contact'),
                         // Padding
-                        self::get_seperator('padding', __('Padding', 'themify')),
+                        self::get_seperator('padding', __('Padding', 'builder-contact')),
                         self::get_padding('.module-contact'),
                         // Margin
-                        self::get_seperator('margin', __('Margin', 'themify')),
+                        self::get_seperator('margin', __('Margin', 'builder-contact')),
                         self::get_margin('.module-contact'),
                         // Border
-                        self::get_seperator('border', __('Border', 'themify')),
+                        self::get_seperator('border', __('Border', 'builder-contact')),
                         self::get_border('.module-contact')
 		);
 
 		$labels = array(
 			// Font
-                        self::get_seperator('font', __('Font', 'themify'),false),
+                        self::get_seperator('font', __('Font', 'builder-contact'),false),
                         self::get_font_family('.module-contact .control-label','font_family_labels'),
-                        self::get_color('.module-contact .control-label', 'font_color_labels', __('Font Color', 'themify')),
+                        self::get_color('.module-contact .control-label', 'font_color_labels', __('Font Color', 'builder-contact')),
                         self::get_font_size('.module-contact .control-label','font_size_labels')
 		);
 
 		$inputs = array(
                         //bacground
-                        self::get_seperator('image_bacground', __('Background', 'themify'), false),
-                        self::get_color(array( '.module-contact input[type="text"]', '.module-contact textarea' ), 'background_color_inputs', __('Background Color', 'themify'), 'background-color'),
+                        self::get_seperator('image_bacground', __('Background', 'builder-contact'), false),
+                        self::get_color(array( '.module-contact input[type="text"]', '.module-contact textarea' ), 'background_color_inputs', __('Background Color', 'builder-contact'), 'background-color'),
 			// Font
-                        self::get_seperator('font', __('Font', 'themify')),
+                        self::get_seperator('font', __('Font', 'builder-contact')),
                         self::get_font_family(array( '.module-contact input[type="text"]', '.module-contact textarea' ),'font_family_inputs'),
-                        self::get_color(array( '.module-contact input[type="text"]', '.module-contact textarea' ), 'font_color_inputs', __('Font Color', 'themify')),
+                        self::get_color(array( '.module-contact input[type="text"]', '.module-contact textarea' ), 'font_color_inputs', __('Font Color', 'builder-contact')),
                         self::get_font_size(array( '.module-contact input[type="text"]', '.module-contact textarea' ),'font_size_inputs'),
 			// Border
-                        self::get_seperator('border', __('Border', 'themify')),
+                        self::get_seperator('border', __('Border', 'builder-contact')),
                         self::get_border(array( '.module-contact input[type="text"]', '.module-contact textarea' ),'border_inputs')
 		);
 
 		$send_button = array(
                         //bacground
-                        self::get_seperator('image_bacground', __('Background', 'themify'), false),
-                        self::get_color('.module-contact .builder-contact-field-send button', 'background_color_send', __('Background Color', 'themify'), 'background-color'),
+                        self::get_seperator('image_bacground', __('Background', 'builder-contact'), false),
+                        self::get_color('.module-contact .builder-contact-field-send button', 'background_color_send', __('Background Color', 'builder-contact'), 'background-color'),
 			// Font
-                        self::get_seperator('font', __('Font', 'themify')),
+                        self::get_seperator('font', __('Font', 'builder-contact')),
                         self::get_font_family('.module-contact .builder-contact-field-send button' ,'font_family_send'),
-                        self::get_color( '.module-contact .builder-contact-field-send button', 'font_color_send', __('Font Color', 'themify')),
+                        self::get_color( '.module-contact .builder-contact-field-send button', 'font_color_send', __('Font Color', 'builder-contact')),
                         self::get_font_size( '.module-contact .builder-contact-field-send button','font_size_send'),
 			// Border
-                        self::get_seperator('border', __('Border', 'themify')),
+                        self::get_seperator('border', __('Border', 'builder-contact')),
                         self::get_border('.module-contact .builder-contact-field-send button','border_send')
 		);
 
 		$success_message = array(
                         //bacground
-                        self::get_seperator('success', __('Background', 'themify'), false),
-                        self::get_color('.module-contact .contact-success', 'background_color_success_message', __('Background Color', 'themify'), 'background-color'),
+                        self::get_seperator('success', __('Background', 'builder-contact'), false),
+                        self::get_color('.module-contact .contact-success', 'background_color_success_message', __('Background Color', 'builder-contact'), 'background-color'),
 			// Font
-                        self::get_seperator('font', __('Font', 'themify')),
+                        self::get_seperator('font', __('Font', 'builder-contact')),
                         self::get_font_family('.module-contact .contact-success','font_family_success_message'),
-                        self::get_color('.module-contact .contact-success', 'font_color_success_message', __('Font Color', 'themify')),
+                        self::get_color('.module-contact .contact-success', 'font_color_success_message', __('Font Color', 'builder-contact')),
                         self::get_font_size('.module-contact .contact-success','font_size_success_message'),
                         self::get_line_height('.module-contact .contact-success','line_height_success_message'),
                         self::get_text_align('.module-contact .contact-success','text_align_success_message'),
                         // Padding
-                        self::get_seperator('padding', __('Padding', 'themify')),
+                        self::get_seperator('padding', __('Padding', 'builder-contact')),
                         self::get_padding('.module-contact .contact-success','padding_success_message'),
                         // Margin
-                        self::get_seperator('margin', __('Margin', 'themify')),
+                        self::get_seperator('margin', __('Margin', 'builder-contact')),
                         self::get_margin('.module-contact .contact-success','margin_success_message'),
                         // Border
-                        self::get_seperator('border', __('Border', 'themify')),
+                        self::get_seperator('border', __('Border', 'builder-contact')),
                         self::get_border('.module-contact .contact-success','border_success_message')
 		);
 
 		$error_message = array(
                          //bacground
-                        self::get_seperator('success', __('Background', 'themify'), false),
-                        self::get_color('.module-contact .contact-error', 'background_color_error_message', __('Background Color', 'themify'), 'background-color'),
+                        self::get_seperator('success', __('Background', 'builder-contact'), false),
+                        self::get_color('.module-contact .contact-error', 'background_color_error_message', __('Background Color', 'builder-contact'), 'background-color'),
 			// Font
-                        self::get_seperator('font', __('Font', 'themify')),
+                        self::get_seperator('font', __('Font', 'builder-contact')),
                         self::get_font_family('.module-contact .contact-error','font_family_error_message'),
-                        self::get_color('.module-contact .contact-error', 'font_color_error_message', __('Font Color', 'themify')),
+                        self::get_color('.module-contact .contact-error', 'font_color_error_message', __('Font Color', 'builder-contact')),
                         self::get_font_size('.module-contact .contact-error','font_size_error_message'),
                         self::get_line_height('.module-contact .contact-error','line_height_error_message'),
                         self::get_text_align('.module-contact .contact-error','text_align_error_message'),
                         // Padding
-                        self::get_seperator('padding', __('Padding', 'themify')),
+                        self::get_seperator('padding', __('Padding', 'builder-contact')),
                         self::get_padding('.module-contact .contact-error','padding_error_message'),
                         // Margin
-                        self::get_seperator('margin', __('Margin', 'themify')),
+                        self::get_seperator('margin', __('Margin', 'builder-contact')),
                         self::get_margin('.module-contact .contact-error','margin_error_message'),
                         // Border
-                        self::get_seperator('border', __('Border', 'themify')),
+                        self::get_seperator('border', __('Border', 'builder-contact')),
                         self::get_border('.module-contact .contact-error','border_error_message')
 		);
 
@@ -237,27 +340,27 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 				'id' => 'module-styling',
 				'tabs' => array(
 					'general' => array(
-						'label' => __('General', 'themify'),
+						'label' => __('General', 'builder-contact'),
 						'fields' => $general
 					),
 					'labels' => array(
-						'label' => __('Field Labels', 'themify'),
+						'label' => __('Field Labels', 'builder-contact'),
 						'fields' => $labels
 					),
 					'inputs' => array(
-						'label' => __('Input Fields', 'themify'),
+						'label' => __('Input Fields', 'builder-contact'),
 						'fields' => $inputs
 					),
 					'send_button' => array(
-						'label' => __('Send Button', 'themify'),
+						'label' => __('Send Button', 'builder-contact'),
 						'fields' => $send_button
 					),
 					'success_message' => array(
-						'label' => __('Success Message', 'themify'),
+						'label' => __('Success Message', 'builder-contact'),
 						'fields' => $success_message
 					),
 					'error_message' => array(
-						'label' => __('Error Message', 'themify'),
+						'label' => __('Error Message', 'builder-contact'),
 						'fields' => $error_message
 					)
 				)
@@ -280,9 +383,9 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 		} catch( e ){
 			field_order = {};
 		}
-
 		#>
 		<div class="module module-<?php echo $this->slug; ?> {{ data.css_class_contact }} <# data.layout_contact ? print('contact-' + data.layout_contact) : ''; #>">
+			<!--insert-->
 			<# if( data.mod_title_contact ) { #>
 				<?php echo $module_args['before_title']; ?>
 				{{{ data.mod_title_contact }}}
@@ -318,12 +421,14 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 					</div>
 					<# } #>
 
+                    <# if( data.field_message_active !== 'yes' ) { #>
 					<div class="builder-contact-field builder-contact-field-message builder-contact-textarea-field" data-order="{{ field_order.field_message_label }}">
 						<label class="control-label"><# data.field_message_label != '' ? print(data.field_message_label) : print('Message') #> <# if( data.field_message_label != '' ) { #><span class="required">*</span><# } #></label>
 						<div class="control-input">
 							<textarea name="contact-message" placeholder="{{{ data.field_message_placeholder }}}" rows="8" cols="45" class="form-control" required></textarea>
 						</div>
 					</div>
+                    <# } #>
 
 					<# _.each( field_extra, function( field, field_index ){ #>
 						<div class="builder-contact-field builder-contact-field-extra builder-contact-{{ field.type }}-field" data-order="{{ field_order[field.label] }}">
@@ -333,6 +438,10 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 								<textarea name="field_extra_{{ field_index }}" placeholder="{{ field.value }}" rows="8" cols="45" class="form-control" <# true === field.required && print( 'required' ) #>></textarea>
 							<# } else if( 'text' == field.type ){ #>
 								<input type="text" name="field_extra_{{ field_index }}" placeholder="{{ field.value }}" class="form-control" <# true === field.required && print( 'required' ) #> />
+							<# } else if( 'upload' == field.type ){ #>
+								<input type="file" name="field_extra_{{ field_index }}" placeholder="{{ field.value }}" class="form-control" <# true === field.required && print( 'required' ) #> />
+							<# } else if( 'static' == field.type ){ #>
+								{{{ field.value }}}
 							<# } else if( 'radio' == field.type ){ #>
 								<# _.each( field.value, function( value, index ){ #>
 									<label>
@@ -377,6 +486,19 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 					</div>
 					<# } #>
 
+					<# if( data.gdpr ) { #>
+					<div class="builder-contact-field builder-contact-field-gdpr">
+						<div class="control-label">
+							<div class="control-input checkbox">
+								<label class="field-gdpr">
+									<input type="checkbox" name="gdpr" value="1" required> <# data.gdpr_label != '' ? print(data.gdpr_label) : print('I consent to my submitted data being collected and stored') #>
+								</label>
+							</div>
+						</div>
+					</div>
+					<# } #>
+
+
 					<div class="builder-contact-field builder-contact-field-send">
 						<div class="control-input builder-contact-field-send-{{ data.field_send_align }}">
 							<button type="submit" class="btn btn-primary"> <i class="fa fa-cog fa-spin"></i> <# if( data.field_send_label != '' ) { #> {{{ data.field_send_label }}} <# }else{ #> Send <# } #></button>
@@ -393,8 +515,8 @@ class TB_Contact_Module extends Themify_Builder_Component_Module {
 
 function themify_builder_field_contact_fields( $field, $mod_name ) {
 	?>
-	<div class="themify_builder_field builder_contact_fields">
-		<div class="themify_builder_input">
+	<div class="tb_field builder_contact_fields">
+		<div class="tb_input">
 		<table class="contact_fields">
 		<thead>
 			<tr>
@@ -430,11 +552,16 @@ function themify_builder_field_contact_fields( $field, $mod_name ) {
 				<td><?php _e( 'Message', 'builder-contact' ) ?></td>
 				<td><input type="text" id="field_message_label" name="field_message_label" value="" class="tb_lb_option large" placeholder="<?php _e( 'Message', 'builder-contact' ) ?>" data-control-binding="live" data-control-event="keyup" data-control-type="change" /></td>
 				<td><input type="text" id="field_message_placeholder" name="field_message_placeholder" value="" class="tb_lb_option large" placeholder="<?php _e( 'Placeholder', 'builder-contact' ) ?>" data-control-binding="live" data-control-event="keyup" data-control-type="change" /></td>
-				<td class=""></td>
-			</tr>
-			<tr class="tb-no-sort tb-new-field-row">
+                <td>
+                    <input type="checkbox" id="field_message_active_reverse" value="yes" class="tb-checkbox">
+                </td>
+                <td class="tb_lb_option themify-checkbox" id="field_message_active" data-control-binding="live" data-control-type="checkbox">
+                    <input type="checkbox" id="field_message_active_field" name="field_message_active" value="yes" class="tb-checkbox" style="display: none;"/>
+                </td>
+            </tr>
+			<tr class="tb_no_sort tb_new_field_row">
 				<td>
-					<a href="#" class="tb-new-field-action"><span class="ti-plus"></span><?php esc_html_e( 'Add Field', 'builder-contact' ); ?></a>
+					<a href="#" class="tb_new_field_action"><span class="ti-plus"></span><?php esc_html_e( 'Add Field', 'builder-contact' ); ?></a>
 				</td>
 				<td><input type="text" id="field_extra" name="field_extra" value="" class="tb_lb_option hidden-all" data-control-binding="live" data-control-event="keyup" data-control-type="change" /></td>
 				<td></td>
@@ -467,14 +594,14 @@ function themify_builder_field_contact_fields( $field, $mod_name ) {
 					<input type="text" id="field_send_label" name="field_send_label" value="" class="tb_lb_option large" placeholder="<?php _e( 'Send', 'builder-contact' ) ?>" data-control-binding="live" data-control-event="keyup" data-control-type="change" />
 					<div class="selectwrapper">
 						<select id="field_send_align" name="field_send_align" class="tb_lb_option module-widget-select-field" data-control-binding="live" data-control-event="change" data-control-type="change">
-							<option value="left">Left</option>
-							<option value="right">Right</option>
-							<option value="center">Center</option>
+							<option value="left"><?php _e( 'Left', 'builder-contact' ); ?></option>
+							<option value="right"><?php _e( 'Right', 'builder-contact' ); ?></option>
+							<option value="center"><?php _e( 'Center', 'builder-contact' ); ?></option>
 						</select>
-					</div>Button Alignment
+					</div><?php _e( 'Button Alignment', 'builder-contact' ); ?>
 				</td>
 				<td></td>
-				<td class="">&nbsp;</td>
+				<td>&nbsp;</td>
 			</tr>
 
 		</tfoot>

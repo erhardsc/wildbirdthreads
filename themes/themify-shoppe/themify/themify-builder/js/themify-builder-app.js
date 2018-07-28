@@ -216,7 +216,6 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 model.destroy();
             });
             this.items = {};
-            console.log('destroy registry');
         }
     };
 
@@ -857,10 +856,10 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 						}};
 						var lightbox_func = wp.template('builder_layoutpart_lightbox'),
 							markup = lightbox_func({'link': data.url}),
-							overlay = $('#pagewrap,#wpwrap').append('<div class="themify_builder_overlay_2" style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; bottom: 0; right: 0; z-index: 9990; overflow: hidden;">&nbsp;</div>').children('.themify_builder_overlay_2')[0];
-							//overlay = document.getElementById('themify_builder_overlay');
-						if( api.mode=='visual' ){
+							overlay = $('body').append('<div class="themify_builder_overlay_2" style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; bottom: 0; right: 0; z-index: 9990; overflow: hidden;">&nbsp;</div>').children('.themify_builder_overlay_2')[0];
+						if( api.mode=='visual' ) {
 							overlay.insertAdjacentHTML('afterend',markup);
+							$("body",highest_iframe).addClass('themify_builder_layoutPart_edit');
 							$("#tb_toolbar",highest_iframe).hide();
 							var main_container = $(".themify_builder_workspace_container",highest_iframe);
 							highest_iframe.layoutpart.margin = main_container.css('margin');
@@ -1644,7 +1643,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                     }
 
                     if (val) {
-                        var cselected = val.split('|');
+                        var cselected = val.constructor === Array ? val : val.split('|');
                         cel.each(function () {
                             if (cselected.indexOf($(this).val()) !== -1) {
                                 $(this).prop('checked', true);
@@ -2216,6 +2215,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                             toggleCollapseMod = false;
                         }
                         var moved_row = ui.item.closest('.module_row');
+						api.hasChanged = true;
                         api.vent.trigger('dom:change', ui.item.data('cid'), row, moved_row, 'sort', {'before': row.data('cid'), 'after': moved_row.data('cid')});
                     }
                     row = false;
@@ -2423,6 +2423,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 						type: api.mode
 					}, subRowView.view.$el.find('.subrow_inner'));
 				}
+				subRowView.view.$el.find('ul.themify_builder_grid_list li a[data-col="'+ set_length +'"]').first().parent().addClass('selected');
 				api.Mixins.Builder.updateModuleSort(subRowView.view.$el);
 				api.Utils.setCompactMode(subRowView.view.el.getElementsByClassName('module_column'));
 			}else{
@@ -2446,9 +2447,14 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 api.vent.trigger('dom:change', '', '', '', 'predesign', {'prev': prev_row_id, 'rows': rows, 'bid': bid});
                 for (var i = 0, len = rows.length; i < len; ++i) {
                     api.Mixins.Builder.update(rows[i]);
-                }
+                    var colsLength = rows[i].find('.module_column').length;
+					rows[i].find('ul.themify_builder_grid_list li a[data-col="'+ colsLength +'"]').first().parent().addClass('selected');
+
+				}
                 ThemifyBuilderCommon.showLoader('hide');
-            }
+				api.Utils.setCompactMode(row.view.el.getElementsByClassName('module_column'));
+
+			}
             var fragment = document.createDocumentFragment(),
                     rows = [];
             api.saveCid = true;
@@ -2912,7 +2918,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                     if (input) {
                         var tid = input.prop('id'),
                             tiny = tinyMCE.get(tid),
-                            value = tiny.hidden === false ? tiny.getContent() : switchEditors.wpautop(tinymce.DOM.get(tid).value);
+                            value = ( ! _.isNull(tiny) && ( tiny.hidden === false ) ) ? tiny.getContent() : switchEditors.wpautop(tinymce.DOM.get(tid).value);
                         $child.val(value);
                     }
                     else {
@@ -3058,6 +3064,8 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 if (api.mode === 'visual') {
                     api.Utils.loadContentJs();
                     api.id = false;
+                } else {
+                    api.hasChanged = true;
                 }
                 api.vent.trigger('dom:builder:init');
                 ThemifyBuilderCommon.showLoader('hide');
@@ -3460,7 +3468,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
             'click .tb_toolbar_zoom_menu_toggle': 'zoom',
             'click .tb_toolbar_builder_preview': 'previewBuilder'
         },
-        initialize: function () {
+        render: function () {
             var moduleItems = [],
 				that = this,
 				panel = this.$el.find('.tb_module_panel_modules_wrap'),
@@ -3574,11 +3582,9 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 				$('.tb_toolbar_backend_edit', highest_iframe).show();
 				if(api.mode == 'visual'){
 					$('.themify_builder_workspace_container',highest_iframe).css({'margin': highest_iframe.layoutpart.margin});
+					$('body',highest_iframe).removeClass('themify_builder_layoutPart_edit');
 					$('#tb_toolbar',highest_iframe).show();
 					highest_iframe.layoutpart.model();
-					//$(window.highest_iframe.layoutpart.overlay).next('.tb_layoutpart_lightbox').remove();
-				} else {
-					//$(window.highest_iframe.layoutpart.overlay).prev().remove();
 				}
 				$(window.highest_iframe.layoutpart.overlay).css({'backgroundColor':'initial'}).hide().siblings('.tb_layoutpart_lightbox').remove();
 				$(window.highest_iframe.layoutpart.overlay).remove();
@@ -3590,10 +3596,13 @@ window.themifybuilderapp = window.themifybuilderapp || {};
             stack: [],
             is_working: false,
             index: -1,
-            btnUndo: document.getElementsByClassName('tb-undo-btn')[0],
-            btnRedo: document.getElementsByClassName('tb-redo-btn')[0],
+            btnUndo: null,
+            btnRedo: null,
             init: function () {
                 var self = this;
+                this.btnUndo = window.parent.document.getElementsByClassName('tb-undo-btn')[0];
+                this.btnRedo = window.parent.document.getElementsByClassName('tb-redo-btn')[0];
+
                 api.toolbar.$el.find('.tb-undo-redo').on('click', this.do_change.bind(this));
                 if (!themifyBuilder.disableShortcuts) {
                     $(top_iframe).on('keydown', this.keypres.bind(this));
@@ -3815,6 +3824,9 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 return this.index !== -1;
             },
 			disable: function () {
+                if ( ! this.btnUndo ) this.btnUndo = window.parent.document.getElementsByClassName('tb-undo-btn')[0];
+                if ( ! this.btnRedo ) this.btnRedo = window.parent.document.getElementsByClassName('tb-redo-btn')[0];
+
 				this.btnUndo.classList.add('tb_disabled');
 				this.btnRedo.classList.add('tb_disabled');
 
@@ -3968,8 +3980,6 @@ window.themifybuilderapp = window.themifybuilderapp || {};
             }
             if (confirm(themifyBuilder.i18n.confirm_on_duplicate_page)) {
                 api.Utils.saveBuilder(duplicatePageAjax);
-            } else {
-                duplicatePageAjax();
             }
         },
         Revisions: {
@@ -4088,6 +4098,13 @@ window.themifybuilderapp = window.themifybuilderapp || {};
             e.preventDefault();
             e.stopPropagation();
             var link = $(e.currentTarget).closest('.tb_toolbar_backend_edit').length > 0 ? $(e.currentTarget).prop('href') : false;
+            
+            if ( themifyBuilder.is_gutenberg_editor && link !== false ) {
+                api.toolbar.undoManager.reset();
+                api._backendSwitchFrontend(link);
+                return;
+            }
+
             api.Utils.saveBuilder(function (jqXHR, textStatus) {
                 if (textStatus !== 'success') {
                     alert(themifyBuilder.i18n.errorSaveBuilder);
@@ -4098,7 +4115,7 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                         window.parent.location.href = link;
                     } else {
                         api.toolbar.undoManager.reset();
-                        api._backendSwitchFrontend();
+                        api._backendSwitchFrontend(link);
                     }
                 }
             });
@@ -4291,13 +4308,15 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 					parent = $(parent);
                     parent.addClass('tb_busy');
                     $.getJSON('https://themify.me/public-api/predesigned-rows/index.json')
-                            .done(function (data) {
-                                self.setData(data, parent, callback);
-                            }).fail(function (jqxhr, textStatus, error) {
-                        this.is_init = null;
-                        ThemifyBuilderCommon.showLoader('error');
-                        api.toolbar.$el.find('.tb_predesigned_rows_list').html('<h3>Failed to load Pre-Designed Rows from server.</h3>');
-                    });
+                        .done(function (data) {
+                            self.setData(data, parent, callback);
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+							self.setData({}, parent, callback);
+                            this.is_init = null;
+                            ThemifyBuilderCommon.showLoader('error');
+                            api.toolbar.$el.find('.tb_predesigned_rows_list').append('<h3>Failed to load Pre-Designed Rows from server.</h3>');
+                        });
                 }
             },
             setData: function (data, parent, callback) {
@@ -4332,14 +4351,22 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 var predesigned = api.toolbar.$el.find('.tb_predesigned_rows_list');
                 predesigned[0].insertAdjacentHTML('beforeend', html);
                 var self = this;
-                predesigned.find('img').last().one('load', function () {
-                    self.filter();
-                    parent.removeClass('tb_busy');
-					new SimpleBar(predesigned[0]);
-					$(document).trigger('update:tb_btn', 'tb_module_panel_rows_wrap', callback);
+                if( predesigned.find('img').length ) {
+					predesigned.find( 'img' ).last().one( 'load', function () {
+						finalStage();
+					} );
+				}else{
+					finalStage();
+                }
+                function finalStage(){
+					self.filter();
+					parent.removeClass( 'tb_busy' );
+					new SimpleBar( predesigned[ 0 ] );
+					$( document ).trigger( 'update:tb_btn', 'tb_module_panel_rows_wrap', callback );
 					api.toolbar.common.preDesign_load = true;
-                });
+                }
             },
+
             grid: function (e, slug, callback) {
                 var cols = [];
                 if( slug == 1 ){
@@ -4418,7 +4445,11 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 			subTab_btn:'',
 			init: function(){
                 this.btn = $('<div class="tb_modules_panel_wrap" id="tb_plus_btn_popover"></div>');
-                $('body').append(this.btn);
+                if ( $('.edit-post-layout__content').length ) {
+                    $('.edit-post-layout__content').append(this.btn);
+                } else {
+                    $('body').append(this.btn);
+                }
 				
 				var self = this;
                 this.btn.on('click', '.add_module_btn', function (e) {
@@ -4498,6 +4529,11 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 }
                 this.clicked = $(e.currentTarget);
                 var offset = this.clicked.offset();
+                if ( $('.edit-post-layout__content').length ) {
+                    var $guten_container = $('.edit-post-layout__content');
+                    offset.top += $guten_container.scrollTop() - 70;
+                    offset.left = ( $guten_container.width() / 2 ) - 11;
+                }
                 this.btn.css({top: offset.top, left: (offset.left - (this.btn.width() / 2) + 11) }).show();
                 var target = this.btn.find('.tb_module_types .active a').data('target');
 				target = target ? target : api.toolbar.$el.find('.tb_module_types .active a').data('target');
@@ -4562,31 +4598,25 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 return;
             }
             var w = '',
-                    self = this,
-                    breakpoint = 'desktop',
-                    $this = $(e.currentTarget),
-                    $body = $('body', top_iframe),
-                    prevBreakPoint = api.activeBreakPoint;
+				self = this,
+				breakpoint = 'desktop',
+				$this = $(e.currentTarget),
+				$body = $('body', top_iframe),
+				prevBreakPoint = api.activeBreakPoint;
 
-            function callback() {
-                self.responsive_grids(breakpoint, prevBreakPoint);
-                api.mode === 'visual' && iframe.css('will-change', 'auto');
-
-                $body
-                        .toggleClass('tb_responsive_mode', breakpoint !== 'desktop')
-                        .removeClass('builder-breakpoint-' + prevBreakPoint)
-                        .addClass('builder-breakpoint-' + breakpoint);
-
-                $('body').trigger('themify_builder_change_mode', [prevBreakPoint, breakpoint]);
+			function callback() {
+				self.responsive_grids(breakpoint, prevBreakPoint);
+				$('body').trigger('themify_builder_change_mode', [prevBreakPoint, breakpoint]);
 
                 if (api.mode === 'visual') {
+					iframe.css('will-change', 'auto');
                     api.Mixins.Builder.updateModuleSort(null, breakpoint === 'desktop' ? 'enable' : 'disable');
                     api.Utils._onResize(true, function () {
                         self.iframeScroll(breakpoint !== 'desktop');
                         $('body', top_iframe).height(breakpoint !== 'desktop' ? document.body.scrollHeight : 'auto');
 
                         api.scrollTo && setTimeout(function () {
-                            $(window).add(top_iframe).scrollTop(api.scrollTo.offset().top);
+                            api.scrollTo && $(window).add(top_iframe).scrollTop(api.scrollTo.offset().top);
                             api.scrollTo = false;
                         }, 500);
 
@@ -4598,6 +4628,11 @@ window.themifybuilderapp = window.themifybuilderapp || {};
                 } else {
                     $body.removeClass('tb_start_animate');
                 }
+
+				$body
+					.toggleClass('tb_responsive_mode', breakpoint !== 'desktop')
+					.removeClass('builder-breakpoint-' + prevBreakPoint)
+					.addClass('builder-breakpoint-' + breakpoint);
             }
 
             if ($this.hasClass('breakpoint-tablet')) {
@@ -4632,14 +4667,21 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 						w = previewWidth[breakpoint];
 					}
 				}
-				
-				if(w && iframe.width() != w){
-					iframe.css('will-change', 'width')
-						.one(api.Utils.transitionPrefix(), callback).css('width', w).parent().removeClass('themify_builder_zoom_bg');
-				} else {
-					iframe.css('width', w).parent().removeClass('themify_builder_zoom_bg');
-					callback();
+
+				iframe.css('width', w).parent().removeClass('themify_builder_zoom_bg');
+
+				// Avoid iframe resize when errors in the callback
+				try {
+					if( w && iframe.width() != w ){
+						iframe.css( 'will-change', 'width' ).one( api.Utils.transitionPrefix(), callback );
+					} else {
+						callback();
+					}
+					
+				} catch( e ) {
+					iframe.css( 'width', $('.themify_builder_workspace_container', top_iframe).width() );
 				}
+
             }
             else {
                 callback();
@@ -6045,7 +6087,11 @@ window.themifybuilderapp = window.themifybuilderapp || {};
 
                 var ed = api.Utils.initNewEditor(this_option_id),
                         is_widget = this.$el.hasClass('wp-editor-area') ? this.$el.closest('#instance_widget').length > 0 : false;
-                ed.on('change keyup', callback);
+                
+				// Backforward compatibility
+				! ed.type && ( ed.type = 'setupeditor' );
+				
+				ed.on('change keyup', callback);
             }
             this.$el.on('change keyup', callback);
             return this;

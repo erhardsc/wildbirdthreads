@@ -2,6 +2,9 @@
 
 namespace WPGDPRC\Includes;
 
+use WPGDPRC\Includes\Extensions\CF7;
+use WPGDPRC\Includes\Extensions\GForms;
+
 /**
  * Class Action
  * @package WPGDPRC\Includes
@@ -31,10 +34,11 @@ class Action {
                                 $consent->setSiteId(get_current_blog_id());
                                 $id = $consent->save();
                                 if (!empty($id)) {
-                                    wp_redirect(add_query_arg(
+                                    wp_safe_redirect(add_query_arg(
                                         array('notice' => 'wpgdprc-consent-added'),
                                         Consent::getActionUrl($id)
                                     ));
+                                    exit;
                                 }
                                 break;
                             case 'delete' :
@@ -172,10 +176,11 @@ class Action {
             $output .= '<nav class="wpgdprc-consent-modal__navigation">';
             /** @var Consent $consent */
             foreach ($consents as $consent) {
+                $title = $consent->getTitle();
                 $output .= sprintf(
                     '<a class="wpgdprc-button" href="javascript:void(0);" data-target="%d">%s</a>',
                     $consent->getId(),
-                    $consent->getTitle()
+                    ((!empty($title)) ? $title : __('(no title)', WP_GDPR_C_SLUG))
                 );
             }
             $output .= '</nav>'; // .wpgdprc-consent-modal__navigation
@@ -200,22 +205,24 @@ class Action {
                 );
                 $output .= sprintf('<h3 class="wpgdprc-consent-modal__title">%s</h3>', $consent->getTitle());
                 $output .= apply_filters('wpgdprc_the_content', $consent->getDescription());
-                $output .= '<div class="wpgdprc-checkbox">';
-                $output .= '<label>';
-                $output .= sprintf(
-                    '<input type="checkbox" value="%d" tabindex="1" %s />',
-                    $consent->getId(),
-                    checked(true, in_array($consent->getId(), $consentIds), false)
-                );
-                $output .= '<span class="wpgdprc-switch" aria-hidden="true">';
-                $output .= '<span class="wpgdprc-switch-label">';
-                $output .= '<span class="wpgdprc-switch-inner"></span>';
-                $output .= '<span class="wpgdprc-switch-switch"></span>';
-                $output .= '</span>';
-                $output .= '</span>';
-                $output .= __('Enable', WP_GDPR_C_SLUG);
-                $output .= '</label>';
-                $output .= '</div>';
+                if (!$consent->getRequired()) {
+                    $output .= '<div class="wpgdprc-checkbox">';
+                    $output .= '<label>';
+                    $output .= sprintf(
+                        '<input type="checkbox" value="%d" tabindex="1" %s />',
+                        $consent->getId(),
+                        checked(true, in_array($consent->getId(), $consentIds), false)
+                    );
+                    $output .= '<span class="wpgdprc-switch" aria-hidden="true">';
+                    $output .= '<span class="wpgdprc-switch-label">';
+                    $output .= '<span class="wpgdprc-switch-inner"></span>';
+                    $output .= '<span class="wpgdprc-switch-switch"></span>';
+                    $output .= '</span>';
+                    $output .= '</span>';
+                    $output .= __('Enable', WP_GDPR_C_SLUG);
+                    $output .= '</label>';
+                    $output .= '</div>';
+                }
                 $output .= '</div>'; // .wpgdprc-consent-modal__description
             }
             $output .= '<footer class="wpgdprc-consent-modal__footer">';
@@ -238,40 +245,78 @@ class Action {
 
     public function addConsentsToHead() {
         $consentIds = Helper::getConsentIdsByCookie();
-        if ($consentIds === false) {
+        if (empty($consentIds)) {
             return;
         }
         $args = array(
-            'placement' => array('value' => 'head'),
-            'active' => array('value' => 1),
-        );
-        if (!empty($consentIds)) {
-            $args['ID'] = array(
+            'placement' => array(
+                'value' => 'head'
+            ),
+            'active' => array(
+                'value' => 1
+            ),
+            'ID' => array(
                 'value' => $consentIds,
                 'compare' => 'IN'
-            );
-        }
+            )
+        );
         $consents = Consent::getInstance()->getList($args);
         echo Consent::output($consents);
     }
 
     public function addConsentsToFooter() {
         $consentIds = Helper::getConsentIdsByCookie();
-        if ($consentIds === false) {
+        if (empty($consentIds)) {
             return;
         }
         $args = array(
-            'placement' => array('value' => 'footer'),
-            'active' => array('value' => 1),
-        );
-        if (!empty($consentIds)) {
-            $args['ID'] = array(
+            'placement' => array(
+                'value' => 'footer'
+            ),
+            'active' => array(
+                'value' => 1
+            ),
+            'ID' => array(
                 'value' => $consentIds,
                 'compare' => 'IN'
-            );
-        }
+            )
+        );
         $consents = Consent::getInstance()->getList($args);
         echo Consent::output($consents);
+    }
+
+    public function addTagsToFields() {
+        // Contact Form 7
+        if (Helper::isEnabled(CF7::ID)) {
+            CF7::getInstance()->addFormTagToForms();
+            CF7::getInstance()->addAcceptedDateToForms();
+        }
+
+        // Gravity Forms
+        if (Helper::isEnabled(GForms::ID)) {
+            foreach (GForms::getInstance()->getForms() as $form) {
+                if (in_array($form['id'], GForms::getInstance()->getEnabledForms())) {
+                    GForms::getInstance()->addField($form);
+                }
+            }
+        }
+    }
+
+    public function removeTagsFromFields() {
+        // Contact Form 7
+        if (Helper::isEnabled(CF7::ID)) {
+            CF7::getInstance()->removeFormTagFromForms();
+            CF7::getInstance()->removeAcceptedDateFromForms();
+        }
+
+        // Gravity Forms
+        if (Helper::isEnabled(GForms::ID)) {
+            foreach (GForms::getInstance()->getForms() as $form) {
+                if (in_array($form['id'], GForms::getInstance()->getEnabledForms())) {
+                    GForms::getInstance()->removeField($form);
+                }
+            }
+        }
     }
 
     /**

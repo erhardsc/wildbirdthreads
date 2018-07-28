@@ -46,7 +46,7 @@
 					cm = $li.find( '.CodeMirror' ).get(0);
 				$li.appendTo( $self );
 
-				if( 'CodeMirror' in cm ) {
+				if( 'undefined' !== typeof cm && 'CodeMirror' in cm ) {
 					cm.CodeMirror.focus();
 					cm.CodeMirror.scrollTo( 0, scrollTop );
 				}

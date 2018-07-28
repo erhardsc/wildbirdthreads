@@ -6,7 +6,7 @@
  *	----------------------------------------------------------------------
  *
  *  					Copyright (C) Themify
- * 						http://themify.me
+ * 						https://themify.me
  *
  *  To add custom PHP functions to the theme, create a child theme (https://themify.me/docs/child-theme) and add it to the child theme functions.php file.
  *  They will be added to the theme automatically.
@@ -29,6 +29,9 @@ add_action( 'init', 'themify_register_custom_nav' );
 
 // Register sidebars
 add_action( 'widgets_init', 'themify_theme_register_sidebars' );
+
+// Exclude CPT for sidebar
+add_filter( 'themify_exclude_CPT_for_sidebar', 'themify_CPT_exclude_sidebar' );
 
 // Set class on body tag according to layout width
 add_filter( 'body_class', 'themify_theme_body_class', 99 );
@@ -169,6 +172,8 @@ function themify_theme_enqueue_scripts() {
 		'maxPages'	   	=> $wp_query->max_num_pages,
 		'autoInfinite' 	=> themify_check( 'setting-autoinfinite' ) ? 'no': 'auto',
 		'infiniteURL' => themify_check( 'setting-infinite-url' ) ? 1 : 0,
+		'ajaxCartSeconds' => themify_check( 'setting-cart_show_seconds' ) ? themify_get( 'setting-cart_show_seconds' ) : 1000,
+		'ajaxSingleCart' => is_singular( 'product' ) && themify_check( 'setting-single_ajax_cart' ),
 		 // auto tiles
 		'tiledata' => array(
 			'grids' => array(
@@ -419,6 +424,11 @@ if ( ! function_exists( 'themify_theme_body_class' ) ) {
 		if(($post_layout = array_search('auto_tiles',$classes))!==false){
 			unset($classes[$post_layout]);
 		}
+
+		if( themify_check( 'setting-revealing_footer' ) ) {
+			$classes[] = 'revealing-footer';
+		}
+
 		return $classes;
 	}
 }
@@ -491,7 +501,7 @@ function themify_theme_header_background( $area = 'header', $classes = '' ) {
 			} elseif ( $image ) {
 				$data_bg .= " data-bg='$image'";
 			} else {
-				$data_bg .= ' data-bg="http://themify.me/demo/themes/wp-content/uploads/2013/05/header.jpg"';
+				$data_bg .= ' data-bg="https://themify.me/demo/themes/wp-content/uploads/2013/05/header.jpg"';
 				$repeat = 'fullcover';
 			}
 
@@ -1117,6 +1127,28 @@ function themify_theme_get_header_design() {
 	return $header;
 }
 
+if( ! function_exists('themify_CPT_exclude_sidebar') ) {
+	/**
+	 * Exclude Custom Post Types
+	 */
+	function themify_CPT_exclude_sidebar($CPT = array()) {
+		
+		$shoppe = array('slider');
+		
+		if(empty($CPT)){
+			$CPT = array('post', 'page', 'attachment', 'tbuilder_layout', 'tbuilder_layout_part', 'section');
+		}
+		
+		if(themify_is_woocommerce_active()){
+			$shoppe[] = 'product';
+		}
+
+		$CPT = array_merge($CPT, $shoppe);
+
+		return $CPT;
+	}
+}
+
 if ( ! function_exists( 'themify_theme_comment' ) ) {
 	/**
 	 * Custom Theme Comment
@@ -1376,12 +1408,21 @@ add_action( 'wp_head', 'themify_theme_custom_post_css', 77 );
 function themify_theme_query_classes() {
 	global $themify, $wp_query;
 	$class = array();
-	$is_product_query_page =  themify_theme_is_product_query();
-	if(!isset($themify->builder_args['is_product']) || $is_product_query_page){
+	$is_product_query_page = themify_theme_is_product_query();
+
+	if( ! empty( $themify->builder_args['content_layout'] ) ) {
+		$class[] = $themify->builder_args['content_layout'];
+	} else if( ! empty( $themify->post_layout_type ) ) {
+		$class[] = $themify->post_layout_type;
+	}
+
+	if( ! isset( $themify->builder_args['is_product'] ) || $is_product_query_page ) {
 		$class[] = $themify->layout;
+		
 		if ( isset( $themify->query_post_type ) && ! in_array( $themify->query_post_type, array( 'post', 'page','portfolio') ) ) {
 			$class[] = $themify->query_post_type;
 		}
+
 		$queried_object = get_queried_object();
 		$post_type = $wp_query->get( 'post_type' );
 		$is_product_query = themify_is_product_search()
@@ -1394,10 +1435,16 @@ function themify_theme_query_classes() {
 				&& is_array( $post_type )
 					? in_array( 'product', $post_type )
 					: $post_type === 'product' );
-		
+
 		if (themify_is_query_page() || is_archive() || is_search() || is_tax() || is_home() || $is_product_query || $is_product_query_page){
+			if( $is_product_query || is_tax('product_cat') ) {
+				if( $themify->post_layout != 'auto_tiles' ){
+					$themify->post_layout = themify_get( 'setting-products_layout' );
+				}
+			}
 			
 			$is_masonry = !in_array($themify->post_layout,array('auto_tiles','list-post','list-large-image','list-thumb-image'));
+
 			if($is_product_query_page || $is_product_query || get_post_type()==='product' ||  (isset( $themify->query_post_type ) && $themify->query_post_type==='product')){
 				if('no-gutter' == themify_theme_get( 'gutter','','setting-product_post_gutter' )){
 					$class[] = 'no-gutter';
@@ -1432,19 +1479,13 @@ function themify_theme_query_classes() {
 			if ( $temp_class = themify_theme_get( 'more_posts', 'infinite' ) ) {
 				$class[] = $temp_class;
 			}
-			if($is_product_query || is_tax('product_cat')){
-				if($themify->post_layout!='auto_tiles'){
-					$themify->post_layout = themify_get( 'setting-products_layout' );
-				}
-			}
+			
 		}
 	}
 	$class[] = $themify->post_layout;
 
 	return implode( ' ', apply_filters( 'themify_theme_loops_wrapper_class', $class ) );
 }
-
-
 
 //Change comments fields position
 add_filter('comment_form_fields', 'themify_reorder_comment_fields' );
@@ -1805,7 +1846,9 @@ function themify_add_tile_layout($options,$module){
 						'default' => __('Default', 'themify'),
 						'no' => __('No', 'themify'),
 						'overlay' => __('Overlay', 'themify'),
-						'polaroid' => __('Polaroid', 'themify')
+						'polaroid' => __('Polaroid', 'themify'),
+						'boxed' => __('Boxed', 'themify'),
+						'flip' => __('Flip', 'themify')
 					)
 				),
 				array(
@@ -1888,7 +1931,7 @@ function themify_builder_args( $show, $mod, $builder_id, $identifier ) {
 			$content_layout = $layout != 'auto_tiles'
 				&& ! empty( $mod_settings['content_layout'] )
 					? $mod_settings['content_layout'] : '';
-					
+
 			$post_gutter = ! empty( $mod_settings['post_gutter'] )
 				? $mod_settings['post_gutter'] : '';
 			
@@ -1942,8 +1985,17 @@ function themify_builder_args( $show, $mod, $builder_id, $identifier ) {
 
 	return $show;
 }
-
 add_filter('themify_builder_module_display', 'themify_builder_args', 10, 4);
+
+function themify_builder_reset_global_args() {
+	global $themify;
+
+	if( ! empty( $themify->builder_args['content_layout'] ) ) {
+		unset( $themify->builder_args['content_layout'] );
+	}
+}
+add_action( 'themify_builder_after_template_content_render', 'themify_builder_reset_global_args' );
+add_action( 'themify_builder_row_end', 'themify_builder_reset_global_args' );
 
 function themify_add_builder_classes($classes) {
     global $themify;
@@ -1959,7 +2011,6 @@ function themify_add_builder_classes($classes) {
     }
     return $classes;
 }
-
 
 function themify_add_fancy_heading_class($container,$args,$mod_name, $module_ID ){
 	remove_filter('themify_builder_module_container_props','themify_add_fancy_heading_class',10,4);
@@ -2081,3 +2132,19 @@ function localize_variation_product( $args ) {
 }
 endif;
 add_filter( 'themify_shop_js_vars', 'localize_variation_product' );
+
+if ( ! function_exists( 'themify_allow_menu_highlight' ) ) {
+	/**
+	 * Enable menu link highlight.
+	 *
+	 * @since 1.2.6
+	 *
+	 * @param boolean $allow.
+	 *
+	 * @return boolean.
+	 */
+	function themify_allow_menu_highlight( $allow ) {
+		return true;
+	}
+	add_filter( 'themify_menu_highlight_link', 'themify_allow_menu_highlight', 10 );
+}

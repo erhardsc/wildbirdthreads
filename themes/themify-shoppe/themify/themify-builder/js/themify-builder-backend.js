@@ -1,68 +1,94 @@
 (function ($) {
 
-    'use strict';
+	'use strict';
+	
+	//if (typeof wp.blocks === 'undefined' || $('#page-builder.themify_write_panel').length === 0)
+	  //  return;
 
-    if ($('#page-builder.themify_write_panel').length === 0)
-        return;
-    var api = themifybuilderapp,
-    $body = $('body'),
-    saved = false;
-    api.mode = false;
-    api.render = function () {
-       
-        $body[0].insertAdjacentHTML('afterbegin', '<div class="themify_builder_fixed_scroll" id="themify_builder_fixed_bottom_scroll"></div>');
-        $body.append($('<div/>', {id: 'themify_builder_alert'}));
-        if (themifyBuilder.builder_data.length === 0) {
-            themifyBuilder.builder_data = {};
-        }
-        this.toolbar = new api.Views.Toolbar({el: '#tb_toolbar'});
-        api.Instances.Builder[0] = new api.Views.Builder({el: '#themify_builder_row_wrapper', collection: new api.Collections.Rows(themifyBuilder.builder_data)});
-        api.Instances.Builder[0].render();
-        /* hook save to publish button */
-        $('input#publish,input#save-post').one('click', function (e) {
-            if (!saved) {
-                api.Utils.saveBuilder(function(){
-                    // Clear undo history
-                    api.toolbar.undoManager.reset();
-                    $(e.currentTarget).trigger('click');
-                });
-                e.preventDefault();
-            }
-        });
-        // switch frontend
-        $('<a href="#" id="themify_builder_switch_frontend_button" class="button themify_builder_switch_frontend">' + themifyBuilder.i18n.switchToFrontendLabel + '</a>')
-                .on('click', function (e) {
-                    e.preventDefault();
-                    $('#themify_builder_switch_frontend').trigger('click');
-                }).appendTo('#postdivrich #wp-content-media-buttons');
+	if ( ! themifyBuilder.is_gutenberg_editor && $('#page-builder.themify_write_panel').length === 0 )
+      return;
 
-        $('input[name*="builder_switch_frontend"]').closest('.themify_field_row').remove(); // hide the switch to frontend field check
+	var api = themifybuilderapp,
+	$body = $('body'),
+	saved = false;
+	api.mode = false;
+	api.redirectFrontend = false;
+	api.render = function () {
+		if ( themifyBuilder.is_gutenberg_editor && !document.getElementById('themify-builder-canvas-block') ) return;
 
-        api.Views.bindEvents();
+		$body[0].insertAdjacentHTML('afterbegin', '<div class="themify_builder_fixed_scroll" id="themify_builder_fixed_bottom_scroll"></div>');
+		$body.append($('<div/>', {id: 'themify_builder_alert'}));
+		if (themifyBuilder.builder_data.length === 0) {
+			themifyBuilder.builder_data = {};
+		}
 
-        api.Forms.bindEvents();
+		if ( themifyBuilder.is_gutenberg_editor ) {
+			var template = wp.template('builder_admin_canvas_block');
+			document.getElementById('themify-builder-canvas-block').innerHTML = template();
+		}
+		this.toolbar = new api.Views.Toolbar({el: '#tb_toolbar'});
+		this.toolbar.render();
+		api.Instances.Builder[0] = new api.Views.Builder({el: '#themify_builder_row_wrapper', collection: new api.Collections.Rows(themifyBuilder.builder_data)});
+		api.Instances.Builder[0].render();
+		/* hook save to publish button */
+		$('input#publish,input#save-post').one('click', function (e) {
+			if (!saved) {
+				api.Utils.saveBuilder(function(){
+					// Clear undo history
+					api.toolbar.undoManager.reset();
+					$(e.currentTarget).trigger('click');
+				});
+				e.preventDefault();
+			}
+		});
+		// switch frontend
+		$('<a href="#" id="themify_builder_switch_frontend_button" class="button themify_builder_switch_frontend">' + themifyBuilder.i18n.switchToFrontendLabel + '</a>')
+				.on('click', function (e) {
+					e.preventDefault();
+					$('#themify_builder_switch_frontend').trigger('click');
+				}).appendTo('#postdivrich #wp-content-media-buttons');
 
-        api.vent.trigger('dom:builder:init', true);
-    };
+		$('input[name*="builder_switch_frontend"]').closest('.themify_field_row').remove(); // hide the switch to frontend field check
 
-    api._backendSwitchFrontend = function(){
-        $('#builder_switch_frontend_noncename').val('ok');
-        saved = true;
-        if ( 'publish' === $('#original_post_status').val() ) {
-            $('#publish').trigger('click');
-        } else {
-            $('#save-post').trigger('click');
-        }
-    };
-    api._backendBuilderFocus = function(){
-        $( '#page-buildert' ).trigger( 'click' );
-        $( 'html, body' ).animate( {
-                scrollTop: $( '#tb_toolbar' ).offset().top - $( '#wpadminbar' ).height()
-        }, 2000 );
-    };
+		api.Views.bindEvents();
 
-    $(function () {
-        if ( $body.hasClass( 'post-php' ) && $( '#post-lock-dialog' ).length ) {
+		api.Forms.bindEvents();
+
+		api.vent.trigger('dom:builder:init', true);
+	};
+
+	api._backendSwitchFrontend = function(link){
+		$('#builder_switch_frontend_noncename').val('ok');
+		saved = true;
+		if ( 'publish' === $('#original_post_status').val() ) {
+			if ( themifyBuilder.is_gutenberg_editor ) {
+				if ( $('.editor-post-publish-button').length ) {
+					$('.editor-post-publish-button').trigger('click');
+				} else {
+					$('.editor-post-publish-panel__toggle').trigger('click');
+				}
+				api.redirectFrontend = link;
+			} else {
+				$('#publish').trigger('click');
+			}
+		} else {
+			if ( themifyBuilder.is_gutenberg_editor ) {
+				$('.editor-post-save-draft').trigger('click');
+				api.redirectFrontend = link;
+			} else {
+				$('#save-post').trigger('click');
+			}
+		}
+	};
+	api._backendBuilderFocus = function(){
+		$( '#page-buildert' ).trigger( 'click' );
+		$( 'html, body' ).animate( {
+				scrollTop: $( '#tb_toolbar' ).offset().top - $( '#wpadminbar' ).height()
+		}, 2000 );
+	};
+
+	$(function () {
+		if ( $body.hasClass( 'post-php' ) && $( '#post-lock-dialog' ).length ) {
 			if ( ! $( '#post-lock-dialog' ).hasClass( 'hidden' ) ) {
 				return;
 			}
@@ -75,43 +101,43 @@
 			}, null, null, function() {
 				return typeof TB_Ticks !== 'undefined';
 			} );
-        }
-        var _original_icl_copy_from_original;
+		}
+		var _original_icl_copy_from_original;
 
-        api.render();
+		api.render();
 
-        // WPML compat
-        if (typeof window.icl_copy_from_original === 'function') {
-            _original_icl_copy_from_original = window.icl_copy_from_original;
-            // override "copy content" button action to load Builder modules as well
-            window.icl_copy_from_original = function (lang, id) {
-                _original_icl_copy_from_original(lang, id);
-                jQuery.ajax({
-                    url: ajaxurl,
-                    type: "POST",
-                    data: {
-                        action: 'themify_builder_icl_copy_from_original',
-                        source_page_id: id,
-                        source_page_lang: lang
-                    },
-                    success: function (data) {
-                        if (data != '-1') {
-                            jQuery('#page-builder .themify_builder.themify_builder_admin').empty().append(data).contents().unwrap();
+		// WPML compat
+		if (typeof window.icl_copy_from_original === 'function') {
+			_original_icl_copy_from_original = window.icl_copy_from_original;
+			// override "copy content" button action to load Builder modules as well
+			window.icl_copy_from_original = function (lang, id) {
+				_original_icl_copy_from_original(lang, id);
+				jQuery.ajax({
+					url: ajaxurl,
+					type: "POST",
+					data: {
+						action: 'themify_builder_icl_copy_from_original',
+						source_page_id: id,
+						source_page_lang: lang
+					},
+					success: function (data) {
+						if (data != '-1') {
+							jQuery('#page-builder .themify_builder.themify_builder_admin').empty().append(data).contents().unwrap();
 
-                            // redo module events
-                            //ThemifyPageBuilder.moduleEvents();
-                        }
-                    }
-                });
-            };
-        }
+							// redo module events
+							//ThemifyPageBuilder.moduleEvents();
+						}
+					}
+				});
+			};
+		}
 
-    });
+	});
 
-    // Run on WINDOW load
-    $(window).load(function () {
+	// Run on WINDOW load
+	$(window).load(function () {
 
-        var $panel = $('#tb_toolbar'),
+		var $panel = $('#tb_toolbar'),
 			$module_tmp_helper = $('#themify_builder_module_tmp'),
 			$scroll_anchor = $('#tb_scroll_anchor'),
 			$top = 0,
@@ -120,18 +146,18 @@
 			$panel_top = 0,
 			$wpadminbar = $('#wpadminbar'),
 			$wpadminbarHeight = $wpadminbar.css( 'position' ) === 'fixed' ? $wpadminbar.outerHeight(true) : 0;
-        if ($panel.length > 0) {
-            if ($panel.is(':visible')) {
-                themify_sticky_pos();
-            }
-            else {
-                $('.themify-meta-box-tabs a').one('click', function () {
-                    if ($(this).attr('id') === 'page-buildert') {
-                        themify_sticky_pos();
-                    }
-                });
-            }
-        }
+		if ($panel.length > 0) {
+			if ($panel.is(':visible') && ! themifyBuilder.is_gutenberg_editor ) {
+				themify_sticky_pos();
+			}
+			else {
+				$('.themify-meta-box-tabs a').one('click', function () {
+					if ($(this).attr('id') === 'page-buildert') {
+						themify_sticky_pos();
+					}
+				});
+			}
+		}
 
 		function isStickyBar() {
 			var $bottom = $panel_top + $('#page-builder').height(),
@@ -181,5 +207,5 @@
 			api._backendBuilderFocus();
 			sessionStorage.removeItem( 'focusBackendEditor' );
 		}
-    });
+	});
 })(jQuery);

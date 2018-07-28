@@ -210,6 +210,7 @@ if( ! function_exists('themify_theme_mega_get_posts') ) {
 		}
 		$mega_posts = '<article itemscope itemtype="https://schema.org/Article" class="post"><h1 class="post-title">'.__('Error loading posts.', 'themify').'</h1></article>';
 
+		$postPerPage = themify_get( 'setting-mega_menu_posts', 5 );
 		$term_query_args = apply_filters( 'themify_mega_menu_query',
 			array(
 				'post_type' => $taxObject->object_type,
@@ -221,7 +222,7 @@ if( ! function_exists('themify_theme_mega_get_posts') ) {
 					)
 				),
 				'suppress_filters' => false,
-				'posts_per_page' => 5
+				'posts_per_page' => $postPerPage
 			)
 		);
 		
@@ -230,6 +231,10 @@ if( ! function_exists('themify_theme_mega_get_posts') ) {
 		if( $posts ) {
 			global $post;
 			ob_start();
+			if ($postPerPage != 5) {
+				$temp_width = (100 / intval($postPerPage)) - 2.4;
+				echo '<style>#main-nav .mega-menu-posts .post { width: '.$temp_width.'%; }</style>';
+			}
 			foreach( $posts as $post ) {
 				setup_postdata( $post );
 
@@ -509,7 +514,7 @@ class Themify_Widgets_Menu {
 			$class = $this->get_widget_menu_class( $item );
 
 			/* Check widget availability */
-			if( ! isset( $wp_widget_factory->widgets[$class] ) )
+			if ( ! isset( $wp_widget_factory->widgets[ $class ] ) )
 				return;
 			?>
 			<input type="hidden" class="themify-widget-menu-type" value="widget" />
@@ -528,8 +533,18 @@ class Themify_Widgets_Menu {
 	}
 
 	function wp_update_nav_menu_item( $menu_id, $menu_item_db_id, $args ) {
-		if( isset( $_POST['menu-item-widget-options'] ) && isset( $_POST['menu-item-widget-options'][$menu_item_db_id] ) )
-			$this->save_meta( $this->meta_key, $_POST['menu-item-widget-options'][$menu_item_db_id], $menu_item_db_id );
+		global $wp_widget_factory;
+
+		if ( isset( $_POST['menu-item-widget-options'] ) && isset( $_POST['menu-item-widget-options'][ $menu_item_db_id ] ) ) {
+			$new_instance = $_POST['menu-item-widget-options'][ $menu_item_db_id ];
+			/* the widget class is stored in the menu item URL field */
+			$widget_class = ltrim( $_POST['menu-item-url'][ $menu_item_db_id ], '#' );
+			if ( isset( $wp_widget_factory->widgets[ $widget_class ] ) ) {
+				$old_instance = get_post_meta( $menu_item_db_id, $this->meta_key, true );
+				$new_instance = $wp_widget_factory->widgets[ $widget_class ]->update( $new_instance, $old_instance );
+				$this->save_meta( $this->meta_key, $new_instance, $menu_item_db_id );
+			}
+		}
 	}
 
 	function nav_menu_script() {

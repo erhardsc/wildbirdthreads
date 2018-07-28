@@ -197,7 +197,7 @@ if (!class_exists('Themify_Customizer')) :
 			wp_enqueue_style('themify-customize-control', themify_enque(THEMIFY_CUSTOMIZER_URI . '/css/themify.customize-control.css'), array(), THEMIFY_VERSION);
 
 			// Minicolors JS
-			wp_enqueue_script('themify-colorpicker-js', themify_enque(THEMIFY_METABOX_URI . 'js/jquery.minicolors.js'), array('jquery'), THEMIFY_VERSION);
+			wp_enqueue_script('themify-colorpicker-js', themify_enque(THEMIFY_METABOX_URI . 'js/jquery.minicolors.min.js'), array('jquery'), THEMIFY_VERSION);
 
 			// Plupload
 			wp_enqueue_script('plupload-all');
@@ -616,6 +616,7 @@ if (!class_exists('Themify_Customizer')) :
 			$css_to_save = $this->generate_css();
 			$css_to_save .= $this->generate_responsive_css();
 			$css_to_save .= $this->global_css;
+			$css_to_save .= $this->generate_custom_css();
 			$css_to_save = apply_filters( 'themify_customizer_css_output', $css_to_save, $this );
 
 			$filesystem = Themify_Filesystem::get_instance();
@@ -930,7 +931,6 @@ if (!class_exists('Themify_Customizer')) :
 
 			// Styles are saved by selector to later output them all at once
 			$css = array();
-			$custom_css = '';
 
 			foreach ($this->styles as $selector => $style) {
 				if (!isset($css[$selector])) {
@@ -938,7 +938,6 @@ if (!class_exists('Themify_Customizer')) :
 				}
 
 				if ('customcss' === $selector && (!$is_customize || $this->saving_stylesheet ) && is_null($device)) {
-					$custom_css = $this->custom_css();
 					continue;
 				}
 
@@ -1019,11 +1018,14 @@ if (!class_exists('Themify_Customizer')) :
 					$out = "/* Themify Customize Styling */\n" . apply_filters('themify_customizer_styling', $out);
 				}
 			}
-			if (!empty($custom_css)) {
-				$out .= "\n/* Themify Custom CSS */\n" . apply_filters('themify_customizer_custom_css', $custom_css);
-			}
 
 			return $out;
+		}
+
+		function generate_custom_css() {
+			$custom_css = $this->custom_css();
+
+			return ! empty( $custom_css ) ? "\n/* Themify Custom CSS */\n" . apply_filters( 'themify_customizer_custom_css', $custom_css ) : '';
 		}
 
 		/**

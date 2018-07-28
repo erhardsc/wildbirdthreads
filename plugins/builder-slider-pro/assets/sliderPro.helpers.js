@@ -26,25 +26,19 @@
 		// Will replace the original 'gotoSlide' function by adding a cross-fade effect
 		// between the previous and the next slide.
 		_gotoSlide: function( index ) {
-			
-			if( $(window).width() > 320 ) {
-				if( this.$slider.parent().data( 'isKeySliding' ) ) {
-					return false;
-				}
-			}
-			
-			if ( index === this.selectedSlideIndex ) {
-				return;
-			}
-			
-			if( $(window).width() > 320 ) {
-				this.$slider.parent().data( 'isKeySliding', true );
+
+			if( this.$slider.parent().data( 'isKeySliding' ) || index === this.selectedSlideIndex ) {
+				return false;
 			}
 			
 			// If the slides are being swiped/dragged, don't use fade, but call the original method instead.
 			// If not, which means that a new slide was selected through a button, arrows or direct call, then
 			// use fade.
 			if ( this.$slider.hasClass( 'sp-swiping' ) ) {
+				if( index === undefined ) {
+					index = this.slidesOrder[0];
+				}
+
 				this.originalGotoSlideReference( index );
 			} else {
 				var that = this,
@@ -100,6 +94,8 @@
 					// Wait before reposition is running
 					var waitingTime = parseFloat( $nextSlide.data( 'duration' ) ) * 1000;
 
+					that.$slider.parent().data( 'isKeySliding', true );
+
 					setTimeout(function() {
 						// After the animation is over, make all the slides visible again
 						$.each( that.slides, function( index, element ) {
@@ -117,6 +113,8 @@
 						if ( that.settings.autoHeight === true ) {
 							that._resizeHeight();
 						}
+
+						that.$slider.parent().data( 'isKeySliding', false );
 					}, waitingTime );
 				};
 

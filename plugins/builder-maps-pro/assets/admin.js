@@ -133,7 +133,7 @@ function builderMapsPro_remove_marker( index ) {
                     if(type==='maps-pro'){
                         setTimeout(function(){
                             if (typeof google !== 'object') {
-                                Themify.LoadAsync('//maps.google.com/maps/api/js?sensor=false&callback=builderMapsProInit&key='+builderMapsPro.key, false,true, true, function(){
+                                Themify.LoadAsync('//maps.google.com/maps/api/js?v=3.exp&callback=builderMapsProInit&key='+builderMapsPro.key, false,false, false, function(){
                                     return typeof google === 'object' && typeof google.maps === 'object';
                                 });
                             } else {

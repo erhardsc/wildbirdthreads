@@ -8,10 +8,14 @@
 global $woocommerce;
 $carts = array_reverse( $woocommerce->cart->get_cart() );
 
-foreach ( $carts as $cart_item_key => $values ) :
-	$_product = $values['data'];
+foreach ( $carts as $cart_item_key => $cart_item ) :
+	// Add support for MNM plugin
+	if( isset( $cart_item['mnm_container'] ) ) continue;
 
-	if ( $_product->exists() && $values['quantity'] > 0 ): ?>
+	$_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+
+	if ( $_product->exists() && $cart_item['quantity'] > 0 ): 
+		$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $_product->get_permalink( $cart_item ), $cart_item, $cart_item_key ); ?>
 
 		<div class="product">
 
@@ -22,9 +26,9 @@ foreach ( $carts as $cart_item_key => $values ) :
 
 			<figure class="product-image">
 				<?php themify_product_cart_image_start(); // hook ?>
-				<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>">
+				<a href="<?php echo esc_url( $product_permalink ); ?>">
 					<?php
-						$product_thumbnail = $_product->get_image('cart_thumbnail');
+						$product_thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
 						if ( ! empty( $product_thumbnail ) ) {
 							echo $product_thumbnail;
 						} else {
@@ -39,11 +43,11 @@ foreach ( $carts as $cart_item_key => $values ) :
 
 			<div class="product-details">
 				<h3 class="product-title">
-					<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) );?>">
-						<?php echo apply_filters( 'woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ); ?>
+					<a href="<?php echo esc_url( $product_permalink );?>">
+						<?php echo apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ); ?>
 					</a>
 				</h3>
-				<p class="quantity-count"><?php echo sprintf(__('x %d', 'themify'), $values['quantity']); ?></p>
+				<p class="quantity-count"><?php printf(__('x %d', 'themify'), $cart_item['quantity']); ?></p>
 			</div>
 
 		</div>

@@ -6,7 +6,7 @@
  *	----------------------------------------------------------------------
  *
  *  					Copyright (C) Themify
- * 						http://themify.me
+ * 						https://themify.me
  *
  ***************************************************************************/
 
@@ -72,6 +72,10 @@ $themify_theme_config['panel']['settings']['tab']['default_layouts'] = array(
 		array(
 			'title' => __('Default Page Layout', 'themify'),
 			'function' => 'default_page_layout'
+		),
+		array(
+			'title' => __('Custom Post Types', 'themify'),
+			'function' => 'custom_post_type_layouts'
 		)
 	)
 );
@@ -92,6 +96,10 @@ $themify_theme_config['panel']['settings']['tab']['theme_settings'] = array(
 		array(
 			'title' => __('Theme Appearance', 'themify'),
 			'function' => 'theme_design_controls'
+		),
+		array(
+			'title' => __('Mega Menu', 'themify'),
+			'function' => 'theme_mega_menu_controls'
 		),
 		array(
 			'title' => __('Image Filter', 'themify'),
@@ -126,7 +134,7 @@ $themify_theme_config['panel']['settings']['tab']['shop_settings'] = array(
 			'function' => 'single_product'
 		),
 		array(
-			'title' => __('Ajax Cart Style', 'themify'),
+			'title' => __('Ajax Cart', 'themify'),
 			'function' => 'ajax_cart_style'
 		),
 		array(

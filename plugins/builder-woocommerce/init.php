@@ -1,12 +1,13 @@
 <?php
 /*
-Plugin Name:  Builder WooCommerce
-Plugin URI:   http://themify.me/addons/woocommerce
-Version:      1.2.2
-Author:       Themify
-Description:  Show WooCommerce products anywhere with the Builder. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
-Text Domain:  builder-wc
-Domain Path:  /languages
+Plugin Name:     Builder WooCommerce
+Plugin URI:      http://themify.me/addons/woocommerce
+Version:         1.2.3
+Author:          Themify
+Description:     Show WooCommerce products anywhere with the Builder. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
+Text Domain:     builder-wc
+Domain Path:     /languages
+WC tested up to: current
 */
 
 defined( 'ABSPATH' ) or die( '-1' );
@@ -35,6 +36,7 @@ class Builder_Woocommerce {
 		add_action( 'plugins_loaded', array( $this, 'setup' ), 1 );
 		add_action( 'plugins_loaded', array( $this, 'i18n' ), 5 );
 		add_action( 'init', array( $this, 'updater' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'themify_plugin_meta'), 10, 2 );
 	}
 
 	public function constants() {
@@ -51,6 +53,16 @@ class Builder_Woocommerce {
 		add_action( 'themify_builder_setup_modules', array( $this, 'register_module' ) );
 	}
 
+	public function themify_plugin_meta( $links, $file ) {
+		if ( plugin_basename( __FILE__ ) == $file ) {
+			$row_meta = array(
+			  'changelogs'    => '<a href="' . esc_url( 'https://themify.me/changelogs/' ) . basename( dirname( $file ) ) .'.txt" target="_blank" aria-label="' . esc_attr__( 'Plugin Changelogs', 'builder-wc' ) . '">' . esc_html__( 'View Changelogs', 'builder-wc' ) . '</a>'
+			);
+	 
+			return array_merge( $links, $row_meta );
+		}
+		return (array) $links;
+	}
 	public function i18n() {
 		load_plugin_textdomain( 'builder-wc', false, '/languages' );
 	}

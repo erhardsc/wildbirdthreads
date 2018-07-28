@@ -379,7 +379,9 @@ function getParameterByName(name, url) {
             });
 
             // Ajax add to cart in single page
-            ajax_add_to_cart_single_page();
+			if( ! themifyScript.ajaxSingleCart ) {
+				ajax_add_to_cart_single_page();
+			}
 
         }
 
@@ -418,42 +420,63 @@ function getParameterByName(name, url) {
         /*function ajax add to cart in single page */
         function ajax_add_to_cart_single_page() {
             $(document).on('submit', 'form.cart', function (e) {
-                    e.preventDefault();
-                 
-					var data = new FormData(this);
-					if( $(this).find('input[name="add-to-cart"]').length===0 ){
-						data.append( 'add-to-cart', $(this).find('[name="add-to-cart"]').val() );
-					}
-					data.append( 'action', 'theme_add_to_cart' );
-					$('body').trigger('adding_to_cart', [$(this).find('[type="submit"]'), data])
-					// Ajax action
-					$.ajax( {
-						url: woocommerce_params.ajax_url,
-						type: "POST",
-						data: data,
-						contentType: false,
-						cache: false,
-						processData: false,
-						success: function ( response ) {
-							if (!response) { return; }
-							if (themifyShop.redirect) {
-								window.location.href = themifyShop.redirect;
-								return;
-							}
-							var fragments = response.fragments,
-							cart_hash = response.cart_hash;
-							
-							// Block fragments class
-							if (fragments) {
-								$.each(fragments, function (key, value) {
-									$(key).addClass('updating').replaceWith(value);
-								});
-							}
+				// WooCommerce Subscriptions plugin compatibility
+				if( window.location.search.indexOf( 'switch-subscription' ) > -1 ) return this;
 
-							// Trigger event so themes can refresh other areas
-							$('body').trigger('added_to_cart', [fragments, cart_hash]);
+				e.preventDefault();
+
+				var data = new FormData(this);
+
+				if( $(this).find('input[name="add-to-cart"]').length===0 ){
+					data.append( 'add-to-cart', $(this).find('[name="add-to-cart"]').val() );
+				}
+
+				data.append( 'action', 'theme_add_to_cart' );
+				$('body').trigger('adding_to_cart', [$(this).find('[type="submit"]'), data]);
+
+				var xhr,
+					_orgAjax = $.ajaxSettings.xhr,
+					currentLocation = window.location.href;
+
+				$.ajaxSettings.xhr = function () {
+					xhr = _orgAjax();
+					return xhr;
+				};
+
+				// Ajax action
+				$.ajax( {
+					url: woocommerce_params.ajax_url,
+					type: "POST",
+					data: data,
+					contentType: false,
+					cache: false,
+					processData: false,
+					success: function ( response ) {
+						if (!response) { return; }
+						if (themifyShop.redirect) {
+							window.location.href = themifyShop.redirect;
+							return;
 						}
-					} );
+
+						if( ! response.fragments && currentLocation !== xhr.responseURL ) {
+							window.location.href = xhr.responseURL;
+							return;
+						}
+
+						var fragments = response.fragments,
+						cart_hash = response.cart_hash;
+						
+						// Block fragments class
+						if (fragments) {
+							$.each(fragments, function (key, value) {
+								$(key).addClass('updating').replaceWith(value);
+							});
+						}
+
+						// Trigger event so themes can refresh other areas
+						$('body').trigger('added_to_cart', [fragments, cart_hash]);
+					}
+				} );
             });
         }
 
@@ -589,13 +612,13 @@ function getParameterByName(name, url) {
                     $('#slide-cart').removeClass('sidemenu-off').addClass('sidemenu-on');
                     setTimeout(function () {
                         $('#slide-cart').removeClass('sidemenu-on').addClass('sidemenu-off')
-                    }, 1000);
+                    }, + themifyScript.ajaxCartSeconds || 1000 );
                 }
                 else {
-                    $('#cart-icon-count').addClass('show_cart');
+                    $('#cart-icon-count, #cart-link-mobile #shopdock').addClass('show_cart');
                     setTimeout(function () {
-                        $('#cart-icon-count').removeClass('show_cart');
-                    }, 1000);
+                        $('#cart-icon-count, #cart-link-mobile #shopdock').removeClass('show_cart');
+                    }, + themifyScript.ajaxCartSeconds || 1000 );
                 }
             }
                     $body.removeClass('wc-cart-empty');
@@ -661,39 +684,60 @@ function getParameterByName(name, url) {
         }
 
         function themify_zoom_init( el, url ) {
-            var productZoom = el.find( '.product_zoom' );
+            var productZoom = el.find( '.product_zoom' ),
+				currentImage = el.find( 'img:not(.zoomImg)' ),
+				runZoom = function() {
+					productZoom.off( 'click.runZoom' ).one( 'click.runZoom', function (e) {
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						
+						var $this = $( this );
+						el.addClass('zoom_progress');
 
-            if( url === undefined ) {
-                url = el.data('zoom-image');
-            }
+						$this.after('<span class="themify_spinner"></span>');
+						el.prop('href','javascript:void(0)');
+						el.zoom({
+							on: 'click',
+							url: url || el.data('zoom-image'),
+							callback: function () {
+								$this.next('.themify_spinner').remove();
+								el.removeClass('zoom_progress').trigger('click.zoom');
+								$(this).css({'top':-($(this).height()/2)+120,'left':-($(this).width()/2)+120});
+							},
+							onZoomIn: function () {
+								$this.addClass('zoomed')
+							},
+							onZoomOut: function () {
+								productZoom.removeClass('zoomed');
+							}
+						}).trigger('click.zoom');
+					});
+				};
 
-            if( ! productZoom.length ) {
-                productZoom = $('<span class="product_zoom"></span>').prependTo( el );
-            }
+			if( ! productZoom.length ) {
+				productZoom = $('<span class="product_zoom"></span>').prependTo( el );
+			}
 
-            productZoom.one('click', function (e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                el.addClass('zoom_progress');
-                var $zoom = $(this);
-                $zoom.after('<span class="themify_spinner"></span>');
-                el.prop('href','javascript:void(0)');
-                el.zoom({
-                    on: 'click',
-                    url: url,
-                    callback: function () {
-                        $zoom.next('.themify_spinner').remove();
-                        el.removeClass('zoom_progress').trigger('click.zoom');
-                        $(this).css({'top':-($(this).height()/2)+120,'left':-($(this).width()/2)+120});
-                    },
-                    onZoomIn: function () {
-                        $zoom.addClass('zoomed')
-                    },
-                    onZoomOut: function () {
-                        $zoom.removeClass('zoomed');
-                    }
-                }).trigger('click.zoom');
-            });
+			runZoom();
+
+			// 3-rd party plugins compatibility
+
+			if( 'MutationObserver' in window && currentImage.length ) {
+				var watchImgSrc = new MutationObserver( function( mutations ) {
+					var img = mutations[0].target;
+
+					if( img ) {
+						url = img.src;
+						themify_remove_image_zoom();
+						runZoom();
+					}
+				} );
+
+				watchImgSrc.observe( currentImage.get( 0 ), {
+					attributes: true,
+					attributeFilter: ['src']
+				} );
+			}
         }
 
         function themify_zoom_image() {
@@ -740,42 +784,53 @@ function getParameterByName(name, url) {
 			}
 		}
 
-        /* Variation fix */
-        ( function() {
-            var variationImage = $( '.images .woocommerce-main-image.zoom' ).eq(0),
-                zoomImage, originalImage;
+		/* Variation fix */
+		( function() {
+			var variationImage = $( '.images .woocommerce-main-image.zoom' ).eq(0),
+				zoomImage, originalImage, itemTimeout;
 
-            $( 'body' ).on( 'found_variation', '.variations_form', function (e, v) {
-                if( ! variationImage.length ) {
-                    variationImage = $( '.images .woocommerce-main-image.zoom' ).eq(0);
-                }
+			$( 'body' ).on( 'found_variation', '.variations_form', function (e, v) {
+				if( ! variationImage.length ) {
+					variationImage = $( '.images .woocommerce-main-image.zoom' ).eq(0);
+				}
 
-                zoomImage = variationImage.find( '.zoomImg' );
+				zoomImage = variationImage.find( '.zoomImg' );
 
-                if( ! originalImage ) {
-                    originalImage = variationImage.data( 'zoom-image' );
-                }
+				if( ! originalImage ) {
+					originalImage = variationImage.data( 'zoom-image' );
+				}
 
-                if( typeof v.image.full_src === 'string' ) {
-                    variationImage.attr( 'data-zoom-image', v.image.full_src );
+				if( typeof v.image.full_src === 'string' ) {
+					variationImage.attr( 'data-zoom-image', v.image.full_src );
 
-                    if( zoomImage.length ) {
-                        zoomImage.remove();
-                    }
+					if( zoomImage.length ) {
+						zoomImage.remove();
+					}
 
-                    variationImage.find( '.product_zoom' ).remove();
-                    themify_zoom_init( variationImage, v.image.full_src );
-                }
-            } ).on( 'hide_variation', function() {
-                zoomImage = variationImage.find( '.zoomImg' );
+					variationImage.find( '.product_zoom' ).remove();
+					themify_zoom_init( variationImage, v.image.full_src );
+				}
 
-                if( originalImage ) {
-                    zoomImage.remove();
-                    themify_zoom_init( variationImage, originalImage );
-                    originalImage = '';
-                }
-            } );
-        } )();
-    });
+				// Check if is selected the right variation
+				if( v.image.full_src ) {
+					var imageSrc = v.image.full_src.replace( /\.[^\.]+$/, '' );
+						currentImage = $( '.product-thumbnails-carousel > ul img[src*="' + imageSrc + '"]:first' );
+
+					if( currentImage.length && ! currentImage.parent().hasClass( 'swiper-slide-active' ) ) {
+						clearTimeout( itemTimeout );
+						itemTimeout = setTimeout( function() { currentImage.trigger( 'click' ); }, 1000 );
+					}
+				}
+			} ).on( 'hide_variation', function() {
+				zoomImage = variationImage.find( '.zoomImg' );
+
+				if( originalImage ) {
+					zoomImage.remove();
+					themify_zoom_init( variationImage, originalImage );
+					originalImage = '';
+				}
+			} );
+		} )();
+	});
 
 }(jQuery));

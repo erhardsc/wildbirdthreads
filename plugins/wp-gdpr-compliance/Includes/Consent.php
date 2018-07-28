@@ -26,6 +26,8 @@ class Consent {
     /** @var string */
     private $plugins = '';
     /** @var int */
+    private $required = 0;
+    /** @var int */
     private $active = 0;
     /** @var string */
     private $dateModified = '';
@@ -159,6 +161,7 @@ class Consent {
         $this->setWrap($row->wrap);
         $this->setPlacement($row->placement);
         $this->setPlugins($row->plugins);
+        $this->setRequired($row->required);
         $this->setActive($row->active);
         $this->setDateModified($row->date_modified);
         $this->setDateCreated($row->date_created);
@@ -200,9 +203,10 @@ class Consent {
             'wrap' => $this->getWrap(),
             'placement' => $this->getPlacement(),
             'plugins' => $this->getPlugins(),
+            'required' => $this->getRequired(),
             'active' => $this->getActive(),
         );
-        $dataTypes = array('%s', '%s', '%s', '%d', '%s', '%s', '%d');
+        $dataTypes = array('%s', '%s', '%s', '%d', '%s', '%s', '%d', '%d');
         if ($this->exists($this->getId())) {
             $wpdb->update(
                 self::getDatabaseTableName(),
@@ -399,6 +403,20 @@ class Consent {
      */
     public function setPlugins($plugins) {
         $this->plugins = $plugins;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRequired() {
+        return $this->required;
+    }
+
+    /**
+     * @param int $required
+     */
+    public function setRequired($required) {
+        $this->required = $required;
     }
 
     /**

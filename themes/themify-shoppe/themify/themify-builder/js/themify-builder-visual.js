@@ -602,6 +602,7 @@
             }, 1);
         }
         api.toolbar = new api.Views.Toolbar({el: '#tb_toolbar'});
+        api.toolbar.render();
         setTimeout(function () {
             api.liveStylingInstance = new ThemifyLiveStyling();
             api.liveStylingInstance.getRules();

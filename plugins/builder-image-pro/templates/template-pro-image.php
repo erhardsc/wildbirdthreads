@@ -80,7 +80,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         }
         $image = '<img src="' . esc_url($fields_args['url_image']) . '" alt="' . esc_attr($image_alt) . '" title="' . esc_attr( $title_image ) . '"  width="' . esc_attr($width_image) . '" height="' . esc_attr($height_image) . '"/>';
     } else {
-        $image = themify_get_image('src=' . esc_url($fields_args['url_image']) . '&w=' . $fields_args['width_image'] . '&h=' . $fields_args['height_image'] . '&alt=' . $image_alt . '&title=' . esc_attr( $title_image ) . '&ignore=true');
+        $image = themify_get_image('src=' . esc_url($fields_args['url_image']) . '&w=' . $fields_args['width_image'] . '&h=' . $fields_args['height_image'] . '&title=' . esc_attr( $title_image ) . '&ignore=true');
     }
 
     $out_effect = array(
@@ -106,7 +106,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module image pro -->
     <div <?php echo self::get_element_attributes($container_props); ?> data-entrance-effect="<?php echo $fields_args['overlay_effect']; ?>" data-exit-effect="<?php echo $out_effect[$fields_args['overlay_effect']]; ?>">
-
+        <!--insert-->
         <?php if ($fields_args['mod_title_image'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_image'], $fields_args) . $fields_args['after_title']; ?>
         <?php endif; ?>

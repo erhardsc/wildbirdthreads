@@ -36,7 +36,7 @@ class GForms {
         $lastFieldId = 0;
         $choices = array(
             array(
-                'text' => self::getCheckboxText($form['id']),
+                'text' => self::getCheckboxText($form['id']) . ' <abbr class="wpgdprc-required" title="' . self::getRequiredMessage($form['id']) . '">*</abbr>',
                 'value' => 'true',
                 'isSelected' => false
             )
@@ -206,6 +206,13 @@ class GForms {
         return (array)get_option(WP_GDPR_C_PREFIX . '_integrations_' . self::ID . '_error_message', array());
     }
 
+     /**
+     * @return array
+     */
+    public function getFormRequiredMessages() {
+        return (array)get_option(WP_GDPR_C_PREFIX . '_integrations_' . self::ID . '_required_message', array());
+    }
+
     /**
      * @param int $formId
      * @param bool $insertPrivacyPolicyLink
@@ -236,6 +243,21 @@ class GForms {
             }
         }
         return Integration::getErrorMessage();
+    }
+
+     /**
+     * @param int $formId
+     * @return string
+     */
+    public function getRequiredMessage($formId = 0) {
+        if (!empty($formId)) {
+            $errors = $this->getFormRequiredMessages();
+            if (!empty($errors[$formId])) {
+                $result = esc_attr($errors[$formId]);
+                return apply_filters('wpgdprc_gforms_required_message', $result, $formId);
+            }
+        }
+        return Integration::getRequiredMessage();
     }
 
     /**

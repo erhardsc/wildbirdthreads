@@ -47,7 +47,7 @@ function project_dequeue_unnecessary_styles() {
 	}
 	
 }
-add_action( 'wp_print_styles', 'project_dequeue_unnecessary_styles' );
+//add_action( 'wp_print_styles', 'project_dequeue_unnecessary_styles' );
 
 //Dequeue JavaScripts
 function project_dequeue_unnecessary_scripts() {
@@ -56,7 +56,7 @@ function project_dequeue_unnecessary_scripts() {
 		wp_dequeue_script( 'gridrotator' );
 	}
 }
-add_action( 'wp_print_scripts', 'project_dequeue_unnecessary_scripts' );
+//add_action( 'wp_print_scripts', 'project_dequeue_unnecessary_scripts' );
 
 //*WAYPOINTS
 function waypoints_init() {
@@ -137,54 +137,6 @@ function cc_mime_types($mimes){
 }
 add_action( 'upload_mimes', 'cc_mime_types' );
 
-
-
-/*
-add_action( 'wp_ajax_my_ajax_action', 'my_ajax_action_callback' );
-add_action( 'wp_ajax_nopriv_my_ajax_action', 'my_ajax_action_callback' );
-function my_ajax_action_callback() {
-    if(isset($_POST['newRowId'])){
-    
-        $response = array(
-            'new_row_id' => $_POST['newRowId']
-        );
-        echo json_encode($response);
-        exit;
-    }
-    else {
-        echo "its null mannn";
-    }
-}
-*/
-   
-   
-   
-
-//'. get_permalink($post->ID) . '
-
-/*
-function rgblaster_js() {
-wp_enqueue_script( 'color_theif', get_stylesheet_directory_uri() . '/js/rgbaster.min.js', array('jquery'), true );
-}
-add_action('wp_enqueue_scripts', 'rgblaster_js');
-
-function color_js() {
-wp_enqueue_script( 'color', get_stylesheet_directory_uri() . '/js/color.js', array('jquery'));
-}
-add_action('wp_enqueue_scripts', 'color_js');
-*/
-
-
-/*
-function wpse_setup_theme() {
-   add_theme_support( 'post-thumbnails' );
-   add_image_size( 'required-demension', 400, 9999, true);
-}
-
-add_action( 'after_setup_theme', 'wpse_setup_theme' );
-*/
-
-
 ///////////////// WOOCOMMERCE FUNCTIONS ////////////////////
 
 remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 );
@@ -194,15 +146,6 @@ add_action( 'woocommerce_after_single_product_summary', 'artist_content' );
 function artist_content() {
 	get_template_part( 'partials/content', 'artist');
 }
-
-//add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_stock', 10 );
-//function woocommerce_template_loop_stock() {
-//    global $product;
-//    if ( ! $product->managing_stock() && ! $product->is_in_stock() )
-//        echo '<p class="stock out-of-stock">Out of Stock (can be backordered)</p>';
-//}
-
-// Remove variation stock data from product page
 
 add_filter( 'woocommerce_available_variation', 'remove_variation_stock_display', 99 );
 function remove_variation_stock_display( $data ) {
@@ -288,15 +231,3 @@ function set_shipping_rates( $rates ){
   return $rates;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

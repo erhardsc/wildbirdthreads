@@ -183,9 +183,10 @@ BUILDER ROW
     border: solid 1px #bbbbbb;
     margin-bottom: 12px;
 	display: block;
+	transform: none !important;
 }
 .themify_builder_active .themify_builder:not(.not_editable_builder) .row_inner {
-    padding-top:55px !important;
+    padding-top:54px !important;
 }
 .themify_builder_active .module-layout-part .not_editable_builder .row_inner {
     padding-top:0px !important;
@@ -203,8 +204,11 @@ BUILDER ROW
     margin-top: -14px;
     width: 26px;
     height: 26px;
-    background: #6d55a0;
+    background: #52bb33;
     border-radius: 100%;
+}
+.tb_row_btn_plus:hover{
+    background: #459a2c;
 }
 .tb_row_btn_plus:after {
     content: "\e61a";
@@ -216,9 +220,6 @@ BUILDER ROW
 }
 .module_row:hover>.tb_row_btn_plus{
     display: block;
-}
-.themify_builder_admin .themify_builder_row .tb_row_btn_plus{
-	z-index: auto;
 }
 
 /* row top */
@@ -905,7 +906,7 @@ body:not(.tb-preview-only) .themify_builder:not(.not_editable_builder) .module_c
 }
 /* COLUMN STYLING
 =============================================== */
-.themify_builder_column_action {
+.tb-column .themify_builder_column_action {
     background: rgba(161, 169, 171, 0.3);
     margin: 0;
     opacity: 0;
@@ -981,7 +982,7 @@ body:not(.tb-preview-only) .themify_builder:not(.not_editable_builder) .module_c
     margin: 0;
     padding: 0;
 }
-.module_column.compact-mode-action .themify_builder_column_action li{
+.module_column.compact-mode-action > .themify_builder_column_action li{
     position: relative;
 }
 .module_column.compact-mode-action themify_builder_column_dragger_li a span,
@@ -995,7 +996,7 @@ body:not(.tb-preview-only) .themify_builder:not(.not_editable_builder) .module_c
 .module_column.compact-mode-action .themify_tooltip{
     display: none !important;
 }
-.module_column.compact-mode-action .themify_builder_column_action ul{
+.module_column.compact-mode-action > .themify_builder_column_action ul{
     background: #fff;
     border: 1px solid #ccc;
     position: absolute;
@@ -1014,11 +1015,11 @@ body:not(.tb-preview-only) .themify_builder:not(.not_editable_builder) .module_c
 .module_column.compact-mode-action li.menu_icon> ul:hover{
     display: block;
 }
-.module_column.compact-mode-action .themify_builder_column_action ul li {
+.module_column.compact-mode-action > .themify_builder_column_action ul li {
     display: block;
     padding: 0;
 }
-.module_column.compact-mode-action .themify_builder_column_action ul li a{
+.module_column.compact-mode-action > .themify_builder_column_action ul li a{
     color: #666 !important;
     display: block;
     border-bottom: 1px solid #eee;
@@ -1029,7 +1030,7 @@ body:not(.tb-preview-only) .themify_builder:not(.not_editable_builder) .module_c
     text-decoration: none;
     line-height: 100%;
 }
-.module_column.compact-mode-action .themify_builder_column_action ul li a:hover{
+.module_column.compact-mode-action > .themify_builder_column_action ul li a:hover{
     background: #eee;
 }
 .module_column.compact-mode-action .themify_builder_column_dragger_li a{
@@ -1065,7 +1066,7 @@ MODULE HOLDER
 /* module holder */
 .themify_module_holder {
     margin: 0;
-    min-height: 70px;
+    min-height: 37px;
     cursor: auto;
     padding: 0;
     position: relative;
@@ -1859,6 +1860,9 @@ a.tb-import-layout-button:hover {
 	}
 }
 @media screen and (max-width: 680px) {
+    #tb_plus_btn_popover {
+        max-width: 90%;
+    }    
 	.themify_builder_active #tb_plus_btn_popover .predesigned_row,
 	.themify_builder_active #tb_plus_btn_popover .dragable_library_item {
 		width: 47%;
@@ -1990,8 +1994,7 @@ a.tb-import-layout-button:hover {
 	width:100%;
 	height:100%;
 }
-.layoutpart_overlay
-{
+.layoutpart_overlay {
 	position:fixed;
 	overflow: hidden;
 	z-index: 99999;
@@ -2003,12 +2006,14 @@ a.tb-import-layout-button:hover {
 	height:100vh;
 	background-color:rgba(0,0,0,0.7);
 }
-.layoutpart_overlay span
-{
+.layoutpart_overlay span {
 	position:inherit;
 	width:inherit;
 	font-size: 2.8em;
 	text-align:center;
 	color:white;
 	top: 30px;
+}
+.themify-gutenberg-editor [data-type="themify-builder/canvas"] .editor-block-settings-menu {
+    display: none !important;
 }

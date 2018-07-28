@@ -37,7 +37,8 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                 'label' => __('Module Title', 'builder-slider-pro'),
                 'class' => 'large',
                 'render_callback' => array(
-                    'binding' => 'live'
+                    'binding' => 'live',
+                    'live-selector'=>'.module-title'
                 )
             ),
             array(
@@ -141,7 +142,8 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                         'class' => 'fullwidth',
                         'render_callback' => array(
                             'binding' => 'live',
-                            'repeater' => 'builder_slider_pro_slides'
+                            'repeater' => 'builder_slider_pro_slides',
+                            'live-selector'=>'.bsp-slide-post-title'
                         )
                     ),
                     array(
@@ -152,7 +154,8 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                         'rows' => 1,
                         'render_callback' => array(
                             'binding' => 'live',
-                            'repeater' => 'builder_slider_pro_slides'
+                            'repeater' => 'builder_slider_pro_slides',
+                            'live-selector'=>'.bsp-slide-excerpt'
                         )
                     ),
                     array(
@@ -187,13 +190,37 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                         'type' => 'multi',
                         'label' => __('Action Button', 'builder-slider-pro'),
                         'options' => array(
+							array(
+								'id' => 'builder_ps_button_action_type',
+								'type' => 'select',
+								'label' => __( 'Type', 'builder-slider-pro' ),
+								'options' => array(
+									'custom' => __( 'Custom', 'builder-slider-pro' ),
+									'next_slide' => __( 'Next slide', 'builder-slider-pro' ),
+									'prev_slide' => __( 'Previous slide', 'builder-slider-pro' ),
+								),
+								'default' => 'custom',
+								'render_callback' => array(
+									'binding' => 'live',
+									'repeater' => 'builder_slider_pro_slides'
+								),
+								'binding' => array(
+									'custom' => array(
+										'show' => array('tb-group-element-action-link')),
+									'next_slide' => array(
+										'hide' => array('tb-group-element-action-link')),
+									'prev_slide' => array(
+										'hide' => array('tb-group-element-action-link')),
+								),
+							),
                             array(
                                 'id' => 'builder_ps_button_text',
                                 'type' => 'text',
                                 'label' => 'Text',
                                 'render_callback' => array(
                                     'binding' => 'live',
-                                    'repeater' => 'builder_slider_pro_slides'
+                                    'repeater' => 'builder_slider_pro_slides',
+                                    'live-selector'=>'.bsp-slide-button'
                                 )
                             ),
                             array(
@@ -204,7 +231,8 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                                 'render_callback' => array(
                                     'binding' => 'live',
                                     'repeater' => 'builder_slider_pro_slides'
-                                )
+								),
+								'wrap_with_class' => 'tb-group-element-action-link'
                             ),
                         ),
                         'separated' => 'top'

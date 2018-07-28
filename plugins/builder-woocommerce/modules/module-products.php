@@ -29,7 +29,10 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 				'id' => 'mod_title_products',
 				'type' => 'text',
 				'label' => __('Module Title', 'builder-wc'),
-				'class' => 'large'
+				'class' => 'large',
+                                'render_callback' => array(
+                                    'live-selector'=>'.module-title'
+                                )
 			),
 			array(
 				'id' => 'query_products',
@@ -280,6 +283,15 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 								'class' => 'xsmall',
 								'unit' => 'px',
 								'help' => __('Right margin space between slides', 'builder-wc')
+							),
+							array(
+								'id' => 'height_slider',
+								'type' => 'select',
+								'options' => array(
+									'variable' => __('Variable', 'themify'),
+									'auto' => __('Auto', 'themify')
+								),
+								'help' => __('Height <small class="description">"Auto" measures the highest slide and all other slides will be set to that size. "Variable" makes every slide has it\'s own height.</small>', 'builder-wc')
 							)
 						)
 					)
