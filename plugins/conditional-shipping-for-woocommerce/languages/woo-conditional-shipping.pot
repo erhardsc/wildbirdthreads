@@ -1,0 +1,116 @@
+# Copyright (C) 2017 Conditional Shipping for WooCommerce
+# This file is distributed under the same license as the Conditional Shipping for WooCommerce package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Conditional Shipping for WooCommerce 1.0.1\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/woo-conditional-shipping\n"
+"POT-Creation-Date: 2017-09-13 14:47:54+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: tags/1.0.0/woo-conditional-shipping.php:109
+#: trunk/woo-conditional-shipping.php:109 woo-conditional-shipping.php:115
+msgid "Measurements"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:111
+#: trunk/woo-conditional-shipping.php:111 woo-conditional-shipping.php:117
+msgid "Minimum Weight (%s)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:112
+#: trunk/woo-conditional-shipping.php:112 woo-conditional-shipping.php:118
+msgid "Maximum Weight (%s)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:113
+#: trunk/woo-conditional-shipping.php:113 woo-conditional-shipping.php:119
+msgid "Maximum Total Height (%s)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:114
+#: trunk/woo-conditional-shipping.php:114 woo-conditional-shipping.php:120
+msgid "Maximum Total Length (%s)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:115
+#: trunk/woo-conditional-shipping.php:115 woo-conditional-shipping.php:121
+msgid "Maximum Total Width (%s)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:116
+#: trunk/woo-conditional-shipping.php:116 woo-conditional-shipping.php:122
+msgid "Maximum Total Volume (%s&sup3;)"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:120
+#: trunk/woo-conditional-shipping.php:120 woo-conditional-shipping.php:126
+msgid "Order Totals"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:122
+#: trunk/woo-conditional-shipping.php:122 woo-conditional-shipping.php:128
+msgid "Minimum Subtotal"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:123
+#: trunk/woo-conditional-shipping.php:123 woo-conditional-shipping.php:129
+msgid "Maximum Subtotal"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:164
+#: trunk/woo-conditional-shipping.php:164 woo-conditional-shipping.php:178
+msgid "Conditions"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:248
+#: trunk/woo-conditional-shipping.php:248 woo-conditional-shipping.php:276
+msgid "Add Condition"
+msgstr ""
+
+#: tags/1.0.0/woo-conditional-shipping.php:249
+#: trunk/woo-conditional-shipping.php:249 woo-conditional-shipping.php:277
+msgid "Remove Selected"
+msgstr ""
+
+#: woo-conditional-shipping.php:133
+msgid "Products"
+msgstr ""
+
+#: woo-conditional-shipping.php:135
+msgid "Required Products"
+msgstr ""
+
+#: woo-conditional-shipping.php:136
+msgid "Excluded Products"
+msgstr ""
+
+#: woo-conditional-shipping.php:137
+msgid "Exclusive Products"
+msgstr ""
+
+#: woo-conditional-shipping.php:318
+msgid "Access denied"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Conditional Shipping for WooCommerce"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Disable shipping methods based on shipping classes, weight, categories and "
+"much more."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Lauri Karisola / WooElements.com"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://wooelements.com"
+msgstr ""

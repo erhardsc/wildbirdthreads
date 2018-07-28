@@ -1,0 +1,12 @@
+[29-Jan-2018 04:22:31 CST6CDT] PHP Fatal error:  Uncaught Error: Call to undefined function get_header() in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php on line 8
+[03-Mar-2018 22:13:22 CST6CDT] PHP Fatal error:  Uncaught Error: Call to undefined function get_header() in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php on line 8
+[04-Apr-2018 00:24:28 CST6CDT] PHP Fatal error:  Uncaught Error: Call to undefined function get_header() in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/wildbi94/public_html/wp-content/themes/themify-shoppe/index.php on line 8

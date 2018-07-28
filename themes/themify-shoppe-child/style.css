@@ -1,0 +1,547 @@
+/*
+Theme Name: Themify Shoppe Child
+Description: Child theme for Shoppe theme
+Author: Themify
+Template: themify-shoppe
+*/
+
+/*** Sumner Styles Start ***/
+
+@font-face {
+    font-family: "Snickles";
+    src: url("../themify-shoppe-child/fonts/Snickles.ttf");
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/* ALL PAGES */
+
+
+/*
+.free-shipping h1{
+  font-family: Snickles !important;
+}
+
+.free-shipping h2{
+  font-family: sans-serif !important;
+}
+*/
+
+
+/* Pop styles since themify builder styles are not being translated over */
+.themify_builder .module_row_680-0.module_row {
+	background-color: rgba(241,237,230, 1.00) !important;
+	padding-top: 70px;
+	padding-bottom: 60px;
+}
+
+.themify_builder .image-680-0-0-0.module-image {
+	margin-bottom: 50px;
+}
+
+.themify_builder .module_column_680-0-0.module_column {
+	text-align: center;
+}
+
+#mc_embed_signup input[type="email"] {
+  -webkit-appearance: none;
+  font:18px/1.2 "Open Sans", Helvetica, Arial, sans-serif;
+  background: #fff;
+  color: #808080;
+  padding:15px ;
+  font-weight:300;
+  margin: 0 0 10px;
+  width:100%;
+  border: solid 1px #ccc;
+  box-sizing: border-box;
+}
+#mc_embed_signup .button {
+	-webkit-appearance: none;
+	padding: 18px 20px;
+	font:16px/1 "Montserrat", Helvetica, Arial, sans-serif;
+	background:#89c543;
+	color: #fff;
+	border: none;
+	text-transform: uppercase;
+	border-radius: 0;
+	font-weight:bold;
+	width:100%;
+	white-space: normal;
+}
+#mc_embed_signup .button:hover {
+	background:#73ac31;
+}
+#mc_embed_signup div.mce_inline_error {
+	margin: -5px 0 10px 0;
+	padding: 0;
+	background: none;
+	font-weight: normal;
+	font-size: .9em;
+	color:#f82525;
+}
+#mc_embed_signup .response {
+	font-size: .85em;
+	line-height: 1.3;
+	margin: 0 0 10px;
+}
+
+.product-lightbox #featured-artist-top,
+.product-lightbox #featured-artist-top-below {
+	display: none !important;
+}
+
+
+@media only screen and (max-width: 1200px){
+	
+	.top-icon-wrap .cart #cart-wrap {
+		margin-left: 100% !important;
+	}
+	
+	.artist-title {
+		font-size: 3.8em !important;
+	}
+}
+
+a.added-to-cart {
+	margin-top: 2%;
+}
+
+#footerwrap {
+	margin-top: 3em;
+/*     background: linear-gradient(to bottom right, #ffb693,#B23F1F); */
+  background: linear-gradient(to bottom right, #f1dfd2,#cbaf9a);
+    -webkit-clip-path: polygon(42% 0, 55% 0, 69% 6%, 100% 0, 100% 100%, 0 100%, 0 0, 6% 6%, 19% 1%, 25% 4%);
+clip-path: polygon(42% 0, 55% 0, 69% 6%, 100% 0, 100% 100%, 0 100%, 0 0, 6% 6%, 19% 1%, 25% 4%);
+}
+
+#footerwrap h4 {
+  color: white;
+  
+}
+
+@media (max-width: 500px) {
+
+  .themify_builder .text-102-0-0-0.module-text {
+    margin: 4em 0;
+  }
+}
+
+@media only screen and (max-width: 768px){
+  
+  #footer-logo img{
+    margin-top: 20%;
+  }
+}
+
+/** ALL PAGES END **/
+
+/* About Page */
+
+
+@media only screen and (min-width: 760px) {
+	
+	.wildbird-about-us h1{
+		font-size: 10em !important;	
+	}
+}
+
+@media only screen and (max-width: 640px) {
+	
+	.wildbird-about-us h1{
+		font-size: 3em !important;	
+	}
+	.wildbird-logo img {
+		width: 250px;
+	}
+}
+
+
+/** About Page END **/
+
+/* Artist Page */
+
+.wildbird-featured-artists .post-image {
+	-webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    -khtml-border-radius: 15px;
+}
+
+.wildbird-featured-artists img {
+	-webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -khtml-border-radius: 10px;
+}
+
+/** Artist Page END **/
+
+/* Single Artist Page */
+
+.image-cropper {
+	padding-bottom: 7%;
+}
+
+#featured-artist-top #featured-artist{
+	margin-bottom: 7%;
+}
+
+ @media only screen and (max-width: 640px) { /* Mobile */
+	
+	.single-featured-artist .featured-artist-top{
+		margin-top: 3em;
+	}
+
+	 .single-featured-artist .about-artist .col-md-12 {
+		 margin-bottom: 2em;
+	 }
+
+	 #artist-quote {
+		font-size: 0.7em !important;
+	}
+	 .single-featured-artist .read-on {
+		 display: block;
+		 margin: 0 auto;
+		 position: relative;
+		 right: 19px;
+	 }
+	
+	#featured-artist-top-below {
+		 background: url("../themify-shoppe-child/images/janko-seboek.png") no-repeat center bottom !important;
+	 	 background-size: contain !important;
+	 	 background-attachment: scroll !important;
+	 	 width: auto !important;
+	}
+	
+	.ti_icon {
+	margin-right: .2em !important;
+	margin-left: .2em !important;
+	}
+	
+	.ti_icon.size-large {
+		font-size: 28px !important;
+	}
+	
+	#about-artist img, .round {
+		width: 250px !important;
+		height: 250px !important;
+	}
+	
+}
+
+ @media only screen and (min-width: 1000px) { /* Large screen */
+	.single-featured-artist p {
+	font-size: larger;
+	}
+	
+	
+}
+@media only screen and (max-width: 766px) { /* Mobile */
+	
+	#quote {
+		background: none !important;
+	}
+	
+	#quote2 {
+	background: #FDF9F9 !important;
+	}
+	
+	.question-answer-1 {
+	background: none !important;
+}
+.question-answer-3 {
+	background: none !important;
+}
+}
+.text-center {
+	text-align: center;
+	padding-left: 0 !important;
+}
+.single-featured-artist p {
+	font-size: larger;
+}
+.slider {
+	padding-bottom: 5%;
+}
+
+#featured-artist-top .col-md-12 {
+	text-align: center !important;
+}
+
+#featured-artist-top .col-md-12 h4 {
+	color: gray;
+}
+
+.artist-question {
+	font-weight: 400 !important;
+}
+
+#featured-artist-top{
+	background-color: #FDF9F9;
+}
+
+.artist-title {
+	font-size: 6em !important;
+}
+
+#featured-artist-top-below {
+	 background: url("../themify-shoppe-child/images/seboek.png") no-repeat left bottom;
+ 	 background-size: contain;
+ 	 background-attachment: fixed;
+ 	 width: 100%;
+}
+
+.padding-top{
+	padding-top: 5% !important;
+}
+/*
+#background {
+ 	 background: url("/wp-content/uploads/2017/05/janko.jpg") no-repeat left bottom;
+ 	 filter: blur(4px);
+ 	 -webkit-filter: blur(4px);
+ 	 background-size:cover;
+ 	 max-width: 100%;
+ 	 z-index: -1;
+ 	 
+}
+*/
+.content {
+	display: none;
+}
+
+
+.box {
+	padding-top: 7%;
+	padding-bottom: 7%;
+}
+
+#quote {
+	background: url("../themify-shoppe-child/images/birds.png") no-repeat;
+ 	background-position: 90% 55%;
+}
+
+#quote2 {
+	background: #FDF9F9 url("../themify-shoppe-child/images/mountainLeft.png") no-repeat bottom left;
+}
+
+.question-answer {
+	padding-top: 7% !important;
+	padding-bottom: 3% !important;
+}
+
+.question-answer-odd {
+	background: url("../themify-shoppe-child/images/seboek.png") no-repeat left bottom;
+ 	 background-size: contain;
+ 	 background-attachment: fixed;
+ 	 width: 100%;
+}
+
+.container-dark {
+	background-color: #FDF9F9;
+}
+
+#artist-quote {
+	font-size: 1.5em;
+}
+
+#artist-title h2{
+	padding-top: 7%;
+	text-align: center;
+}
+
+.single-featured-artist .row {
+	/*padding-bottom: 2% !important;*/
+	padding-right: 10% !important;
+	padding-left: 10% !important;
+}
+
+#about-artist .image-cropper {
+	display: flex;
+	display: -webkit-flex;
+	-webkit-flex-direction: row-reverse;
+	flex-direction: row-reverse;
+	justify-content: center;
+	align-items: center;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -khtml-border-radius: 50%;
+}
+
+.image-cropper{
+	text-align: center;
+}
+
+.artist-question {
+	padding-left: 10%;
+}
+
+#about-artist img,
+.round {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -khtml-border-radius: 50%;
+    vertical-align: middle;
+    width: 400px;
+    height: 400px;
+    object-fit:cover; 
+}
+
+#quote-marks {
+	font-size: xx-large;
+	 color: #C2D3AA;
+ }
+#artist-slider .ms-container{
+	padding-bottom: 5% !important;
+}
+
+.wildbird-social {
+	text-align: center !important;
+	padding-top: 3% !important;
+	padding-bottom: 3% !important;
+}
+
+/*
+.social-dark {
+	background:#fdf8f8; 
+}
+*/
+
+.social-links .icon-x-large i {
+	font-size: 2em;
+	padding-right: 40% !important;
+	padding-left: 40% !important;
+	width: 28px;
+	height: 28px;
+	margin-bottom: 0px !important;
+}
+
+.follow-name {
+	font-size: 4.5em !important;
+}
+
+.ti_icon {
+	margin-right: .7em !important;
+	margin-left: .7em !important;
+}
+/** Single Artist Page END **/
+
+ /* Contact Page */
+ 
+/*
+  @media only screen and (max-width: 680px) {
+	wildbird-mountain-background{
+		background: none !important;
+	}
+}
+*/
+
+/** Contact Page END **/
+
+/* Woocommerce Styles */
+ @media only screen and (max-width: 640px) { /* Mobile */
+	
+	.wildbird-best-seller-slider .woocommerce a.button {
+		display: inline-block;
+	}
+
+	 #contact-104-sub_row_1-0-0-1-2 {
+		 padding-left: 1em;
+		 padding-right: 1em;
+	 }
+	
+	/*.module-products .price{*/
+		/*font-size: x-small !important;*/
+	/*}*/
+	
+	.wildbird-best-seller-slider .add-to-cart-button {
+		background: #dcaa2e !important;
+		font-size: 0.5em;
+	}
+}
+
+.woocommerce #icegram_message_616 {
+  position: absolute !important;
+  background-color: #FFC55B !important;
+}
+
+.woocommerce #ig_close_616 {
+  display: none !important;
+}
+
+.woocommerce #icegram_message_616 .ig_message {
+  font-weight: 900 !important;
+  font-size: 1.1em !important;
+}
+
+
+/* Shop Styles */
+
+/* Single-product Styles */
+.product-artist {
+	padding-bottom: 7%;
+}
+
+.mobile {
+	display: none;
+}
+
+.single-product .image-cropper{
+	margin-bottom: 7%;
+}
+
+.single-product #tab-title-additional_information {
+  display: none !important;
+}
+
+	
+ @media only screen and (max-width: 640px) { /* Mobile */
+ 
+   .single-product #size-chart th:first-child {
+    font-size: .1em !important;
+  }
+ 
+	.single-product img.attachment-large.size-large.wp-post-image {
+		margin-top: 5%;
+		margin-bottom: 5%;
+	}
+	
+	.single-product .mobile {
+		display: block !important;
+	}
+	
+	.single-product .desktop {
+		display: none !important;
+	}
+	.single-product button.artist-button {
+		margin-bottom: 20%;
+	}
+	.single-product .about form {
+		margin-left: 25%;
+	}
+}
+
+
+/* Apparel Page Styles */
+
+@media only screen and (min-width: 680px) {
+	
+	.sidebar-none.woocommerce .woocommerce-ordering, 
+	.sidebar-non.woocommerce-page .woocommerce-ordering {
+		margin-top: 2% !important;
+	}
+}
+
+/* Empty Cart Page Styles */
+
+.page-content .woocommerce .cart-empty,
+.page-content .woocommerce .return-to-shop {
+	text-align: center !important;
+}
+
+/** Empty Cart Page Styles **/
+
+/*** Sumner Styles END ***/

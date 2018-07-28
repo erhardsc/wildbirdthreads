@@ -1,0 +1,30 @@
+.wcs-conditions-table th.condition_remove {
+	width: 15px !important;
+}
+
+.wcs-conditions-table {
+	width: 100%;
+	background: #fff;
+	margin: 0 0 1.5em;
+}
+
+.wcs-conditions-table tr th {
+	vertical-align: middle;
+	margin: 0;
+	line-height: 24px;
+	width: 400px;
+	padding: 1em;
+	border-bottom: 1px solid #f8f8f8;
+}
+
+.wcs-conditions-table tr td {
+	vertical-align: middle;
+	margin: 0;
+	line-height: 24px;
+	padding: 1em;
+	border-bottom: 1px solid #f8f8f8;
+}
+
+.ui-autocomplete {
+	z-index: 150000 !important;
+}
