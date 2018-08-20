@@ -10,10 +10,13 @@
  */
 class Themify_Menu_Icons {
 
-	private static $instance = null;
 
 	public static function get_instance() {
-		return null == self::$instance ? self::$instance = new self : self::$instance;
+            static $instance = NULL;
+            if($instance===null){
+                $instance = new self;
+            }
+            return $instance;
 	}
 
 	/**
@@ -130,10 +133,9 @@ class Themify_Menu_Icons {
 	 * @return string
 	 */
 	function the_title( $title, $id = '' ) {
-		if ( '' != $id ) {
-			if ( $icon = $this->get_menu_icon( $id ) ) {
-				$title = '<i class="' . esc_attr( themify_get_icon( $icon ) ) . '"></i> ' . $title;
-			}
+		if ( '' != $id && $icon = $this->get_menu_icon( $id ) ) {
+                    $title = '<i class="' . esc_attr( themify_get_icon( $icon ) ) . '"></i> ' . $title;
+			
 		}
 		return $title;
 	}

@@ -49,7 +49,7 @@ if (!empty($settings['tab_content_testimonial'])):
                 }
                 ?>	
 
-                <?php if ($settings['layout_slider'] === 'image-top' && !empty($image)): ?>			
+                <?php if ($settings['layout_slider'] === 'image-top' && !empty($image)): ?>
                     <figure class="testimonial-image">
                         <?php echo $image; ?>
                     </figure>
@@ -60,9 +60,23 @@ if (!empty($settings['tab_content_testimonial'])):
                         <h3 class="testimonial-title"><?php echo $content['title_testimonial'] ?></h3>
                     <?php endif; ?>
                     <?php if (!empty($content['content_testimonial'])): ?>
-                        <div class="testimonial-entry-content"><?php echo do_shortcode( $content['content_testimonial'] ); ?></div>
+						<div class="testimonial-entry-content">
+							<?php
+								$testimonial_content = get_extended( $content['content_testimonial'] );
+
+								if( ! empty( $testimonial_content['main'] ) ) {
+									printf( '<div class="testimonial-content-main">%s</div>', do_shortcode( $testimonial_content['main'] ) );
+								}
+
+								if( ! empty( $testimonial_content['extended'] ) ) {
+									printf( '<label><input type="checkbox"><div class="testimonial-content-extended">%s</div><a href="#">%s</a></label>'
+										, do_shortcode( $testimonial_content['extended'] )
+										, ! empty( $testimonial_content['more_text'] ) ? $testimonial_content['more_text'] : esc_attr__( 'More', 'themify' ) );
+								}
+							?>
+						</div>
                     <?php endif; ?>
-                    <?php if ($settings['layout_slider'] === 'image-bottom' && !empty($image)): ?>
+                    <?php if ($settings['layout_slider'] !== 'image-top' && !empty($image)): ?>
                         <figure class="testimonial-image"><?php echo $image ?></figure>
                     <?php endif; ?>
 

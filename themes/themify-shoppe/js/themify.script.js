@@ -518,7 +518,7 @@ var FixedHeader = {}, LayoutAndFilter = {};
             $overlay.removeClass('body-overlay-on');
         }).on('click.themify touchend.themify', '.body-overlay', function () {
             $('#menu-icon').themifySideMenu('hide');
-            $('#cart-link').themifySideMenu('hide');
+            $('.top-icon-wrap #cart-link').themifySideMenu('hide');
         });
 
         // Set Body Overlay Resize /////////////////////////
@@ -584,6 +584,8 @@ var FixedHeader = {}, LayoutAndFilter = {};
         }
         if ($body.hasClass('header-overlay')) {
 			$('.search-button').appendTo('.top-icon-wrap');
+			var $sideMenuWrap = $('#mobile-menu');
+			$sideMenuWrap.wrapInner('<div class="overlay-menu-sticky"></div>' );
 		}
 
 		// Mobile cart
@@ -631,6 +633,32 @@ var FixedHeader = {}, LayoutAndFilter = {};
 			}
 
 		} )( $( '#cart-icon-count > a' ), $( '#menu-icon' ) );
+		
+		if ( $body.hasClass( 'header-bottom' ) ) {
+			jQuery("#footer").after("<a class='footer-tab' href='#'></a>");
+			jQuery(".footer-tab").click(function (e) {
+				e.preventDefault();
+				jQuery('#footerwrap').toggleClass('expanded');
+			});
+			jQuery("#footer .back-top").detach().appendTo('#pagewrap');
+			jQuery('.back-top').addClass('back-top-float back-top-hide');
+
+			var $back_top = $('.back-top');
+			if($back_top.length>0){
+				if($back_top.hasClass('back-top-float')){
+					$(window).on("scroll touchstart.touchScroll touchmove.touchScroll", function() {
+						if( window.scrollY < 10){
+							$back_top.addClass('back-top-hide');
+						}else{
+							$back_top.removeClass('back-top-hide');
+						}
+					});
+
+				}
+			}
+
+		}
+		
     });
 
 // WINDOW LOAD /////////////////////////
@@ -641,6 +669,84 @@ var FixedHeader = {}, LayoutAndFilter = {};
         if (typeof ThemifyGallery !== 'undefined') {
             ThemifyGallery.init({'context': jQuery(themifyScript.lightboxContext)});
         }
+
+		///////////////////////////////////////////
+		// Header Video
+		///////////////////////////////////////////
+		var $header = $('#headerwrap'),
+			$videos = $header.find('[data-fullwidthvideo]');
+
+		if($header.data('fullwidthvideo')){
+			$videos = $videos.add($header);
+		}
+		function ThemifyBideo(){
+
+			var init = true,
+				$fixed = $header.hasClass('fixed-header');
+
+			if ($fixed){
+				$header.removeClass('fixed-header');
+			}
+
+			$videos.each(function(i){
+				var url = $(this).data('fullwidthvideo');
+				if(url){
+					var options = {
+						url: url,
+						doLoop: true,
+						ambient:true,
+						id: i
+					};
+					if (init && $fixed){
+						init = false;
+						options['onload'] = function(){
+							$header.addClass('fixed-header');
+						}
+					}
+					$(this).ThemifyBgVideo(options);
+				}
+			});
+		}
+
+		if ($videos.length>0 && !is_touch_device()) {
+			if(typeof $.fn.ThemifyBgVideo === 'undefined'){
+				Themify.LoadAsync(
+					themify_vars.url + '/js/bigvideo.js',
+					ThemifyBideo,
+					null,
+					null,
+					function () {
+						return ('undefined' !== typeof $.fn.ThemifyBgVideo);
+					}
+				);
+			}
+			else{
+				ThemifyBideo();
+			}
+		}
+
+		if ( is_touch_device() && $videos.length ) {
+
+			$videos.each(function (key) {
+				var videoSrc = $(this).data('fullwidthvideo'),
+					videoEl;
+
+				if ( videoSrc ) {
+
+					if ( videoSrc.indexOf('.mp4') >= 0 && videoSrc.indexOf(window.location.hostname) >= 0 ){
+
+						$(this).addClass('themify-responsive-video-background');
+						videoEl = $('<div class="header-video-wrap">'
+							+'<video class="responsive-video header-video video-'+key +'" muted="true" autoplay="true" loop="true" playsinline="true" >' +
+							'<source src="' + videoSrc + '" type="video/mp4">' +
+							'</video></div>')
+						videoEl.prependTo($(this));
+					}
+				}
+			});
+
+
+		}
 
         // EDGE MENU /////////////////////////
         $(function ($) {

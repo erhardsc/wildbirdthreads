@@ -33,6 +33,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module fancy heading -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <<?php echo $fields_args['heading_tag']; ?> class="fancy-heading <?php echo $fields_args['text_alignment']; ?>">
         <span class="main-head"><?php echo $fields_args['heading']; ?></span>
         <span class="sub-head"><?php echo $fields_args['sub_heading']; ?></span>

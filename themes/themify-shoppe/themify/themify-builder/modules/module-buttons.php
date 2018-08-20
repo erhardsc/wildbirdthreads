@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class TB_Buttons_Module extends Themify_Builder_Component_Module {
 	function __construct() {
+                self::$texts['label'] =__( 'Text', 'themify' );
 		parent::__construct( array(
 			'name' => __('Button', 'themify'),
 			'slug' => 'buttons'
@@ -38,17 +39,29 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 				)
 			),
 			array(
+				'id'=>'buttons_shape',
+				'type' => 'radio',
+				'label' => __( 'Button Shape', 'themify' ),
+				'options' => array(
+					'squared' => __( 'Squared', 'themify' ),
+					'circle' => __( 'Circle', 'themify' ),
+					'rounded' => __( 'Rounded', 'themify' )
+				),
+				'default' => 'squared',
+				'render_callback' => array(
+					'binding' => 'live'
+				)
+			),
+			array(
 				'id'=>'buttons_style',
 				'type' => 'radio',
-				'label' => __( 'Button Background Style', 'themify' ),
+				'label' => __( 'Button Background', 'themify' ),
 				'options' => array(
-					'circle' => __( 'Circle', 'themify' ),
-					'rounded' => __( 'Rounded', 'themify' ),
-					'squared' => __( 'Squared', 'themify' ),
+					'solid' => __( 'Solid', 'themify' ),
 					'outline' => __( 'Outlined', 'themify' ),
 					'transparent' => __( 'Transparent', 'themify' )
 				),
-				'default' => 'rounded',
+				'default' => 'solid',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -78,6 +91,28 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 				)
 			),
 			array(
+				'id' => 'nofollow_link',
+				'type' => 'checkbox',
+				'label' => __('Nofollow Link', 'themify'),
+				'options' => array(
+					array( 'name' => 'yes', 'value' => __('Enable nofollow ( search engines won\'t crawl this link )', 'themify') )
+				),
+				'render_callback' => array(
+					'binding' => 'live'
+				)
+			),
+            array(
+				'id' => 'download_link',
+				'type' => 'checkbox',
+				'label' => __('Download-able Link', 'themify'),
+				'options' => array(
+					array( 'name' => 'yes', 'value' => __('Download link as file', 'themify') )
+				),
+				'render_callback' => array(
+					'binding' => 'live'
+				)
+			),
+			array(
 				'id' => 'content_button',
 				'type' => 'builder',
 				'new_row_text'=>__('Add new button','themify'),
@@ -85,12 +120,12 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 					array(
 						'id' => 'label',
 						'type' => 'text',
-						'label' => __( 'Text', 'themify' ),
+						'label' => self::$texts['label'],
 						'class' => 'fullwidth',
 						'render_callback' => array(
 							'repeater' => 'content_button',
 							'binding' => 'live',
-							'live-selector'=>'.builder_button span'
+                            'live-selector'=>'.builder_button span'
 						)
 					),
 					array(
@@ -133,57 +168,51 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 						'id' => 'lightbox_size',
 						'type' => 'multi',
 						'label' => __('Lightbox Dimension', 'themify'),
+						'render_callback' => array(
+							'repeater' => 'content_button',
+							'binding' => 'live'
+						),
 						'options' => array(
 							array(
 								'id' => 'lightbox_width',
-								'type' => 'text',
+								'type' => 'range',
 								'label' => __( 'Width', 'themify' ),
 								'value' => '',
 								'render_callback' => array(
-									'repeater' => 'content_button',
 									'binding' => 'live'
-								)
-							),
-							array(
-								'id' => 'lightbox_size_unit_width',
-								'type' => 'select',
-								'label' => __( 'Units', 'themify' ),
-								'options' => array(
-									'pixels' => __('px ', 'themify'),
-									'percents' => __('%', 'themify')
 								),
-								'default' => 'pixels',
-								'render_callback' => array(
-									'repeater' => 'content_button',
-									'binding' => 'live'
+								'units' => array(
+									'PX' => array(
+										'min' => 0,
+										'max' => 500,
+									),
+									'%' => array(
+										'min' => 0,
+										'max' => 100,
+									)
 								)
 							),
 							array(
 								'id' => 'lightbox_height',
-								'type' => 'text',
 								'label' => __( 'Height', 'themify' ),
 								'value' => '',
 								'render_callback' => array(
-									'repeater' => 'content_button',
 									'binding' => 'live'
-								)
-							),
-							array(
-								'id' => 'lightbox_size_unit_height',
-								'type' => 'select',
-								'label' => __( 'Units', 'themify' ),
-								'options' => array(
-									'pixels' => __('px ', 'themify'),
-									'percents' => __('%', 'themify')
 								),
-								'default' => 'pixels',
-								'render_callback' => array(
-									'repeater' => 'content_button',
-									'binding' => 'live'
+								'type' => 'range',
+								'units' => array(
+									'PX' => array(
+										'min' => 0,
+										'max' => 500,
+									),
+									'%' => array(
+										'min' => 0,
+										'max' => 100,
+									)
 								)
 							)
 						),
-						'wrap_with_class' => 'tb-group-element tb-group-element-lightbox lightbox_size'
+						'wrap_with_class' => 'tb_group_element tb_group_element_lightbox lightbox_size'
 					),
 					array(
 						'id' => 'button_container',
@@ -195,7 +224,7 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 								'id' => 'button_color_bg',
 								'type' => 'layout',
 								'label' =>'',
-								'class' => 'tb-colors',
+								'class' => 'tb_colors',
 								'mode' => 'sprite',
 								'options' => $colors,
 								'bottom' => false,
@@ -248,7 +277,7 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 						'render_callback' => array(
 							'repeater' => 'content_button',
 							'binding' => 'live'
-						)
+					)
 					)
 				),
 				'render_callback' => array(
@@ -265,7 +294,7 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify')),
+				'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify')),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -293,25 +322,28 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
                         self::get_image('.module.module-buttons'),
 						self::get_color('.module.module-buttons', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
 						self::get_repeat('.module.module-buttons'),
+						self::get_position('.module.module-buttons'),
                         // Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(' div.module-buttons'),
-                        self::get_color(' .module-buttons-item span','font_color',__('Font Color', 'themify')),
+                        self::get_element_font_weight(' div.module-buttons'),
+                        self::get_color(' .module-buttons-item a','font_color',__('Font Color', 'themify')),
                         self::get_font_size( array(' div.module-buttons i',' div.module-buttons a',' div.module-buttons span')),
                         self::get_line_height(array(' div.module-buttons i',' div.module-buttons a',' div.module-buttons span')),
                         self::get_letter_spacing(array(' div.module-buttons i',' div.module-buttons a',' div.module-buttons span')),
                         self::get_text_align(' div.module-buttons'),
                         self::get_text_transform(' div.module-buttons'),
                         self::get_font_style(' div.module-buttons'),
+                        self::get_text_decoration(' div.module-buttons','text_decoration_regular'),
 			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding(' div.module-buttons'),
 			// Margin
                         self::get_seperator('margin',__('Margin', 'themify')),
-                        self::get_margin(' div.module-buttons'),
+                        self::get_margin('.module-buttons'),
 			// Border
                         self::get_seperator('border',__('Border', 'themify')),
-                        self::get_border(' div.module-buttons:not(.module)')
+                        self::get_border(' div.module-buttons')
 		);
 
 		$button_link = array(
@@ -324,8 +356,8 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color(' .module-buttons .module-buttons-item a', 'link_color'),
                         self::get_color(' .module-buttons .module-buttons-item a:hover', 'link_color_hover',__('Color Hover', 'themify')),
-                        self::get_text_decoration(array(' .module-buttons .module-buttons-item a span',' .module-buttons .module-buttons-item a i')),
-                        // Padding
+                        self::get_text_decoration(array(' .module-buttons .module-buttons-item a span')),
+			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding(' .module-buttons .module-buttons-item a','padding_link'),
 			// Margin
@@ -356,35 +388,34 @@ class TB_Buttons_Module extends Themify_Builder_Component_Module {
 	}
 
 	protected function _visual_template() { ?>
+        <# var downloadLink = ( data.download_link == 'yes' ) ? 'download' : ''; #>
 		<div class="module module-<?php echo $this->slug; ?> {{ data.css_button }}">
+                        <!--insert-->
 			<# if ( data.content_button ) { #>
-				<div class="module-<?php echo $this->slug; ?> {{ data.buttons_size }} {{ data.buttons_style }}">
+				<div class="module-<?php echo $this->slug; ?> {{ data.buttons_size }} {{ data.buttons_style }} {{ data.buttons_shape }}">
 					<# _.each( data.content_button, function( item ) { #>
 
 						<div class="module-buttons-item {{ data.fullwidth_button }} {{ data.display }}">
 							<# if ( item.link ) { #>
-							<a class="ui builder_button {{ item.button_color_bg }}" href="{{ item.link }}">
-							<# } #>
-
-							<# if ( item.icon_alignment && item.icon_alignment === 'right' ) { #>
-
-								<span>{{ item.label }}</span>
-
-								<# if ( item.icon ) { #>
-								<i class="<# print(themifybuilderapp.Utils.getIcon(item.icon))#>"></i>
-								<# } #>
-
-							<# } else { #>
-
-								<# if ( item.icon ) { #>
-								<i class="<# print(themifybuilderapp.Utils.getIcon(item.icon))#>"></i>
-								<# } #>
+							<a class="ui builder_button {{ item.button_color_bg }}" href="{{ item.link }}" {{downloadLink}}>
+							<# }
+							 if ( item.icon_alignment && item.icon_alignment === 'right' ) { #>
 
 								<span>{{ item.label }}</span>
 
-							<# } #>
+							<# if ( item.icon ) { #>
+								<i class="<# print(themifybuilderapp.Utils.getIcon(item.icon))#>"></i>
+							<# } 
+							 } else { 
 
-							<# if ( item.link ) { #>
+								 if ( item.icon ) { #>
+								<i class="<# print(themifybuilderapp.Utils.getIcon(item.icon))#>"></i>
+								<# } #>
+
+								<span>{{ item.label }}</span>
+
+							<# } 
+							 if ( item.link ) { #>
 							</a>
 							<# } #>
 						</div>

@@ -47,9 +47,9 @@ function themify_fontello_input_callback( $data = array() ) {
 				<a href="#" class="themify-media-lib-browse" data-submit=\'' . json_encode( array( 'action' => 'themify_handle_fontello_upload', 'field_name' => 'setting-fontello' ) ) . '\' data-uploader-title="' . __( 'Upload package', 'themify' ) .'" data-uploader-button-text="'. __( 'Upload package', 'themify' ) .'" data-fields="setting-fontello" data-type="application/zip">'. __( 'Browse Library', 'themify' ) . '</a>
 			</div>
 			<br>
-			<span class="description">
-			'. sprintf( __( 'Go to <a href="%s">fontello.com</a> and create a package, then upload it here. The icon package will be available on Themify\'s icon library where you click "Insert Icon".', 'themify' ), 'http://fontello.com' ) .'
-			</span>
+			<small>
+			'. sprintf( __( 'Go to <a href="%s">fontello.com</a>, pick your icons, download the webfont zip, upload and insert the zip URL here. The icon package will be auto detected on Themify\'s icon library where you click "Insert Icon".', 'themify' ), 'http://fontello.com' ) .'
+			</small>
 		</div>
 	</div>';
 }
@@ -123,7 +123,7 @@ function themify_fontello_get_config( $name = null, $default = null ) {
 			if( $config = themify_get_file_contents( $path['dir'] . 'config.json' ) ) {
 				$config = json_decode( $config, true );
 				if( isset( $name ) ) {
-					if( isset( $config[ $name ] ) && ! empty( $config[ $name ] ) ) {
+					if( ! empty( $config[ $name ] ) ) {
 						$config = $config[ $name ];
 					} else {
 						$config = $default;

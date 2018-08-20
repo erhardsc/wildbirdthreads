@@ -2,7 +2,7 @@
 /*
   Plugin Name:  Builder Contact
   Plugin URI:   https://themify.me/addons/contact
-  Version:      1.2.7
+  Version:      1.2.8
   Author:       Themify
   Description:  Simple contact form. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
   Text Domain:  builder-contact
@@ -83,7 +83,7 @@ class Builder_Contact {
 		}
 
 		wp_enqueue_script( 'builder-contact-admin-scripts', themify_enque( $this->url . 'assets/admin-scripts.js' ), array( 'jquery' ), $this->version );
-		wp_enqueue_style( 'builder-contact', themify_enque( $this->url . 'assets/admin.css' ), null, $this->version );
+		wp_enqueue_style( 'builder-contact-admin-styles', themify_enque( $this->url . 'assets/admin.css' ), null, $this->version );
 
 		return $styles;
 	}

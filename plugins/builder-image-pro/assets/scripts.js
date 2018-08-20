@@ -1,5 +1,5 @@
 (function ($) {
-	var selector = '.module-pro-image';
+	var selector = '.module.module-pro-image';
 
 	function flip_effect( el, side ) {
 		side = side || ( el.hasClass( 'image-pro-flip' ) ? 'front' : 'back' );
@@ -8,7 +8,7 @@
 		window.setTimeout( function(){ el.toggleClass( 'image-pro-flipped', side === 'back' ); }, 1000 );
 	}
 
-	$( 'body' )
+	Themify.body
 		.on( 'mouseenter touchstart', selector, function(){
 			var $this = $( this ),
 				entranceEffect = $this.data( 'entrance-effect' );
@@ -29,7 +29,7 @@
 				$this.find( '.image-pro-overlay' )
 					.css( { visibility: 'visible', 'animation-name' : '' } )
 					.removeClass( $this.data( 'exit-effect' ) )
-					.addClass( 'wow animated ' + entranceEffect );
+					.addClass( 'wow animated ' + (entranceEffect ||'') );
 			}
 		} )
 		.on( 'mouseleave', selector, function(ev){
@@ -59,7 +59,7 @@
 				$this.find( '.image-pro-overlay' )
 					.css( { 'animation-name' : '' } )
 					.removeClass( entranceEffect )
-					.addClass( 'wow animated ' + $this.data( 'exit-effect' ) );
+					.addClass( 'wow animated ' + ($this.data( 'exit-effect' ) || '') );
 			}
 		} )
 		// There is no 'touchleave' event, so we have to emulate it
@@ -83,15 +83,14 @@
 	function builder_image_pro_init(e, el, type ) {
 		if ('undefined' !== typeof $.fn.magnificPopup) {
 			var items = $( selector, el );
-
-			items = el && el.hasClass( 'module-pro-image' ) ? items.add( el ) : items;
-			items.find( '.themify_lightbox' ).length && Themify.InitGallery();
+                        if(el && el.hasClass( 'module-pro-image' )){
+                            items = items.add( el );
+                        }
+			items.find( '.themify_lightbox' ).length>0 && Themify.InitGallery();
 		}
 	}
-
-        
         if ( Themify.is_builder_active ) {
-           $( 'body' ).on( 'builder_load_module_partial',builder_image_pro_init ).on( 'click', '.module-pro-image a',function( e ) {
+            Themify.body.on( 'builder_load_module_partial',builder_image_pro_init ).on( 'click', '.module-pro-image a',function( e ) {
                     ! $( this ).is( '.themify_lightbox[target="_blank"]' ) && e.preventDefault();
             } );
             if(Themify.is_builder_loaded){

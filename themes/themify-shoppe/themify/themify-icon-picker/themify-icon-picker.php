@@ -3,7 +3,7 @@
 Plugin Name:  Themify Icon Picker
 Version:      1.0.0
 Author:       Themify
-Author URI:   http://themify.me/
+Author URI:   https://themify.me/
 Description:   
 Text Domain:  themify
 Domain Path:  /languages
@@ -37,8 +37,9 @@ class Themify_Icon_Picker {
 
 	private function __construct( $url ) {
 		$this->url = trailingslashit( $url );
-		include trailingslashit( dirname( __FILE__ ) ) . 'includes/class-icon-font-fontawesome.php';
-		include trailingslashit( dirname( __FILE__ ) ) . 'includes/class-icon-font-themify.php';
+                $dir = trailingslashit(dirname( __FILE__ ));
+		include $dir . 'includes/class-icon-font-fontawesome.php';
+		include $dir. 'includes/class-icon-font-themify.php';
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_ajax_tf_icon_picker', array( $this, 'tf_icon_picker' ) );
 		add_action( 'wp_ajax_tf_get_icon', array( $this, 'tf_ajax_get_icon' ) );
@@ -189,19 +190,22 @@ class Themify_Icon_Picker_Font {
 		return array();
 	}
 
-	function picker_template() { ?>
-		<div class="tf-font-group" data-group="<?php echo $this->get_id(); ?>">
+	function picker_template() {
+                $id = $this->get_id();
+                $icons = $this->get_icons();
+            ?>
+		<div class="tf-font-group" data-group="<?php echo $id; ?>">
 
 			<ul class="themify-lightbox-icon">
-				<?php foreach( $this->get_icons() as $category ) : ?>
-					<li data-id="<?php echo $this->get_id() . '-' . $category['key']; ?>">
+				<?php foreach( $icons as $category ) : ?>
+					<li data-id="<?php echo $id . '-' . $category['key']; ?>">
 						<span><?php echo $category['label']; ?></span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
 
-			<?php foreach( $this->get_icons() as $category ) : ?>
-				<section id="<?php echo $this->get_id() . '-' . $category['key']; ?>">
+			<?php foreach( $icons as $category ) : ?>
+				<section id="<?php echo $id . '-' . $category['key']; ?>">
 					<h2 class="page-header"><?php echo $category['label']; ?></h2>
 					<div class="row">
 						<?php foreach( $category['icons'] as $icon_key => $icon_label ) : ?>
@@ -211,7 +215,7 @@ class Themify_Icon_Picker_Font {
 							</a>
 						<?php endforeach; ?>
 					</div>
-				</section><!-- #<?php echo $this->get_id() . '-' . $category['key']; ?> -->
+				</section><!-- #<?php echo $id. '-' . $category['key']; ?> -->
 			<?php endforeach; ?>
 
 		</div><!-- .tf-font-group -->

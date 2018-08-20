@@ -149,7 +149,7 @@ function builderMapsPro_remove_marker( index ) {
 				&& builderMapsPro_update_map_preview();
 		} )
 		.on( 'change', '#markers .tb_lb_option_child', update_markers )
-		.on( 'click', '#markers .themify_builder_delete_row', delete_marker_action );
+		.on( 'click', '#markers .tb_delete_row', delete_marker_action );
 			
 		function update_markers() {
 			var row = $( this ).closest( '.tb_repeatable_field' ),

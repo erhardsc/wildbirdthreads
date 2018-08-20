@@ -29,6 +29,8 @@ class WC_Facebook_Product {
   const MAX_TIME = 'T23:59+00:00';
   const MIN_TIME = 'T00:00+00:00';
 
+  static $use_checkout_url = array('simple' => 1, 'variable' => 1, 'variation' => 1);
+
   public function __construct(
     $wpid, $parent_product = null) {
     $this->id = $wpid;
@@ -38,6 +40,7 @@ class WC_Facebook_Product {
     $this->gallery_urls = null;
     $this->fb_use_parent_image = null;
     $this->fb_price = 0;
+    $this->main_description = '';
 
     // Variable products should use some data from the parent_product
     // For performance reasons, that data shouldn't be regenerated every time.
@@ -398,7 +401,8 @@ class WC_Facebook_Product {
       html_entity_decode($this->get_permalink()));
 
     // Use product_url for external/bundle product setting.
-    if ($this->get_type() == 'external' || $this->get_type() == 'woosb') {
+    $product_type = $this->get_type();
+    if (!$product_type || !isset(self::$use_checkout_url[$product_type])) {
       $checkout_url = $product_url;
     } else if (wc_get_cart_url()) {
       $char = '?';
@@ -438,7 +442,7 @@ class WC_Facebook_Product {
     }
     $categories =
       WC_Facebookcommerce_Utils::get_product_categories($id);
-    $brand = get_the_term_list($this->ID, 'product_brand', '', ', ');
+    $brand = get_the_term_list($id, 'product_brand', '', ', ');
     $brand = is_wp_error($brand) || !$brand
       ? WC_Facebookcommerce_Utils::get_store_name()
       : WC_Facebookcommerce_Utils::clean_string($brand);
@@ -475,6 +479,12 @@ class WC_Facebook_Product {
       if (class_exists('WC_Facebook_WPML_Injector') && WC_Facebook_WPML_Injector::should_hide($id)) {
         $product_data['visibility'] = 'staging';
       }
+    }
+
+    // Exclude variations that are "virtual" products from export to Facebook &&
+    // No Visibility Option for Variations
+    if (true === $this->get_virtual()) {
+      $product_data['visibility'] = 'staging';
     }
 
     if (!$prepare_for_product_feed) {

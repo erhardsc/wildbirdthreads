@@ -2,15 +2,15 @@
 !function (e) {
     var t, i, n = e.event;
     t = n.special.tfsmartresize = {setup: function () {
-            e(this).on("resize", t.handler)
+            e(this).on('resize', t.handler);
         }, teardown: function () {
-            e(this).off("resize", t.handler)
+            e(this).off('resize', t.handler);
         }, handler: function (e, r) {
             var s = this, a = arguments, o = function () {
-                e.type = "tfsmartresize", n.dispatch.apply(s, a)
+                e.type = 'tfsmartresize', n.dispatch.apply(s, a);
             };
-            i && clearTimeout(i), r ? o() : i = setTimeout(o, t.threshold)
-        }, threshold: 150}
+            i && clearTimeout(i), r ? o() : i = setTimeout(o, t.threshold);
+        }, threshold: 150};
 }(jQuery);
 var Themify, ThemifyGallery;
 (function ($, window, document, undefined) {
@@ -26,9 +26,9 @@ var Themify, ThemifyGallery;
         fonts: [],
         cssLazy: [],
         jsLazy: [],
+        body:null,
         is_builder_active: false,
         is_builder_loaded:false,
-		body : $( 'body' ),
         triggerEvent: function (a, b) {
             var c;
             document.createEvent ? (c = document.createEvent('HTMLEvents'), c.initEvent(b, !0, !0)) : document.createEventObject && (c = document.createEventObject(), c.eventType = b), c.eventName = b, a.dispatchEvent ? a.dispatchEvent(c) : a.fireEvent && htmlEvents["on" + b] ? a.fireEvent("on" + c.eventType, c) : a[b] ? a[b]() : a["on" + b] && a["on" + b]()
@@ -37,6 +37,7 @@ var Themify, ThemifyGallery;
                 c||(c=window.location.href);var d=RegExp("([?|&])"+a+"=.*?(&|#|$)(.*)","gi");if(d.test(c))return b!==void 0&&null!==b?c.replace(d,"$1"+a+"="+b+"$2$3"):c.replace(d,"$1$3").replace(/(&|\?)$/,"");if(b!==void 0&&null!==b){var e=-1!==c.indexOf("?")?"&":"?",f=c.split("#");return c=f[0]+e+a+"="+b,f[1]&&(c+="#"+f[1]),c}return c;
         },
         Init: function () {
+            Themify.body = $('body');//cache body, main.js is loading in the footer
             if (typeof themify_vars !== 'undefined') {
                 if (typeof tbLocalScript !== 'undefined' && tbLocalScript !== null) {
                     var self = Themify;
@@ -74,8 +75,9 @@ var Themify, ThemifyGallery;
                 callback();
             }
             else {
-                $('body').on('builder_load_module_partial', function (e, el, type) {
+                Themify.body.on('builder_load_module_partial', function (e, el, type) {
                     callback(el, type);
+                    Themify.InitGallery(el);
                 });
             }
         },
@@ -98,7 +100,7 @@ var Themify, ThemifyGallery;
                 self.LoadCss(themify_vars.url + '/fontawesome/css/font-awesome.min.css', themify_vars.version);
             }
             if (is_themify_icons) {
-                self.LoadCss(themify_vars.url + '/themify-icons/themify-icons.css', themify_vars.version);
+                self.LoadCss(themify_vars.url + '/themify-icons/themify-icons.min.css', themify_vars.version);
             }
             if ($('i[class*="icon-"]').length > 0 && typeof themify_vars.fontello_path === 'string') {
                 self.LoadCss(themify_vars.fontello_path);
@@ -232,16 +234,16 @@ var Themify, ThemifyGallery;
                     if (!themify_vars.map_key) {
                         themify_vars.map_key = '';
                     }
-                    self.LoadAsync('//maps.googleapis.com/maps/api/js?v=3.exp&callback=Themify.MapCallback&key=' + themify_vars.map_key, false, false,false,function(){
-                        return typeof google === 'object' && typeof google.maps !== 'object';
+                    self.LoadAsync('//maps.googleapis.com/maps/api/js', self.MapCallback,'v=3.exp&callback=Themify.MapCallback&key=' + themify_vars.map_key,false,function(){
+                        return typeof google === 'object' && typeof google.maps === 'object';
                     });
                 } else {
                     if (themify_vars.isCached && themify_vars.isCached === 'enable') {
                         google.maps = {__gjsload__: function () {
                                 return;
                             }};
-                        self.LoadAsync('//maps.googleapis.com/maps/api/js?v=3.exp&callback=Themify.MapCallback&key=' + themify_vars.map_key, false, false, false,function(){
-							return typeof google === 'object' && typeof google.maps !== 'object';
+                        self.LoadAsync('//maps.googleapis.com/maps/api/js', self.MapCallback, 'v=3.exp&callback=Themify.MapCallback&key=' + themify_vars.map_key, false,function(){
+							return typeof google === 'object' && typeof google.maps === 'object';
 						});
                     } else {
                         self.MapCallback(el);
@@ -255,8 +257,8 @@ var Themify, ThemifyGallery;
                         address = $data.address,
                         zoom = parseInt($data.zoom),
                         type = $data.type,
-                        scroll = $data.scroll,
-                        drag = $data.drag,
+                        scroll = $data.scroll == 'true',
+                        drag = $data.drag == 'true',
                         node = this,
                         delay = $i * 1000;
                 setTimeout(function () {
@@ -288,7 +290,7 @@ var Themify, ThemifyGallery;
                             revGeocoding = $(node).data('reverse-geocoding') ? true : false;
 
                     google.maps.event.addListenerOnce(map, 'idle', function () {
-                        $('body').trigger('themify_map_loaded', [$(node), map]);
+                        Themify.body.trigger('themify_map_loaded', [$(node), map]);
                     });
 
                     /* store a copy of the map object in the dom node, for future reference */
@@ -398,7 +400,9 @@ var Themify, ThemifyGallery;
             t.parentNode.insertBefore(s, t);
         },
         LoadCss: function (href, version, before, media, callback) {
-            if(!version && 'undefined' !== typeof tbLocalScript ){
+			if ( typeof href === 'undefined' ) return;
+			
+            if(!version && version!==false && 'undefined' !== typeof tbLocalScript ){
                     version = tbLocalScript.version;
             }
             var id = this.hash(href),
@@ -430,7 +434,7 @@ var Themify, ThemifyGallery;
                 ref = before;
             }
             else {
-                var refs = (doc.body || doc.getElementsByTagName('head')[ 0 ]).childNodes;
+                var refs = (doc.body || doc.head).childNodes;
                 ref = refs[ refs.length - 1];
             }
 
@@ -447,8 +451,8 @@ var Themify, ThemifyGallery;
             ref.parentNode.insertBefore(ss, (before ? ref : ref.nextSibling));
             // A method (exposed on return object for external use) that mimics onload by polling document.styleSheets until it includes the new sheet.
             var onloadcssdefined = function (cb) {
-                var resolvedHref = ss.href;
-                var i = sheets.length;
+                var resolvedHref = ss.href,
+                    i = sheets.length;
                 while (i--) {
                     if (sheets[ i ].href === resolvedHref) {
                         if (callback) {
@@ -508,30 +512,6 @@ var Themify, ThemifyGallery;
             }
             return $.inArray(font, this.fonts);
         },
-        video: function () {
-            var video = $('.themify_video_desktop a');
-            function videoCalback() {
-                video.each(function () {
-                    flowplayer(
-                            $(this).attr('id'),
-                            themify_vars.url + "/js/flowplayer-3.2.5.swf",
-                            {
-                                clip: {autoPlay: false}
-                            }
-                    );
-                });
-            }
-            if (video.length > 0) {
-                if (typeof flowplayer === 'undefined') {
-                    this.LoadAsync(themify_vars.url + '/js/flowplayer-3.2.4.min.js', videoCalback, '3.2.4', null, function () {
-                        return typeof flowplayer !== 'undefined';
-                    });
-                }
-                else {
-                    videoCalback();
-                }
-            }
-        },
         lightboxCallback: function ($el, $args) {
             this.LoadAsync(themify_vars.url + '/js/themify.gallery.js', function () {
                 Themify.GalleryCallBack($el, $args);
@@ -539,64 +519,81 @@ var Themify, ThemifyGallery;
                 return ('undefined' !== typeof ThemifyGallery);
             });
         },
-        InitGallery: function ($el, $args) {
-            var lightboxConditions = typeof themifyScript === 'object' && ((themifyScript.lightbox.lightboxContentImages && $(themifyScript.lightbox.contentImagesAreas).length > 0) || $(themifyScript.lightbox.lightboxSelector).length > 0);
-            if (!lightboxConditions) {
-                lightboxConditions = typeof themifyScript === 'object' && themifyScript.lightbox.lightboxGalleryOn && ($(themifyScript.lightbox.lightboxContentImagesSelector).length > 0 || (typeof themifyScript.lightbox.gallerySelector !== 'undefined' && $(themifyScript.lightbox.gallerySelector).length > 0));
-            }
-            var self = this;
-            if (lightboxConditions) {
-                this.LoadCss(themify_vars.url + '/css/lightbox.css', null);
-                this.LoadAsync(themify_vars.url + '/js/lightbox.min.js', function () {
-                    Themify.lightboxCallback($el, $args);
-                }, null, null, function () {
-                    return ('undefined' !== typeof $.fn.magnificPopup);
-                });
-            }
-            if ($('.module.module-gallery,.module.module-image').length > 0) {
+        InitGallery: function( $el, $args ) {
+			var self = this,
+				lightboxConditions = false,
+				lbox = typeof themifyScript === 'object' && themifyScript.lightbox,
+				gallery = $( '.module-gallery.gallery-masonry', $el );
 
-                if ($('.gallery-masonry').length > 0) {
-                    this.LoadAsync(themify_vars.includesURL + 'js/imagesloaded.min.js', function () {
-                        self.LoadAsync(themify_vars.includesURL + 'js/masonry.min.js', function () {
-                            $('.gallery-masonry').imagesLoaded(function () {
-                                $('.gallery-masonry').masonry({
-                                    itemSelector: '.gallery-item',
-                                    columnWidth: 1,
-                                    originLeft: !$('body').hasClass('rtl'),
-                                    stamp: ('.module-title')
-                                });
-                                if (!lightboxConditions) {
-                                    $('body').addClass('themify_lightbox_loaded').removeClass('themify_lightboxed_images');
-                                }
-                            });
-                        }, null, null, function () {
-                            return ('undefined' !== typeof $.fn.masonry);
-                        });
-                    }, null, null, function () {
-                        return ('undefined' !== typeof $.fn.imagesLoaded);
-                    });
-                }
-                else if (!lightboxConditions) {
-                    $('body').addClass('themify_lightbox_loaded').removeClass('themify_lightboxed_images');
-                }
-            } else if (!lightboxConditions) {
-                $('body').addClass('themify_lightbox_loaded').removeClass('themify_lightboxed_images');
-            }
+			if( ! Themify.is_builder_active ) {
+				lightboxConditions = lbox && ( ( lbox.lightboxContentImages
+					&& $( lbox.contentImagesAreas ).length ) || $( lbox.lightboxSelector ).length );
+				
+				if( ! lightboxConditions ) {
+					lightboxConditions = lbox && lbox.lightboxGalleryOn
+						&& ( $( lbox.lightboxContentImagesSelector ).length
+						|| ( lbox.gallerySelector && $( lbox.gallerySelector ).length ) );
+				}
 
-        },
+				if ( lightboxConditions ) {
+					this.LoadCss( themify_vars.url + '/css/lightbox.min.css', null );
+					this.LoadAsync( themify_vars.url + '/js/lightbox.min.js', function () {
+						Themify.lightboxCallback( $el, $args );
+					}, null, null, function () {
+						return ( 'undefined' !== typeof $.fn.magnificPopup );
+					});
+				}
+			}
+
+			if( $el && $el.hasClass( 'gallery-masonry' ) ) {
+				gallery = gallery.add( $el );
+			}
+
+			if( gallery.length ) {
+				this.LoadAsync( themify_vars.includesURL + 'js/imagesloaded.min.js', function () {
+					self.LoadAsync( themify_vars.includesURL + 'js/masonry.min.js', function () {
+						var rtl = ! self.body[0].classList.contains( 'rtl' );
+
+						gallery.each( function() {
+							var $this = $( this );
+
+							$( this ).imagesLoaded( function () {
+								$this.data( 'masonry' ) && $this.data( 'masonry' ).destroy();
+
+								$this.masonry({
+									itemSelector: '.gallery-item',
+									originLeft: rtl,
+									stamp: '.module-title',
+									gutter: '.module-gallery-gutter'
+								});
+							});
+						});
+						
+						! lightboxConditions && self.body.addClass( 'themify_lightbox_loaded' ).removeClass( 'themify_lightboxed_images' );
+
+					}, null, null, function () {
+						return 'undefined' !== typeof $.fn.masonry;
+					} );
+				}, null, null, function () {
+					return 'undefined' !== typeof $.fn.imagesLoaded;
+				} );
+			} else if( ! lightboxConditions ) {
+				self.body.addClass( 'themify_lightbox_loaded' ).removeClass( 'themify_lightboxed_images' );
+			}
+		},
         GalleryCallBack: function ($el, $args) {
             if (!$el) {
                 $el = $(themifyScript.lightboxContext);
             }
             $args = !$args && themifyScript.extraLightboxArgs ? themifyScript.extraLightboxArgs : {};
             ThemifyGallery.init({'context': $el, 'extraLightboxArgs': $args});
-            $('body').addClass('themify_lightbox_loaded').removeClass('themify_lightboxed_images');
+            Themify.body.addClass('themify_lightbox_loaded').removeClass('themify_lightboxed_images');
         },
         parseVideo: function (url) {
-                url.match(/(http:|https:|)\/\/(player.|www.)?(vimeo\.com|youtu(be\.com|\.be|be\.googleapis\.com))\/(video\/|embed\/|watch\?v=|v\/)?([A-Za-z0-9._%-]*)(\&\S+)?/);
+                var m = url.match(/(http:|https:|)\/\/(player.|www.)?(vimeo\.com|youtu(be\.com|\.be|be\.googleapis\.com))\/(video\/|embed\/|watch\?v=|v\/)?([A-Za-z0-9._%-]*)(\&\S+)?/i);
                 return {
-                        type: RegExp.$3.indexOf('youtu') > -1?'youtube':(RegExp.$3.indexOf('vimeo') > -1?'vimeo':false),
-                        id: RegExp.$6
+                        type: m!==null?(m[3].indexOf('youtu') > -1?'youtube':(m[3].indexOf('vimeo') > -1?'vimeo':false)):false,
+                        id: m!==null?m[6]:false
                 };
         },
         hash: function (str) {

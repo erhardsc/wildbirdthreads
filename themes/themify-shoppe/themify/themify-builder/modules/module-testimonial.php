@@ -82,14 +82,14 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 					'taxonomy' => 'testimonial-category'
 				),
 				'help' => sprintf(__('Add more <a href="%s" target="_blank">testimonials</a>', 'themify'), admin_url('post-new.php?post_type=testimonial')),
-				'wrap_with_class' => 'tb-group-element tb-group-element-category'
+				'wrap_with_class' => 'tb_group_element tb_group_element_category'
 			),
 			array(
 				'id' => 'query_slug_testimonial',
 				'type' => 'text',
 				'label' => __('Testimonial Slugs', 'themify'),
 				'class' => 'large',
-				'wrap_with_class' => 'tb-group-element tb-group-element-post_slug',
+				'wrap_with_class' => 'tb_group_element tb_group_element_post_slug',
 				'help' => '<br/>' . __( 'Insert Testimonial slug. Multiple slug should be separated by comma (,)', 'themify')
 			),
 			array(
@@ -131,7 +131,7 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 					'comment_count' => __('Comment Count', 'themify'),
 					'meta_value' => __( 'Custom Field String', 'themify' ),
 					'meta_value_num' => __( 'Custom Field Numeric', 'themify' )
-				),
+			),
 				'binding' => array(
 					'meta_value' => array( 'show' => array( 'meta_key_testimonial' ) ),
 					'meta_value_num' => array( 'show' => array( 'meta_key_testimonial' ) ),
@@ -218,7 +218,7 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') )
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') )
 			)
 		);
 	}
@@ -232,6 +232,7 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(array( '.module-testimonial .post-title', '.module-testimonial .post-title a' )),
+                        self::get_element_font_weight(array( '.module-testimonial .post-title', '.module-testimonial .post-title a' )),
                         self::get_color(array( '.module-testimonial .post', '.module-testimonial h1', '.module-testimonial h2', '.module-testimonial h3:not(.module-title)', '.module-testimonial h4', '.module-testimonial h5', '.module-testimonial h6', '.module-testimonial .post-title', '.module-testimonial .post-title a' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-testimonial .post'),
                         self::get_line_height('.module-testimonial .post'),
@@ -239,6 +240,7 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-testimonial .post'),
                         self::get_text_transform('.module-testimonial .post'),
                         self::get_font_style('.module-testimonial .post'),
+                        self::get_text_decoration('.module-testimonial .post','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-testimonial a','link_color'),
@@ -259,15 +261,20 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family(array( '.module-testimonial .post-title', '.module-testimonial .post-title a' ),'font_family_title'),
+                        self::get_element_font_weight(array( '.module-testimonial .post-title', '.module-testimonial .post-title a' ),'font_weight_title'),
                         self::get_color(array( '.module-testimonial .post-title', '.module-testimonial .post-title a' ),'font_color_title',__('Font Color', 'themify')),
                         self::get_color(array( '.module-testimonial .post-title:hover', '.module-testimonial .post-title a:hover' ),'font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size('.module-testimonial .post-title','font_size_title'),
-                        self::get_line_height('.module-testimonial .post-title','line_height_title')
+                        self::get_line_height('.module-testimonial .post-title','line_height_title'),
+						self::get_letter_spacing('.module-testimonial .post-title', 'letter_spacing_title'),
+                        self::get_text_transform('.module-testimonial .post-title','t_t_t'),
+                        self::get_font_style('.module-testimonial .post-title','f_sy_t','f_b_t')
 		);
 
 		$testimonial_content = array(
 			// Font
                         self::get_font_family('.module-testimonial .testimonial-post .post-content','font_family_content'),
+                        self::get_element_font_weight('.module-testimonial .testimonial-post .post-content','font_weight_content'),
                         self::get_color('.module-testimonial .testimonial-post .post-content','font_color_content',__('Font Color', 'themify')),
                         self::get_font_size('.module-testimonial .testimonial-post .post-content','font_size_content'),
                         self::get_line_height('.module-testimonial .testimonial-post .post-content','line_height_content')
@@ -385,7 +392,7 @@ class TB_Testimonial_Module extends Themify_Builder_Component_Module {
 			'img_width_testimonial' => $image_w,
 			'img_height_testimonial' => $image_h,
 			'unlink_feat_img_testimonial' => 'no',
-			'hide_post_title_testimonial' => $title == 'yes' ? 'no' : 'yes',
+			'hide_post_title_testimonial' => $title === 'yes' ? 'no' : 'yes',
 			'unlink_post_title_testimonial' => 'no',
 			'hide_post_date_testimonial' => 'no',
 			'hide_post_meta_testimonial' => 'no',
@@ -418,7 +425,7 @@ if( ! function_exists( 'themify_builder_testimonial_author_name' ) ) :
 		$out = '';
 		if( 'yes' === $show_author){
 			if( $author = get_post_meta( $post->ID, '_testimonial_name', true ) )
-				$out .= '<span class="dash"></span><cite class="testimonial-name">' . $author . '</cite> <br/>';
+				$out = '<span class="dash"></span><cite class="testimonial-name">' . $author . '</cite> <br/>';
 
 			if( $position = get_post_meta( $post->ID, '_testimonial_position', true ) )
 				$out .= '<em class="testimonial-title">' . $position;
@@ -441,10 +448,8 @@ if( ! function_exists( 'themify_builder_testimonial_author_name' ) ) :
 				if( $link ) $out .= '</a>';
 
 			$out .= '</em>';
-
-			return $out;
 		}
-		return '';
+		return $out;
 	}
 endif;
 

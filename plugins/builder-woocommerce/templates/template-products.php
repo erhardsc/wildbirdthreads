@@ -35,6 +35,7 @@ $fields_default = array(
 	// slider settings
 	'layout_slider' => '',
 	'visible_opt_slider' => '',
+	'mob_visible_opt_slider' => '',
 	'auto_scroll_opt_slider' => 0,
 	'scroll_opt_slider' => '',
 	'speed_opt_slider' => '',
@@ -212,7 +213,7 @@ if( $is_theme_template ) {
         }
 	?>
 	<div <?php echo self::get_element_attributes( $container_props ); ?>>
-
+            <!--insert-->
 		<?php if ( $fields_args['mod_title_products'] !== '' ): ?>
 			<?php echo $fields_args['before_title'] . apply_filters( 'themify_builder_module_title', $fields_args['mod_title_products'], $fields_args )  . $fields_args['after_title']; ?>
 		<?php endif; ?>

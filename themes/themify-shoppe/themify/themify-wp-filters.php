@@ -277,7 +277,7 @@ function themify_body_classes( $classes ) {
 	// Browser classes
 	global $is_gecko, $is_opera, $is_iphone, $is_IE, $is_winIE, $is_macIE;
 
-	$is_android = $is_webkit = $is_ie10 = $is_ie9 = $is_ie8 = false;
+	$is_android = $is_webkit = $is_edge = $is_ie10 = $is_ie9 = $is_ie8 = false;
 
 	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 		if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'android' ) ) {
@@ -285,6 +285,9 @@ function themify_body_classes( $classes ) {
 		}
 		if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'webkit' ) ) {
 			$is_webkit = true;
+		}
+		if( stripos( $_SERVER['HTTP_USER_AGENT'], 'Edge' ) ) {
+			$is_edge = true;
 		}
 		if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'MSIE 10' ) ) {
 			$is_ie10 = true;
@@ -303,6 +306,7 @@ function themify_body_classes( $classes ) {
 		'iphone'  => $is_iphone,
 		'android' => $is_android,
 		'webkit'  => $is_webkit,
+		'edge'	  => $is_edge,
 		'ie' 	  => $is_IE,
 		'iewin'   => $is_winIE,
 		'iemac'   => $is_macIE,
@@ -762,7 +766,8 @@ if( empty($themify_data['setting-exclude_img_rss'])) {
 
 // Custom Post Types in RSS
 function themify_feed_custom_posts( $qv ) {
-	$feed_custom_posts = explode( ',', trim( themify_get( 'setting-feed_custom_post' ) ) );
+	$feed_custom_posts = themify_check( 'setting-feed_custom_post' )
+		? explode( ',', trim( themify_get( 'setting-feed_custom_post' ) ) ) : '';
 
 	if( ! empty( $feed_custom_posts ) && isset( $qv['feed'] ) && ! isset( $qv['post_type'] ) ) {
 		if( in_array( 'all', $feed_custom_posts,true ) ) {
@@ -1149,43 +1154,53 @@ function themify_setup_cpt_post_options( $metaboxes ){
 		return $metaboxes;
 	}
 
-	$post_options = apply_filters( 'themify_post_type_default_options', array(
-		array(
-			'name' => 'page_layout',
-			'title' => __('Sidebar Option', 'themify'),
-			'description' => '',
-			'type' => 'layout',
-			'show_title' => true,
-			'meta' => array(
-				array('value' => 'default', 'img' => 'images/layout-icons/default.png', 'selected' => true, 'title' => __('Default', 'themify')),
-				array('value' => 'sidebar1', 'img' => 'images/layout-icons/sidebar1.png', 'title' => __('Sidebar Right', 'themify')),
-				array('value' => 'sidebar1 sidebar-left', 'img' => 'images/layout-icons/sidebar1-left.png', 'title' => __('Sidebar Left', 'themify')),
-				array('value' => 'sidebar-none', 'img' => 'images/layout-icons/sidebar-none.png', 'title' => __('No Sidebar ', 'themify'))
+	global $typenow;
+	if (isset($typenow) && $typenow) {
+		$name = 'custom_post_'. $typenow .'_single';
+	} else {
+		$name = 'page_layout';
+	}
+
+	$post_options =  array(
+			array(
+				'name' => $name,
+				'title' => __('Sidebar Option', 'themify'),
+				'description' => '',
+				'type' => 'layout',
+				'show_title' => true,
+				'meta' => apply_filters('themify_post_type_theme_sidebars' , array(
+							array('value' => 'default', 'img' => 'images/layout-icons/default.png', 'selected' => true, 'title' => __('Default', 'themify')),
+							array('value' => 'sidebar1', 'img' => 'images/layout-icons/sidebar1.png', 'title' => __('Sidebar Right', 'themify')),
+							array('value' => 'sidebar1 sidebar-left', 'img' => 'images/layout-icons/sidebar1-left.png', 'title' => __('Sidebar Left', 'themify')),
+							array('value' => 'sidebar-none', 'img' => 'images/layout-icons/sidebar-none.png', 'title' => __('No Sidebar ', 'themify'))
+						)
+					),
+				'default' => 'default'
 			),
-			'default' => 'default'
-		),
-		array(
-			'name'=> 'content_width',
-			'title' => __('Content Width', 'themify'),
-			'description' => '',
-			'type' => 'layout',
-			'show_title' => true,
-			'meta' => array(
-				array(
-					'value' => 'default_width',
-					'img' => 'themify/img/default.png',
-					'selected' => true,
-					'title' => __( 'Default', 'themify' )
+			array(
+				'name'=> 'content_width',
+				'title' => __('Content Width', 'themify'),
+				'description' => '',
+				'type' => 'layout',
+				'show_title' => true,
+				'meta' => array(
+					array(
+						'value' => 'default_width',
+						'img' => 'themify/img/default.png',
+						'selected' => true,
+						'title' => __( 'Default', 'themify' )
+					),
+					array(
+						'value' => 'full_width',
+						'img' => 'themify/img/fullwidth.png',
+						'title' => __( 'Fullwidth', 'themify' )
+					)
 				),
-				array(
-					'value' => 'full_width',
-					'img' => 'themify/img/fullwidth.png',
-					'title' => __( 'Fullwidth', 'themify' )
-				)
+				'default' => 'default_width'
 			),
-			'default' => 'default_width'
-		),
-	) );
+		) ;
+
+	$post_options = apply_filters( 'themify_post_type_default_options', $post_options);
 
 	return array_merge( array(
 		array(
@@ -1204,9 +1219,20 @@ add_filter( 'themify_metabox/fields/themify-meta-boxes', 'themify_setup_cpt_post
  * @uses global $themify
  */
 function themify_cpt_set_post_options() {
-	if( is_single() && ( $layout = themify_get( 'page_layout' ) ) ) {
+	if( is_single() ) {
+		$exclude = apply_filters('themify_exclude_CPT_for_sidebar', array('post', 'attachment', 'tbuilder_layout', 'tbuilder_layout_part', 'section') );
 		global $themify;
-		$themify->layout = $layout;
+
+		if ( ! in_array( get_post_type(), $exclude ) ) {
+			$cpt_sidebar = 'custom_post_'.get_post_type().'_single';
+			if ( themify_check( $cpt_sidebar ) && themify_get( $cpt_sidebar ) != 'default' ) {
+				$themify->layout = themify_get( $cpt_sidebar );
+			} elseif ( themify_check( 'setting-'.$cpt_sidebar ) ) {
+				$themify->layout = themify_get( 'setting-'.$cpt_sidebar );
+			} else {
+				$themify->layout = themify_get( 'page_layout' );
+			}
+		}
 	}
 }
 add_action( 'template_redirect', 'themify_cpt_set_post_options', 100 );
@@ -1220,3 +1246,11 @@ function themify_image_script_source_size( $size ) {
 	return themify_get( 'setting-img_php_base_size', 'large' );
 }
 add_filter( 'themify_image_script_source_size', 'themify_image_script_source_size', 1 );
+
+/**
+ * Set default 'large' image size on attachment page
+ */
+function themify_prepend_attachment() {
+	return '<p>' . wp_get_attachment_link( 0, 'large', false ) . '</p>';
+}
+add_filter( 'prepend_attachment', 'themify_prepend_attachment' );

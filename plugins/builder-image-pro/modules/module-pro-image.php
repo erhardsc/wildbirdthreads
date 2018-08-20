@@ -66,7 +66,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 					'image_modal' => __( 'Text modal', 'builder-image-pro' ),
 				),
 				'default' => 'image_external',
-				'help' => sprintf( '<span class="tb-group-element tb-group-element-image_modal">%s</span>', __( '(it will open text content in a lightbox)', 'builder-image-pro' ) ),
+				'help' => sprintf( '<span class="tb_group_element tb_group_element_image_modal">%s</span>', __( '(it will open text content in a lightbox)', 'builder-image-pro' ) ),
 				'option_js' => true,
 				'render_callback' => array(
                                     'binding' =>false
@@ -76,7 +76,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 				'id' => 'image_content_modal',
 				'type' => 'wp_editor',
 				'class' => 'fullwidth',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image_modal',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image_modal',
                                 'render_callback' => array(
                                     'binding' =>false
 				)
@@ -88,7 +88,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 				'pushed' => 'pushed',
 				'before' => __( 'Image Link', 'builder-image-pro' ),
 				'class' => 'fullwidth',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image_external tb-group-element-image_lightbox_link',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image_external tb_group_element_image_lightbox_link',
                                 'render_callback' => array(
                                     'binding' =>false
 				)
@@ -104,7 +104,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 					'no' => __( 'No', 'builder-image-pro' ),
 				),
 				'default' => 'no',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image_external',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image_external',
                                 'render_callback' => array(
                                     'binding' =>false
 				)
@@ -161,7 +161,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 						)
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-image_lightbox_link tb-group-element-image_modal',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image_lightbox_link tb_group_element_image_modal',
                                 'render_callback' => array(
                                     'binding' =>false
 				)
@@ -194,10 +194,10 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'appearance_image',
 				'type' => 'checkbox',
-				'label' => '&nbsp;',
+				'pushed'=>'pushed',
 				'default' => 'rounded',
 				'options' => array(
-					array( 'name' => 'fullwidth_image', 'value' => __( 'Auto full width', 'builder-image-pro' ), 'help' => __( 'Span the image across available width', 'builder-image-pro' ))
+					array( 'name' => 'fullwidth_image', 'value' => __( 'Auto full width', 'builder-image-pro' ))
 				),
 				'render_callback' => array(
 					'binding' => 'live'
@@ -316,7 +316,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 						'show' => array('link_type', 'link_new_window')
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-external tb-group-element-lightbox_link',
+				'wrap_with_class' => 'tb_group_element tb_group_element_external tb_group_element_lightbox_link',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -331,7 +331,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 					'modal' => __( 'Text modal', 'builder-image-pro' ),
 				),
 				'default' => 'external',
-				'help' => sprintf( '<span class="tb-group-element tb-group-element-modal">%s</span>', __( '(it will open text content in a lightbox)', 'builder-image-pro' ) ),
+				'help' => sprintf( '<span class="tb_group_element tb_group_element_modal">%s</span>', __( '(it will open text content in a lightbox)', 'builder-image-pro' ) ),
 				'option_js' => true,
 				'render_callback' => array(
 					'binding' => false
@@ -346,7 +346,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 					'no' => __( 'No', 'builder-image-pro' ),
 				),
 				'default' => 'no',
-				'wrap_with_class' => 'tb-group-element tb-group-element-external',
+				'wrap_with_class' => 'tb_group_element tb_group_element_external',
 				'render_callback' => array(
 					'binding' => false
 				)
@@ -355,7 +355,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 				'id' => 'color_button',
 				'type' => 'layout',
                                 'mode'=>'sprite',
-                                'class'=>'tb-colors',
+                                'class'=>'tb_colors',
 				'label' => __( 'Button Color', 'builder-image-pro' ),
 				'options' =>$colors,
 				'render_callback' => array(
@@ -366,7 +366,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 				'id' => 'content_modal',
 				'type' => 'wp_editor',
 				'class' => 'fullwidth',
-				'wrap_with_class' => 'tb-group-element tb-group-element-modal',
+				'wrap_with_class' => 'tb_group_element tb_group_element_modal',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -432,7 +432,7 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __( 'Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling', 'themify' ) ),
+				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify' ) ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -446,15 +446,14 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
 			'url_image' => 'https://themify.me/demo/themes/themes/wp-content/uploads/addon-samples/image-pro-sample-image.jpg',
 			'width_image' => 350,
 			'height_image' => 275,
-			'title_image' => esc_html__( 'Image Title', 'builder-image-pro' ),
 			'overlay_effect' => 'fadeIn',
 			'image_alignment' => 'image_alignment_left'
 		);
 	}
 
 	public function get_styling() {
-		return array(
-                        //bacground
+		$general = array(
+			//bacground
                         self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
                         self::get_color('.module-pro-image', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
 			// Font
@@ -462,9 +461,9 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
                         self::get_font_family( array( '.module-pro-image .image-pro-caption', '.module-pro-image .image-pro-title', '.module-pro-image .image-pro-action-button' )),
                         self::get_color(array( '.module-pro-image .image-pro-title', '.module-pro-image .image-pro-caption' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-pro-image'),
-			self::get_line_height('.module-pro-image'),
+						self::get_line_height('.module-pro-image'),
                         self::get_text_align('.module-pro-image'),
-                        // Padding
+			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding('.module-pro-image'),
 			// Margin
@@ -474,24 +473,130 @@ class TB_Image_Pro_Module extends Themify_Builder_Component_Module {
                         self::get_seperator('border',__('Border', 'themify')),
                         self::get_border('.module-pro-image')
 		);
+
+        $image_title = array(
+            // Font
+						self::get_seperator('font',__('Font', 'themify')),
+						self::get_font_family(array( '.module-pro-image .image-pro-title' ),'f_f_i_t'),
+						self::get_color(array( '.module-pro-image .image-pro-title' ),'f_c_i_t',__('Font Color', 'themify')),
+						self::get_font_size('.module-pro-image .image-pro-title', 'f_s_i_t'),
+						self::get_line_height('.module-pro-image .image-pro-title', 'l_h_i_t'),
+						self::get_letter_spacing('.module-pro-image .image-pro-title', 'l_s_i_t'),
+						self::get_text_align('.module-pro-image .image-pro-title', 't_a_i_t'),
+						self::get_text_transform('.module-pro-image .image-pro-title', 't_t_i_t'),
+						self::get_font_style('.module-pro-image .image-pro-title', 'f_sy_i_t','f_t_b'),
+            // Padding
+						self::get_seperator('padding', __('Padding', 'themify')),
+						self::get_padding('.module-pro-image .image-pro-title','i_t_p'),
+            // Margin
+						self::get_seperator('margin', __('Margin', 'themify')),
+						self::get_margin('.module-pro-image .image-pro-title','i_t_m'),
+            // Border
+						self::get_seperator('border', __('Border', 'themify')),
+						self::get_border('.module-pro-image .image-pro-title','i_t_b')
+        );
+
+        $image_caption = array(
+            // Font
+						self::get_seperator('font',__('Font', 'themify')),
+						self::get_font_family(array( '.module-pro-image .image-pro-caption' ),'f_f_i_c'),
+						self::get_color(array( '.module-pro-image .image-pro-caption' ),'f_c_i_c',__('Font Color', 'themify')),
+						self::get_font_size('.module-pro-image .image-pro-caption', 'f_s_i_c'),
+						self::get_line_height('.module-pro-image .image-pro-caption', 'l_h_i_c'),
+						self::get_letter_spacing('.module-pro-image .image-pro-caption', 'l_s_i_c'),
+						self::get_text_align('.module-pro-image .image-pro-caption', 't_a_i_c'),
+						self::get_text_transform('.module-pro-image .image-pro-caption', 't_t_i_c'),
+						self::get_font_style('.module-pro-image .image-pro-caption', 'f_sy_i_c','f_c_b'),
+            // Padding
+						self::get_seperator('padding', __('Padding', 'themify')),
+						self::get_padding('.module-pro-image .image-pro-caption','i_c_p'),
+            // Margin
+						self::get_seperator('margin', __('Margin', 'themify')),
+						self::get_margin('.module-pro-image .image-pro-caption','i_c_m'),
+            // Border
+						self::get_seperator('border', __('Border', 'themify')),
+						self::get_border('.module-pro-image .image-pro-caption','i_c_b')
+        );
+
+        $action_button = array(
+            // Font
+						self::get_seperator('font',__('Font', 'themify')),
+						self::get_font_family(array( '.module-pro-image .image-pro-action-button' ),'f_f_a_b'),
+						self::get_color(array( '.module-pro-image .image-pro-action-button' ),'f_c_a_b',__('Font Color', 'themify')),
+						self::get_font_size('.module-pro-image .image-pro-action-button', 'f_s_a_b'),
+						self::get_line_height('.module-pro-image .image-pro-action-button', 'l_h_a_b'),
+						self::get_letter_spacing('.module-pro-image .image-pro-action-button', 'l_s_a_b'),
+						self::get_text_align('.module-pro-image .image-pro-action-button', 't_a_a_b'),
+						self::get_text_transform('.module-pro-image .image-pro-action-button', 't_t_a_b'),
+						self::get_font_style('.module-pro-image .image-pro-action-button', 'f_sy_a_b','f_b_b'),
+            // Padding
+						self::get_seperator('padding', __('Padding', 'themify')),
+						self::get_padding('.module-pro-image .image-pro-action-button','a_b_p'),
+            // Margin
+						self::get_seperator('margin', __('Margin', 'themify')),
+						self::get_margin('.module-pro-image .image-pro-action-button','a_b_m'),
+            // Border
+						self::get_seperator('border', __('Border', 'themify')),
+						self::get_border('.module-pro-image .image-pro-action-button','a_b_b')
+        );
+		
+		return array(
+			array(
+				'type' => 'tabs',
+				'id' => 'module-styling',
+				'tabs' => array(
+					'general' => array(
+						'label' => __('General', 'themify'),
+						'fields' => $general
+					),
+					'image_title' => array(
+						'label' => __('Image Title', 'themify'),
+						'fields' => $image_title
+					),
+					'image_caption' => array(
+						'label' => __('Image Caption', 'themify'),
+						'fields' => $image_caption
+					),
+					'action_button' => array(
+						'label' => __('Action Button', 'themify'),
+						'fields' => $action_button
+					)
+				)
+			)
+		);
 	}
 
 	protected function _visual_template() {
-		$module_args = self::get_module_args();?>
+		$module_args = self::get_module_args();
+                ?>
 
 		<# var moduleSettings = '';
 			moduleSettings += data.image_filter ? ' filter-' + data.image_filter : '';
 			moduleSettings += data.image_effect ? ' effect-' + data.image_effect : '';
-			moduleSettings += data.appearance_image ? ' ' + data.appearance_image : '';
-			moduleSettings += data.appearance_image2 ? ' ' + data.appearance_image2 : '';
+			moduleSettings += data.appearance_image ? ' ' + data.appearance_image : '';			
+			moduleSettings += data.appearance_image2 ? ' ' + data.appearance_image2.split('|').join(' ') : '';
 			moduleSettings += data.image_alignment ? ' ' + data.image_alignment : '';
 			moduleSettings += data.style_image ? ' ' + data.style_image : '';
 			moduleSettings += data.css_image ? ' ' + data.css_image : '';
 			moduleSettings += data.animation_effect ? ' ' + data.animation_effect : '';
 			moduleSettings += data.overlay_effect ? ' entrance-effect-' + data.overlay_effect : '';
+                        var out = {'none' : '',
+                                    'partial-overlay' : '',
+                                    'flip-horizontal' : '',
+                                    'flip-vertical' : '',
+                                    'fadeInUp' : 'fadeOutDown',
+                                    'fadeIn' : 'fadeOut',
+                                    'fadeInLeft' : 'fadeOutLeft',
+                                    'fadeInRight' : 'fadeOutRight',
+                                    'fadeInDown' : 'fadeOutUp',
+                                    'zoomInUp' : 'zoomOutDown',
+                                    'zoomInLeft' : 'zoomOutLeft',
+                                    'zoomInRight' : 'zoomOutRight',
+                                    'zoomInDown' : 'zoomOutUp'
+                                };
 		#>
 		
-		<div class="module module-<?php echo $this->slug; ?> {{ moduleSettings }}" data-entrance-effect="{{ data.overlay_effect }}" data-exit-effect="">
+		<div class="module module-<?php echo $this->slug; ?> {{ moduleSettings }}" data-entrance-effect="{{ data.overlay_effect }}" data-exit-effect="{{out[data.overlay_effect]}}">
                         <!--insert-->
 			<# if( data.mod_title_image ) { #>
 				<?php echo $module_args['before_title']; ?>

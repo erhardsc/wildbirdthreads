@@ -6,21 +6,13 @@
 
 class Themify_Builder_Include extends Themify_Builder_Component_Base{
 
-	/**
-	 * Builder instance.
-	 *
-	 * @access   private
-	 * @var      object    $builder
-	 */
-	private $builder;
 
 	/**
 	 * Constructor.
 	 * 
 	 * @param object Themify_Builder $builder 
 	 */
-	public function __construct( Themify_Builder $builder ) {
-            $this->builder = $builder;
+	public function __construct(Themify_Builder $builder) {
             $is_frontend = Themify_Builder_Model::is_frontend_editor_page();
             $is_premium = Themify_Builder_Model::is_premium();
             if($is_premium || $is_frontend){
@@ -72,17 +64,17 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'fields' => array(
 					array(
 						'id' => 'hover_animation_effect',
-						'type' => 'animation_select',
-						'label' => __('Effect', 'themify')
+						'type' => 'animation_select'
 					)
 				)
 			),
 		);
+                
 		return array_merge( $fields, $new_fields );
 	}
         
 	/**
-	 * Add module parallax scrolling fields to Styling Tab module settings.
+	 * Add module Float Scrolling fields to Styling Tab module settings.
 	 * 
 	 * @access public
 	 * @param array $fields 
@@ -94,7 +86,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 			array(
 				'id' => 'separator_parallax',
 				'type' => 'separator',
-				'meta' => array('html'=>'<hr><h4>'.__('Parallax Scrolling', 'themify').'</h4>'),
+				'meta' => array('html'=>'<hr><h4>'.__('Float Scrolling', 'themify').'</h4>'),
 			),
 			array(
 				'id' => 'custom_parallax_scroll_speed',
@@ -113,7 +105,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 					array('value' => 9,  'name' => 9),
 					array('value' => 10,  'name' => 10)
 				),
-				'description' => sprintf( '<small>%s <br>%s</small>', esc_html__( '1 = slow, 10 = very fast', 'themify' ), esc_html__( 'Produce parallax scrolling effect by selecting different scroll speed', 'themify' ) ),
+				'description' => sprintf( '<small>%s <br>%s</small>', esc_html__( '1 = slow, 10 = very fast', 'themify' ), esc_html__( 'Produce floating effect by selecting different scroll speed', 'themify' ) ),
 				'binding' => array(
 					'empty' => array(
 						'hide' => array('custom_parallax_scroll_reverse', 'custom_parallax_scroll_fade')
@@ -227,54 +219,52 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 		if (empty($row_or_col['styling']['background_slider']) || 'slider' !== $row_or_col['styling']['background_type']) {
 			return false;
 		}
-                $size = isset($row_or_col['styling']['background_slider_size']) ? $row_or_col['styling']['background_slider_size'] : false;
+        $size = isset($row_or_col['styling']['background_slider_size']) ? $row_or_col['styling']['background_slider_size'] : false;
 		if ($images = Themify_Builder_Model::get_images_from_gallery_shortcode($row_or_col['styling']['background_slider'])) :
 			$bgmode = !empty($row_or_col['styling']['background_slider_mode']) ?$row_or_col['styling']['background_slider_mode'] : 'fullcover';
+			$slider_speed = !empty($row_or_col['styling']['background_slider_speed']) ?$row_or_col['styling']['background_slider_speed'] : '2000';
 			if (!$size) {
-                            $size = Themify_Builder_Model::get_gallery_param_option($row_or_col['styling']['background_slider'], 'size');
-                            if (!$size) {
-                                $size = 'large';
-                            }
+                $size = Themify_Builder_Model::get_gallery_param_option($row_or_col['styling']['background_slider'], 'size');
+                if (!$size) {
+                    $size = 'large';
+                }
 			}
 			?>
-                        <div id="<?php echo $builder_type; ?>-slider-<?php echo $order; ?>" class="<?php echo $builder_type; ?>-slider" data-bgmode="<?php echo $bgmode; ?>">
-                            <ul class="row-slider-slides clearfix">
-                                <?php
-                                $dot_i = 0;
-                                foreach ($images as $image) :
-                                        $img_data = wp_get_attachment_image_src($image->ID, $size);
-                                        ?>
-                                            <li data-bg="<?php echo esc_url(themify_https_esc($img_data[0])); ?>">
-                                                <a class="row-slider-dot" data-index="<?php echo $dot_i; ?>"></a>
-                                            </li>
-                                    <?php
-                                        $dot_i++;
-                                endforeach;
-                                ?>
-                            </ul>
-                            <div class="row-slider-nav">
-                                    <a class="row-slider-arrow row-slider-prev">&lsaquo;</a>
-                                    <a class="row-slider-arrow row-slider-next">&rsaquo;</a>
-                            </div>
-                        </div>
-				<!-- /.row-bgs -->
+            <div id="<?php echo $builder_type; ?>-slider-<?php echo $order; ?>" class="<?php echo $builder_type; ?>-slider" data-sliderspeed="<?php echo $slider_speed ?>" data-bgmode="<?php echo $bgmode; ?>">
+                <ul class="row-slider-slides clearfix">
+                    <?php
+                    $dot_i = 0;
+                    foreach ($images as $image) :
+                        $img_data = wp_get_attachment_image_src($image->ID, $size);
+                        ?>
+                        <li data-bg="<?php echo esc_url(themify_https_esc($img_data[0])); ?>">
+                            <a class="row-slider-dot" data-index="<?php echo $dot_i; ?>"></a>
+                        </li>
+                        <?php
+                            ++$dot_i;
+                    endforeach;
+                    ?>
+                </ul>
+                <div class="row-slider-nav">
+                        <a class="row-slider-arrow row-slider-prev">&lsaquo;</a>
+                        <a class="row-slider-arrow row-slider-next">&rsaquo;</a>
+                </div>
+            </div>
+            <!-- /.row-bgs -->
 			<?php
 		endif; // images
 	}
         
         public function background_styling($builder_id,$row,$order,$type){
             // Background cover color
-                if ( !empty( $row['styling'] ) ) {
-                    if(!$this->do_color_overlay( $row['styling'] )){
-                        $breakpoints = themify_get_breakpoints();
-                        foreach($breakpoints as $bp=>$v){
-                            if(!empty($row['styling']['breakpoint_'.$bp]) && $this->do_color_overlay( $row['styling']['breakpoint_'.$bp] )){
-                                break;
-                            }
-                        }
+            if ( !empty( $row['styling'] ) && !$this->do_color_overlay( $row['styling'] ) ) {
+                $breakpoints = themify_get_breakpoints();
+                foreach($breakpoints as $bp=>$v){
+                    if(!empty($row['styling']['breakpoint_'.$bp]) && $this->do_color_overlay( $row['styling']['breakpoint_'.$bp] )){
+                        break;
                     }
-                    
                 }
+            }
             
             // Background Slider
             $this->do_slider_background($row,$order, $type);
@@ -343,7 +333,25 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 		$is_mobile = themify_is_touch();
 
 		$key = '.module_'.$type;
-		$overlay = sprintf( __( '%s Overlay', 'themify' ), ucfirst( $type ) );
+		if ( $type === 'row' ) {
+			$overlay = __( 'Row Overlay', 'themify' );
+			$inner = __( 'Row Inner Container', 'themify' );
+                        $inner_selector = 'row_inner';
+		} elseif ( $type === 'column' ) {
+			$overlay = __( 'Column Overlay', 'themify' );
+			$inner = __( 'Column Inner Container', 'themify' );
+                        $inner_selector = 'tb-column-inner';
+		} else {
+			$overlay = __( 'Subrow Overlay', 'themify' );
+			$inner = __( 'Subrow Inner Container', 'themify' );
+                        $inner_selector = 'subrow_inner';
+		}
+		$inner_selector = array( $key . '>div.'.$inner_selector );
+		
+		if( $type === 'column' ) {
+			$inner_selector[] = $key . '>.tb_holder';
+		}
+
 		// Image size
 		$image_size = themify_get_image_sizes_list( true );
 		unset( $image_size[ key( $image_size ) ] );
@@ -368,38 +376,56 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'id' => 'background_slider',
 				'type' => 'textarea',
 				'label' => __('Background Slider', 'themify'),
-				'class' => 'tb-hide tb-shortcode-input',
-				'wrap_with_class' => 'reponive_disable tb-group-element tb-group-element-slider',
-				'description' => sprintf('<a href="#" class="builder_button tb-gallery-btn">%s</a>', __('Insert Gallery', 'themify'))
+				'class' => 'tb_hide tb_shortcode_input',
+				'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_slider',
+				'description' => sprintf('<a href="#" class="builder_button tb_gallery_btn">%s</a>', __('Insert Gallery', 'themify'))
 			),
 			// Background Slider Image Size
 			array(
 				'id' => 'background_slider_size',
-				'label' => __('Image Size', 'themify'),
+				'label' => '',
+				'description' => __('Image Size', 'themify'),
 				'type' => 'select',
 				'meta' => $image_size,
 				'default'=>'large',
-				'wrap_with_class' => 'reponive_disable tb-group-element tb-group-element-slider'
+				'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_slider'
 			),
-			// Background Slider Mode
-			array(
-				'id' => 'background_slider_mode',
-				'label' => __('Background Slider Mode', 'themify'),
-				'type' => 'select',
-				'meta' => array(
-					array('value' => 'fullcover', 'name' => __('Fullcover', 'themify')),
-					array('value' => 'best-fit', 'name' => __('Best Fit', 'themify'))
-				),
-				'wrap_with_class' => 'reponive_disable tb-group-element tb-group-element-slider'
-			),
-			// Video Background
-			array(
+            array(
+                'id' => 'background_slider_mode',
+				'label' => '',
+                'description' => __('Background Slider Mode', 'themify'),
+                'type' => 'select',
+                'meta' => array(
+
+                    array('value' => 'fullcover', 'name' => __('Fullcover', 'themify')),
+                    array('value' => 'best-fit', 'name' => __('Best Fit', 'themify')),
+                    array('value' => 'kenburns-effect', 'name' => __('Ken Burns Effect', 'themify'))
+                ),
+                'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_slider'
+            ),
+            array(
+                'id' => 'background_slider_speed',
+				'label' => '',
+                'description' => __('Slider Speed', 'themify'),
+                'type' => 'select',
+                'default' => '2000',
+                'meta' => array(
+                    array('value' => '3500', 'name' => __('Slow', 'themify')),
+                    array('value' => '2000', 'name' => __('Normal', 'themify')),
+                    array('value' => '500', 'name' => __('Fast', 'themify'))
+                ),
+                'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_slider'
+            ),
+
+            // Video Background
+
+            array(
 				'id' => 'background_video',
 				'type' => 'video',
 				'label' => __('Background Video', 'themify'),
-				'description' => __('Video format: mp4. Note: video background does not play on mobile, background image will be used as fallback.', 'themify'),
+				'description' => __('Video format: mp4, YouTube, and Vimeo. Note: video background does not play on some mobile devices, background image will be used as fallback. Audio should be disabled to have auto play.', 'themify'),
 				'class' => 'xlarge',
-				'wrap_with_class' => 'reponive_disable tb-group-element tb-group-element-video'
+				'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_video'
 			),
 			array(
 				'id' => 'background_video_options',
@@ -410,7 +436,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 					array('name' => 'mute', 'value' => __('Disable audio', 'themify'))
 				),
 				'default' => 'mute',
-				'wrap_with_class' => 'reponive_disable tb-group-element tb-group-element-video'
+				'wrap_with_class' => 'reponive_disable tb_group_element tb_group_element_video'
 			),
 			// Background Image
 			array(
@@ -418,15 +444,15 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'type' => 'image',
 				'label' => __('Background Image', 'themify'),
 				'class' => 'xlarge',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image tb-group-element-video',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_group_element_video',
 				'prop' => 'background-image',
 				'selector' => $key,
 				'binding' => array(
 					'empty' => array(
-						'hide' => array('tb-image-options')
+						'hide' => array('tb_image_options')
 					),
 					'not_empty' => array(
-						'show' => array('tb-image-options')
+						'show' => array('tb_image_options')
 					)
 				)
 			),
@@ -435,7 +461,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'type' => 'gradient',
 				'label' => __('Background Gradient', 'themify'),
 				'class' => 'xlarge',
-				'wrap_with_class' => 'tb-group-element tb-group-element-gradient',
+				'wrap_with_class' => 'tb_group_element tb_group_element_gradient',
 				'prop' => 'background-image',
 				'selector' => $key
 			),
@@ -458,33 +484,33 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 					array('value' => 'builder-zoom-scrolling', 'name' => __('Zoom Scrolling', 'themify'), 'disable'=>( !$is_premium || $is_mobile ) ),
 					array('value' => 'builder-zooming', 'name' => __('Zooming', 'themify'), 'disable'=>( !$is_premium || $is_mobile ) )
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-image tb-image-options tb-background_mode',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_options',
 				'binding' => array(
 					'repeat-none' => array(
-						'show' => array('tb-background_zoom')
+						'show' => array('background_zoom')
 					),
 					'builder-parallax-scrolling' => array(
-						'hide' => array('tb-background_attachment', 'tb-background_zoom'),
+						'hide' => array('background_attachment'),
 						'responsive' => array(
-							'disabled' => array( 'tb-background_mode' )
+							'disabled' => array( 'background_repeat' )
 						)
 					),
 					'builder-zoom-scrolling' => array(
-						'hide' => array('tb-background_attachment', 'tb-background_zoom'),
+						'hide' => array('background_attachment'),
 						'responsive' => array(
-							'disabled' => array( 'tb-background_mode' )
+							'disabled' => array( 'background_repeat' )
 						)
 					),
 					'builder-zooming' => array(
-						'hide' => array('tb-background_attachment', 'tb-background_zoom'),
+						'hide' => array('background_attachment'),
 						'responsive' => array(
-							'disabled' => array( 'tb-background_mode' )
+							'disabled' => array( 'background_repeat' )
 						)
 					),
 					'select'=>array(
 						'value' => 'repeat-none',
-						'hide' => array('tb-background_zoom'),
-						'show' => array('tb-background_attachment')
+						'hide' => array('background_zoom'),
+						'show' => array('background_attachment')
 					),
 					'responsive' => array(
 						'disabled' => array( 'builder-parallax-scrolling', 'builder-zoom-scrolling', 'builder-zooming' )
@@ -501,7 +527,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 					array('value' => 'scroll', 'name' => __('Scroll', 'themify')),
 					array('value' => 'fixed', 'name' => __('Fixed', 'themify'))
 				),
-				'wrap_with_class' => 'tb-background_attachment tb-group-element tb-group-element-image tb-image-options',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_options',
 				'prop' => 'background-attachment',
 				'selector' => $key
 			),
@@ -514,7 +540,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'options' => array(
 					array('value' => __('Zoom background image on hover', 'themify'), 'name' => 'zoom')
 				),
-				'wrap_with_class' => 'tb-background_zoom reponive_disable tb-group-element-image tb-group-element'
+				'wrap_with_class' => 'reponive_disable tb_group_element_image tb_group_element'
 			),
 			// Background position
 			array(
@@ -534,7 +560,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 					array('value' => 'center-bottom', 'name' => __('Center Bottom', 'themify'))
 				),
 				'default'=>'center-center',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image tb-image-options',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_options',
 				'prop' => 'background-position',
 				'selector' => $key
 			),
@@ -544,7 +570,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'type' => 'color',
 				'label' => __('Background Color', 'themify'),
 				'class' => 'small',
-				'wrap_with_class' => 'tb-group-element tb-group-element-image tb-group-element-slider tb-group-element-video',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_group_element_slider tb_group_element_video',
 				'prop' => 'background-color',
 				'selector' => $key
 			),
@@ -560,7 +586,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				),
 				'default'=>'color',
 				'option_js' => true,
-				'wrap_with_class' => 'tb-overlay-element',
+				'wrap_with_class' => 'tb_overlay_element',
 				'is_premium' => $is_premium
 			),
 			array(
@@ -568,19 +594,19 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'type' => 'color',
 				'label' => '',
 				'class' => 'small',
-				'wrap_with_class' => 'tb-group-element tb-group-element-color',
+				'wrap_with_class' => 'tb_group_element tb_group_element_color',
 				'is_premium' => $is_premium,
 				'prop' => 'background-color',
-				'selector' => $key.'>.builder_row_cover:before'
+				'selector' => $key.'>.builder_row_cover::before'
 			),
 			array(
 				'id' => 'cover_gradient',
 				'type' => 'gradient',
 				'label' =>'',
-				'wrap_with_class' => 'tb-group-element tb-group-element-cover_gradient',
+				'wrap_with_class' => 'tb_group_element tb_group_element_cover_gradient',
 				'is_premium' => $is_premium,
 				'prop' => 'background-image',
-				'selector' => $key.'>.builder_row_cover:before'
+				'selector' => $key.'>.builder_row_cover::before'
 			),
 			array(
 				'id' => 'cover_color_hover-type',
@@ -592,7 +618,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				),
 				'default' => 'hover_color',
 				'option_js' => true,
-				'wrap_with_class' => 'tb-overlay-element',
+				'wrap_with_class' => 'tb_overlay_element',
 				'is_premium' => $is_premium
 			),
 			array(
@@ -600,20 +626,105 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'type' => 'color',
 				'label' => '',
 				'class' => 'small',
-				'wrap_with_class' => 'tb-group-element tb-group-element-hover_color',
+				'wrap_with_class' => 'tb_group_element tb_group_element_hover_color',
 				'is_premium' => $is_premium,
 				'prop' => 'background-color',
-				'selector' => $key.'>.builder_row_cover:after'
+				'selector' => $key.'>.builder_row_cover::after'
 			),
 			array(
 				'id' => 'cover_gradient_hover',
 				'type' => 'gradient',
 				'label' => '',
-				'wrap_with_class' => 'tb-group-element tb-group-element-hover_gradient',
+				'wrap_with_class' => 'tb_group_element tb_group_element_hover_gradient',
 				'is_premium' => $is_premium,
 				'prop' => 'background-image',
-				'selector' => $key.'>.builder_row_cover:after'
-			)
+				'selector' => $key.'>.builder_row_cover::after'
+			),
+			// Inner Container
+			self::get_seperator( 'separator_cover', $inner ),
+			// Background Image
+			array(
+				'id' => 'background_image_inner',
+				'type' => 'image',
+				'label' => __('Background Image', 'themify'),
+				'class' => 'xlarge',
+				'prop' => 'background-image',
+				'selector' => $inner_selector,
+				'binding' => array(
+					'empty' => array(
+						'hide' => array('tb_image_inner_options')
+					),
+					'not_empty' => array(
+						'show' => array('tb_image_inner_options')
+					)
+				)
+			),
+			// Background repeat
+			array(
+				'id' => 'background_repeat_inner',
+				'label' => '',
+				'type' => 'select',
+				'description'=>__('Background Mode', 'themify'),
+				'prop' => 'background-mode',
+				'selector' => $inner_selector,
+				'meta' => array(
+					array('value' => 'repeat', 'name' => __('Repeat All', 'themify')),
+					array('value' => 'repeat-x', 'name' => __('Repeat Horizontally', 'themify')),
+					array('value' => 'repeat-y', 'name' => __('Repeat Vertically', 'themify')),
+					array('value' => 'repeat-none', 'name' => __('Do not repeat', 'themify')),
+					array('value' => 'fullcover', 'name' => __('Fullcover', 'themify')),
+					array('value' => 'best-fit-image', 'name' => __('Best Fit', 'themify'))
+				),
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_inner_options'
+			),
+			// Background attachment
+			array(
+				'id' => 'background_attachment_inner',
+				'label' => '',
+				'type' => 'select',
+				'description'=>__('Background Attachment', 'themify'),
+				'meta' => array(
+					array('value' => 'scroll', 'name' => __('Scroll', 'themify')),
+					array('value' => 'fixed', 'name' => __('Fixed', 'themify'))
+				),
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_inner_options',
+				'prop' => 'background-attachment',
+				'selector' => $inner_selector
+			),
+			// Background position
+			array(
+				'id' => 'background_position_inner',
+				'label' => '',
+				'type' => 'select',
+				'description'=>__('Background Position', 'themify'),
+				'meta' => array(
+					array('value' => 'left-top', 'name' => __('Left Top', 'themify')),
+					array('value' => 'left-center', 'name' => __('Left Center', 'themify')),
+					array('value' => 'left-bottom', 'name' => __('Left Bottom', 'themify')),
+					array('value' => 'right-top', 'name' => __('Right top', 'themify')),
+					array('value' => 'right-center', 'name' => __('Right Center', 'themify')),
+					array('value' => 'right-bottom', 'name' => __('Right Bottom', 'themify')),
+					array('value' => 'center-top', 'name' => __('Center Top', 'themify')),
+					array('value' => 'center-center', 'name' => __('Center Center', 'themify')),
+					array('value' => 'center-bottom', 'name' => __('Center Bottom', 'themify'))
+				),
+				'default'=>'center-center',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image tb_image_inner_options',
+				'prop' => 'background-position',
+				'selector' => $inner_selector
+			),
+			// Background Color
+			array(
+				'id' => 'background_color_inner',
+				'type' => 'color',
+				'label' => __('Background Color', 'themify'),
+				'class' => 'small',
+				'wrap_with_class' => 'tb_group_element tb_group_element_image',
+				'prop' => 'background-color',
+				'selector' => $inner_selector
+			),
+			self::get_padding( $inner_selector, 'padding_inner' ),
+			self::get_border( $inner_selector, 'border_inner' )
 		);
 		$props = array_reverse($props);
 
@@ -633,7 +744,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'parent' => 'themify_builder',
 				'title' => __('Layouts', 'themify'),
 				'href' => '#',
-				'meta' => array('class' => !$is_premium?'themify_builder_lite':'')
+				'meta' => array('class' => !$is_premium?'tb_lite':'')
 			),
 			// Sub Menu
 			array(
@@ -641,7 +752,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'parent' => 'layout_themify_builder',
 				'title' => __('Load Layout', 'themify'),
 				'href' => '#',
-				'meta' => array('class' =>'themify_builder_load_layout'),
+				'meta' => array('class' =>'tb_load_layout'),
                                 'is_premium'=>$is_premium
 			),
 			array(
@@ -649,7 +760,7 @@ class Themify_Builder_Include extends Themify_Builder_Component_Base{
 				'parent' => 'layout_themify_builder',
 				'title' => __('Save as Layout', 'themify'),
 				'href' => '#',
-				'meta' => array('class' =>'themify_builder_save_layout'),
+				'meta' => array('class' =>'tb_save_layout'),
                                 'is_premium'=>$is_premium
 			),
 		);

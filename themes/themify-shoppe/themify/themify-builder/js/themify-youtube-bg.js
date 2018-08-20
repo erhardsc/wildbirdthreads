@@ -107,7 +107,7 @@ var ytp = ytp || {};
                             YTPlayer.playerEl = YTPlayer.player.getIframe();
                             $(YTPlayer.playerEl).attr("unselectable", "on");
                             $YTPlayer.optimizeDisplay();
-                            $(window).off("tfsmartresize." + playerId).on("tfsmartresize." + playerId, function () {
+                            $(window).off("tfsmartresize." + playerId).on("tfsmartresize.tfVideo tfsmartresize." + playerId, function () {
                                 $YTPlayer.optimizeDisplay();
                             });
 

@@ -17,6 +17,7 @@ class WC_Facebookcommerce_EventsTracker {
   private $pixel;
   private static $isEnabled = true;
   const FB_PRIORITY_HIGH = 2;
+  const FB_PRIORITY_LOW = 11;
 
   public function __construct($user_info) {
     $this->pixel = new WC_Facebookcommerce_Pixel($user_info);
@@ -46,6 +47,8 @@ class WC_Facebookcommerce_EventsTracker {
       array($this, 'inject_gateway_purchase_event'), self::FB_PRIORITY_HIGH);
     add_action('woocommerce_payment_complete',
       array($this, 'inject_purchase_event'), self::FB_PRIORITY_HIGH);
+    add_action('wpcf7_contact_form',
+      array($this, 'inject_lead_event_hook'), self::FB_PRIORITY_LOW);
 
   }
 
@@ -88,7 +91,7 @@ class WC_Facebookcommerce_EventsTracker {
     $products = array_values(array_map(function($item) {
         return wc_get_product($item->ID);
       },
-      $wp_query->get_posts()));
+      $wp_query->posts));
 
     // if any product is a variant, fire the pixel with
     // content_type: product_group
@@ -176,8 +179,8 @@ class WC_Facebookcommerce_EventsTracker {
     if (!self::$isEnabled) {
       return;
     }
-
-    $product = wc_get_product(get_the_ID());
+    global $post;
+    $product = wc_get_product($post->ID);
     $content_type = 'product_group';
     if (!$product) {
       return;
@@ -296,6 +299,8 @@ class WC_Facebookcommerce_EventsTracker {
       return;
     }
 
+    $this->inject_subscribe_event($order_id);
+
     $order = new WC_Order($order_id);
     $content_type = 'product';
     $product_ids = array();
@@ -320,6 +325,33 @@ class WC_Facebookcommerce_EventsTracker {
   }
 
   /**
+   * Triggers Subscribe for payment transaction complete of purchase with
+   * subscription.
+   */
+  public function inject_subscribe_event($order_id) {
+    if (!function_exists("wcs_get_subscriptions_for_order")) {
+      return;
+    }
+
+    $subscription_ids = wcs_get_subscriptions_for_order($order_id);
+    foreach ($subscription_ids as $subscription_id) {
+      $subscription = new WC_Subscription($subscription_id);
+      $this->pixel->inject_event(
+        'Subscribe',
+        array(
+          'sign_up_fee' => $subscription->get_sign_up_fee(),
+          'start' => $subscription->get_date('start'),
+          'trial_end' => $subscription->get_date('trial_end'),
+          'end' => $subscription->get_date('end'),
+          'last_payment' => $subscription->get_date('last_payment'),
+          'next_payment' => $subscription->get_date('next_payment'),
+          'value' => $subscription->get_total(),
+          'currency' => get_woocommerce_currency()
+        ));
+    }
+  }
+
+  /**
    * Triggers Purchase for thank you page for COD, BACS CHEQUE payment
    * which won't invoke woocommerce_payment_complete.
    */
@@ -332,6 +364,22 @@ class WC_Facebookcommerce_EventsTracker {
     $order = new WC_Order($order_id);
     $payment = $order->get_payment_method();
     $this->inject_purchase_event($order_id);
+    $this->inject_subscribe_event($order_id);
+  }
+
+  /** Contact Form 7 Support **/
+  public function inject_lead_event_hook() {
+    add_action('wp_footer', array($this, 'inject_lead_event'), 11);
+  }
+
+  public function inject_lead_event() {
+    if (!is_admin()) {
+      $this->pixel->inject_conditional_event(
+        'Lead',
+        array(),
+        'wpcf7submit',
+        '{ em: event.detail.inputs.filter(ele => ele.name.includes("email"))[0].value }');
+    }
   }
 }
 

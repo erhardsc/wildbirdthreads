@@ -189,10 +189,11 @@
 		},
 
 		controlLogo: function( event, model, currentData ) {
-			var values = themifyParseJSON( currentData, model.getCurrentDevice() );
+			var values = themifyParseJSON( currentData, model.getCurrentDevice() ),
+				defaultMode = themifyParseJSON( currentData, 'desktop' ).mode;
 
 			apiResponsiveControl._colorChange( model, values );
-			apiResponsiveControl._logoMode( model, values );
+			apiResponsiveControl._logoMode( model, values, defaultMode );
 		},
 
 		controlWidth: function( event, model, currentData ) {
@@ -434,34 +435,35 @@
 			});
 		},
 
-		_logoMode: function( model, values ) {
+		_logoMode: function( model, values, mode ) {
 			var $logoMode = $('.logo-modes .logo-mode', model.container),
 				val = values.mode || '',
 				$logoTab = $logoMode.closest( '.customize-control' ),
-				deskValue = 'text';
+				deskValue = mode;
 
 			if ( model.isResponsiveStyling() ) {
-				$logoMode.filter( '[value="image"]' ).parent().hide();
-				$logoMode = $logoMode.filter( ':not([value="image"])' );
+				$('.remove-image, .open-media', model.container).hide();
 				deskValue = $logoTab.data( 'deskValue' ) || deskValue;
-				
-				if( deskValue === 'image' ) {
-					$logoTab.hide();
-					$logoMode.filter( '[value="text"]' ).prop( 'checked', true );
-
-				}
 			} else {
-				$logoMode.filter( '[value="image"]' ).parent().show();
-				$logoTab.is( ':hidden' ) && $logoTab.show();
+				$('.remove-image, .open-media', model.container).show();
+				deskValue = val;
 				$logoTab.data( 'deskValue', val );
+			}
+
+			if (deskValue == 'image') {
+				var width = values.imgwidth || '',
+					height = values.imgheight || '';
+				$logoTab.find('.img-width').val(width);
+				$logoTab.find('.img-height').val(height);
 			}
 
 			$logoMode.each( function() {
 				var $el = $( this ),
-					isActive = $el.val() == val;
+					isActive = $el.val() == deskValue;
 				$el.prop( 'checked', isActive );
 				isActive && $el.trigger( 'click' );
 			} );
+			
 		}
 	};
 
@@ -828,12 +830,13 @@
 						styles[$id]['display'] = 'block';
 
 						var $img = $('img', $selector);
-						if ($img.length > 0) {
-							$img.remove();
-						}
+
 						if (values.mode && 'image' === values.mode) {
 							$selector.find('span').hide();
 							if ('undefined' !== typeof values.src && values.src) {
+								if ($img.length > 0) {
+									$img.remove();
+								}
 								if ($('a', $selector).length > 0) {
 									$selector.find('a').prepend('<img src="' + values.src + '" />');
 									if (values.link) {
@@ -842,13 +845,13 @@
 								} else {
 									$selector.prepend('<img src="' + values.src + '" />');
 								}
-								var imgwidth = values.imgwidth ? values.imgwidth : '',
-										imgheight = values.imgheight ? values.imgheight : '';
-								$selector.find('img').css({
-									'width': imgwidth,
-									'height': imgheight
-								});
 							}
+							var imgwidth = values.imgwidth ? values.imgwidth : '',
+								imgheight = values.imgheight ? values.imgheight : '';
+							$selector.find('img').css({
+								'width': imgwidth,
+								'height': imgheight
+							});
 						} else {
 							$selector.find('span').show();
 							if ($('a', $selector).length > 0) {

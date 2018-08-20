@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name:  Builder Image Pro
-Plugin URI:   http://themify.me/addons/image-pro
-Version:      1.2.4
+Plugin URI:   https://themify.me/addons/image-pro
+Version:      1.2.5 
 Author:       Themify
 Description:  Builder addon to display cool image effects with overlay animation. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
 Text Domain:  builder-image-pro

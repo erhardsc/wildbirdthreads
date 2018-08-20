@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name:  Builder Slider Pro
-Plugin URI:   http://themify.me/addons/slider-pro
-Version:      1.2.4
+Plugin URI:   https://themify.me/addons/slider-pro
+Version:      1.2.5
 Author:       Themify
 Description:  A Builder addon to make animated sliders with many transition effects. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
 Text Domain:  builder-slider-pro

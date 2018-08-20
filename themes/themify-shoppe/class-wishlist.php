@@ -97,8 +97,9 @@ class Themify_Wishlist {
     }
 	
     public static function head(){
-            add_filter('the_content', array(__CLASS__, 'wishlist_result'), 20, 1);
-            add_filter('body_class', array(__CLASS__, 'body_class'), 10, 1);
+		remove_action('the_content', array(__CLASS__, 'wishlist_result'), 20, 1);
+		add_filter('the_content', array(__CLASS__, 'wishlist_result'), 20, 1);
+		add_filter('body_class', array(__CLASS__, 'body_class'), 10, 1);
     }
 
     public static function body_class($classes) {
@@ -109,7 +110,6 @@ class Themify_Wishlist {
     }
 
     public static function wishlist_result($content) {
-        remove_action('the_content', array(__CLASS__, 'wishlist_result'), 20, 1);
         $items = self::get();
         if (!empty($items)) {
             $query_args = array(

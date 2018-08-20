@@ -22,13 +22,13 @@ class Themify_Builder_Component_Column extends Themify_Builder_Component_Base {
 	 */
 	public static function template( $rows, $row, $cols, $col, $builder_id, $order_classes = array(), $echo = false) {
 		$grid_class = trim(str_replace(array('first','last'),array('',''),$col['grid_class']));
-                $print_column_classes = array('tb-column',$grid_class);
+                $print_column_classes = array('module_column tb-column',$grid_class);
                 $is_styling = !empty($col['styling']);
                 if(!Themify_Builder::$frontedit_active){
                     if (isset( $order_classes[ $cols ] ) ){
                         $print_column_classes[] = $order_classes[ $cols ];
                     }
-                    $print_column_classes[] = 'module_column tb_' . $builder_id . '_column';
+                    $print_column_classes[] = 'tb_' . $builder_id . '_column';
                     if (isset($col['column_order'])) {
                         $print_column_classes[] = 'module_column_' . $col['column_order'].' module_column_' . $builder_id . '-' . $row['row_order'] . '-' . $col['column_order'];
                     }
@@ -63,6 +63,7 @@ class Themify_Builder_Component_Column extends Themify_Builder_Component_Base {
                         if ($is_styling) {
                                 $column_order = $row['row_order'] . '-' . $col['column_order'];
                                 do_action('themify_builder_background_styling',$builder_id,$col,$column_order,'column');	
+                                self::show_frame($col['styling']);
                             }
                     ?>
                     <?php if (!empty($col['modules'])):?>
@@ -81,8 +82,6 @@ class Themify_Builder_Component_Column extends Themify_Builder_Component_Base {
                         </div>
                     <?php endif;?>
 		</div>
-		<!-- /.tb-column -->
-		
 		<?php
 		// End Column Render ######
 
@@ -145,6 +144,7 @@ class Themify_Builder_Component_Column extends Themify_Builder_Component_Base {
                         if ($is_styling) {
                             $sub_column_order = $rows . '-' . $cols . '-' . $modules . '-' . $col_key;
                             do_action('themify_builder_background_styling',$builder_id,$sub_col,$sub_column_order,'sub_column');
+                            self::show_frame($sub_col['styling']);
                         }
                    ?>
                     <?php if (!empty($sub_col['modules'])):?>

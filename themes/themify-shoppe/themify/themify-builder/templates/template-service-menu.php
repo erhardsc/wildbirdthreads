@@ -112,7 +112,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module service menu -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php if ($highlight === true && $fields_args['highlight_text_service_menu'] !== '') : ?>
             <div class="tb-highlight-text">
                 <?php echo $fields_args['highlight_text_service_menu']; ?>
@@ -150,15 +150,15 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
                     <?php echo $fields_args['price_service_menu']; ?>
                     
                     <?php if (isset( $fields_args['_render_plain_content'] ) && true === $fields_args['_render_plain_content'] ): ?>
-                    <br />
-                    <?php endif; ?>
+                <br />
+                <?php endif; ?>
                 </div>
             <?php endif; ?>
-
+            
             <?php if ($fields_args['description_service_menu'] !== '') : ?>
                 <div class="tb-menu-description">
                     <?php echo $fields_args['description_service_menu']; ?>
-                </div>
+            </div>
             <?php endif; ?>
         </div><!-- .tb-image-content -->
     </div>

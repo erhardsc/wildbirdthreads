@@ -24,7 +24,7 @@
             onInit: function () {
             }
         },
-        $element = $(element), _container, _canvas, $pointsContainer, $pointsInfos,
+        $element = $(element), $pointsContainer,
                 $pointsInfosContent, $pointColor, $pointPosition, $btnPointDelete, _context, _selPoint,
                 points = new Array();
         this.isInit = false;
@@ -87,25 +87,68 @@
             }
         };
         this._setup = function () {
-            var self = this;
-            _container = $('<div class="themifyGradient"></div>');
-            _canvas = $('<canvas class="canvas" width="' + this.settings.width + '" height="' + this.settings.height + '"></canvas>');
-            _container.append(_canvas);
-            _context = _canvas[0].getContext('2d');
-            $pointsContainer = $('<div class="points"></div>');
-            $pointsContainer.css('width', (this.settings.width) + Math.round(this.settings.point / 2 + 1) + 'px');
-            _container.append($pointsContainer);
-            $pointsInfos = $('<div class="gradient-pointer-info"></div>');
-            $pointsInfos.append('<div class="gradient-pointer-arrow"></div>');
-            _container.append($pointsInfos);
-            $pointsInfosContent = $('<div class="content"></div>');
-            $pointsInfos.append($pointsInfosContent);
-            $pointColor = $('<div class="point-color"><div style="background-color: #00ff00"></div></div>');
-            $pointPosition = $('<input type="text" class="point-position"/>');
-            $btnPointDelete = $('<a href="#" class="gradient-point-delete"><i class="ti-close"></i></a>');
-            $pointsInfosContent.append($pointColor, '<span class="gradient_delimiter"></span>', $pointPosition, '<span class="gradient_percent">%</span>', $btnPointDelete);
-
-            $element.html(_container);
+            var self = this,
+            fragment = document.createDocumentFragment(),
+            pointInfoFragment = document.createDocumentFragment(),
+            _container = document.createElement('div'),
+            pointsInfos = document.createElement('div'),
+            delimiter = document.createElement('span'),
+            _canvas = document.createElement('canvas'),
+            percent = document.createElement('span');
+            
+            $btnPointDelete = document.createElement('a');
+            $pointColor = document.createElement('div');
+            $pointPosition = document.createElement('input');
+            $pointsContainer =  document.createElement('div');
+            $pointsInfosContent = document.createElement('div');
+            
+            _container.setAttribute('class','themifyGradient');
+            _canvas.setAttribute('width',this.settings.width);
+            _canvas.setAttribute('height',this.settings.height);
+            $pointsContainer.style['width'] = this.settings.width + Math.round(this.settings.point / 2 + 1)+'px';
+            $pointsContainer.setAttribute('class','points');
+            $pointColor.setAttribute('class','point-color');
+            delimiter.setAttribute('class','gradient_delimiter');
+            percent.setAttribute('class','gradient_percent');
+            percent.innerHTML = '%';
+            $pointPosition.setAttribute('type', 'text');
+            $pointPosition.setAttribute('class','point-position');
+            $btnPointDelete.setAttribute('class', 'gradient-point-delete');
+            $btnPointDelete.setAttribute('href', '#');
+            pointsInfos.setAttribute('class','gradient-pointer-info');
+            $pointsInfosContent.setAttribute('class','content');
+            $pointColor.insertAdjacentHTML('afterbegin', '<div style="background-color: #00ff00"></div>');
+            $btnPointDelete.insertAdjacentHTML('afterbegin', '<i class="ti-close"></i>');
+            pointsInfos.insertAdjacentHTML('afterbegin', '<div class="gradient-pointer-arrow"></div>');
+            pointInfoFragment.appendChild($pointColor);
+            pointInfoFragment.appendChild(delimiter);
+            pointInfoFragment.appendChild($pointPosition);
+            pointInfoFragment.appendChild(percent);
+            pointInfoFragment.appendChild($btnPointDelete);
+            $pointsInfosContent.appendChild(pointInfoFragment);
+            fragment.appendChild(_canvas);
+            fragment.appendChild($pointsContainer);
+            pointsInfos.appendChild($pointsInfosContent);
+            
+            fragment.appendChild(pointsInfos);
+            _container.appendChild(fragment);
+            
+            pointInfoFragment = delimiter = percent = fragment = null;
+            
+            $element[0].innerHTML = '';
+            $element[0].appendChild(_container);
+            
+            _container = pointsInfos = null;
+            
+            $pointsInfosContent = $($pointsInfosContent);
+            $pointColor = $($pointColor);
+            $pointPosition = $($pointPosition);
+            $btnPointDelete = $($btnPointDelete);
+            $pointsContainer = $($pointsContainer);
+            _context = _canvas.getContext('2d');
+            
+            _canvas = $(_canvas);
+            
             _canvas.off('click').on('click', function (e) {
                 var offset = _canvas.offset(),
                         clickPosition = e.pageX - offset.left;
@@ -169,10 +212,10 @@
                     p = $pointsInfosContent.find('.minicolors'),
                     el = p.find('.minicolors-panel');
             if ((lightbox.offset().left + lightbox.width()) <= el.offset().left + el.width()) {
-                p.addClass('tb-minicolors-right');
+                p.addClass('tb_minicolors_right');
             }
             else {
-                p.removeClass('tb-minicolors-right');
+                p.removeClass('tb_minicolors_right');
             }
         };
         this._initGradientPoints = function () {

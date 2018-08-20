@@ -29,16 +29,18 @@ Template: themify-shoppe
 }
 */
 
+.has-cookie-bar .cart-total-checkout-wrap{
+  margin-bottom: 138px;
+}
+
+
+
 
 /* Pop styles since themify builder styles are not being translated over */
 .themify_builder .module_row_680-0.module_row {
 	background-color: rgba(241,237,230, 1.00) !important;
 	padding-top: 70px;
 	padding-bottom: 60px;
-}
-
-.has-cookie-bar .cart-total-checkout-wrap{
-  margin-bottom: 138px;
 }
 
 .themify_builder .image-680-0-0-0.module-image {

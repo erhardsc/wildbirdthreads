@@ -559,12 +559,16 @@ function themify_get_sample_content_file() {
 	$cache_dir = themify_get_cache_dir();
 	$extract_file = $cache_dir['path'] . 'import.php';
 
+	if ( file_exists( $extract_file ) ) {
+		@unlink( $extract_file );
+	}
+
 	if ( ! function_exists( 'WP_Filesystem' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 	}
 	WP_Filesystem();
-	if( 1 == unzip_file( $resource_file, $extract_file ) ) {
-		$extract_file = $cache_dir['path'] . 'import.php/import.php';
+	if ( 1 == unzip_file( $resource_file, $cache_dir['path'] ) ) {
+		// extract successful
 	}
 
 	$parse_file = file_exists( $extract_file ) ? $extract_file : $resource_file;

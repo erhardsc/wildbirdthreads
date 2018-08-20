@@ -158,16 +158,16 @@ function themify_the_footer_text( $area = 'left', $wrap = true, $block = '', $da
 	}
 	// Prepare variables
 	if('' == $block){
-		if('left' == $area){
-			$block = 'one';
-		} elseif('right' == $area){
-			$block = 'two';
-		}
+            if('left' === $area){
+                $block = 'one';
+            } elseif('right' === $area){
+                $block = 'two';
+            }
 	}
 	$text_block = '';
-	if('one' == $block) {
+	if('one' === $block) {
 		$text_block = '&copy; <a href="' . esc_url( home_url() ) . '">' . esc_html( get_bloginfo( 'name' ) ) . '</a> ' . date( $date_fmt );
-	} elseif('two' == $block) {
+	} elseif('two' === $block) {
 		$text_block = __( 'Powered by <a href="http://wordpress.org">WordPress</a> &bull; <a href="https://themify.me">Themify WordPress Themes</a>', 'themify' );
 	}
 	$key = 'setting-footer_text_'.$area;
@@ -203,8 +203,7 @@ if ( ! function_exists( 'themify_get_author_link' ) ) :
  * @since 1.7.4
  */
 function themify_get_author_link() {
-	$output = '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '" rel="author">' . get_the_author() . '</a></span>';
-	return $output;
+	return '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '" rel="author">' . get_the_author() . '</a></span>';
 }
 endif;
 
@@ -320,9 +319,9 @@ function themify_excerpt( $limit ) {
 	$excerpt = explode(' ', get_the_excerpt(), $limit);
 	if (count($excerpt)>=$limit) {
 		array_pop($excerpt);
-		$excerpt = implode(" ",$excerpt).'...';
+		$excerpt = implode(' ',$excerpt).'...';
 	} else {
-		$excerpt = implode(" ",$excerpt);
+		$excerpt = implode(' ',$excerpt);
 	}
 		$excerpt = preg_replace('`[[^]]*]`','',$excerpt);
 	return $excerpt;
@@ -437,7 +436,7 @@ function themify_get_featured_image_link( $args = array() ) {
 				$link = add_query_arg( array( 'post_in_lightbox' => 1 ), get_permalink() ) . '" class="themify_lightbox';
 			}
 			if( themify_is_query_page() ){
-				if( 'no' == themify_get('post_in_lightbox') ){
+				if( 'no' === themify_get('post_in_lightbox') ){
 					$link = get_permalink();
 				} else {
 					$link = add_query_arg( array( 'post_in_lightbox' => 1 ), get_permalink() ) . '" class="themify_lightbox';
@@ -513,12 +512,12 @@ function themify_post_media( $args = array() ) {
 		themify_after_post_image(); // Hook
 
 	} elseif( $post_image = themify_get_image($themify->auto_featured_image . $themify->image_setting . "w=".$themify->width."&h=".$themify->height ) ){
-		if( $themify->hide_image != 'yes' ) : ?>
+		if( $themify->hide_image !== 'yes' ) : ?>
 
 			<?php themify_before_post_image(); // Hook ?>
 
 			<figure class="<?php echo $class; ?>">
-				<?php if( 'yes' == $themify->unlink_image ): ?>
+				<?php if( 'yes' === $themify->unlink_image ): ?>
 					<?php echo $post_image; ?>
 				<?php else: ?>
 					<a href="<?php echo $use_permalink ? get_permalink() : themify_get_featured_image_link(); ?>"><?php echo $post_image; ?><?php themify_zoom_icon(); ?></a>
@@ -572,7 +571,7 @@ function themify_post_title( $args = array() ) {
 		'before_title' => '',
 		'after_title' => '',
 		'echo' => true,
-		'unlink' => isset( $themify->unlink_title ) && $themify->unlink_title == 'yes' ? true : false,
+		'unlink' => isset( $themify->unlink_title ) && $themify->unlink_title === 'yes',
 	), 'post_title' ) );
 
 	$link_before = $unlink ? '' : '<a href="' . themify_get_featured_image_link() .'">';
@@ -691,9 +690,9 @@ if( ! function_exists( 'themify_loop_get_context' ) ) :
 function themify_loop_get_context( $type = 'post' ) {
 	global $themify;
 
-	if( isset( $themify->is_shortcode ) && $themify->is_shortcode ) {
+	if( !empty( $themify->is_shortcode ) ) {
 		return 'shortcode';
-	} elseif( isset( $themify->is_builder_loop ) && $themify->is_builder_loop ) {
+	} elseif( !empty( $themify->is_builder_loop )  ) {
 		return 'builder';
 	} elseif( is_singular( $type ) ) {
 		return 'single';
@@ -753,7 +752,7 @@ function themify_open_link( $args = array() ) {
 					$lightbox = true;
 				}
 				if( themify_is_query_page() ){
-					if( 'no' == themify_get('post_in_lightbox') ){
+					if( 'no' === themify_get('post_in_lightbox') ){
 						$link = get_permalink();
 					} else {
 						$link = add_query_arg( array( 'post_in_lightbox' => 1 ), get_permalink() );

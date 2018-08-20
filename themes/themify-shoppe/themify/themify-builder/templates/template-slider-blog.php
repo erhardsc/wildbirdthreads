@@ -34,12 +34,13 @@ $temp_terms = explode(',', $terms);
 $new_terms = $new_exclude_terms = array();
 $is_string = false;
 foreach ($temp_terms as $t) {
-    if (!is_numeric($t)) {
+    $is_numeric = is_numeric($t);
+    if (!$is_numeric) {
         $is_string = true;
     }
     if ('' !== $t) {
-        $result_array = ( ( is_numeric($t) && 0 <= $t ) || $is_string ) ? 'new_terms' : 'new_exclude_terms';
-        array_push($$result_array, is_numeric($t) ? abs(trim($t)) : trim($t) );
+        $result_array = ( ( $is_numeric && 0 <= $t ) || $is_string ) ? 'new_terms' : 'new_exclude_terms';
+		array_push( $$result_array, is_numeric( $t ) ? abs( trim( $t ) ) : trim( $t ) );
     }
 }
 $tax_field = ( $is_string ) ? 'slug' : 'id';
@@ -56,6 +57,7 @@ $args = array(
 if ($fields_args['posts_per_page_slider'] !== '') {
     $args['posts_per_page'] = $fields_args['posts_per_page_slider'];
 }
+
 // tax query
 if (!empty($new_terms) && !in_array('0', $new_terms)) {
     $args['tax_query'] = array(

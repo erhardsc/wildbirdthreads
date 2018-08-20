@@ -152,7 +152,6 @@ function themify_enqueue_scripts($page){
 	// Register icon assets for later enqueueing.
 	wp_register_style( 'themify-font-icons-css', THEMIFY_URI . '/fontawesome/css/font-awesome.min.css', array(), THEMIFY_VERSION );
 	wp_register_style( 'themify-icons', themify_enque(THEMIFY_URI . '/themify-icons/themify-icons.css'), array(), THEMIFY_VERSION );
-	wp_register_style( 'google-fonts-admin', themify_https_esc('http://fonts.googleapis.com/css'). '?family=Open+Sans:400,300,600|Montserrat');
 
 	// Settings Panel
 	if( $page === 'toplevel_page_themify' ){
@@ -269,7 +268,12 @@ function themify_is_theme_skin() {
 function themify_enqueue_framework_assets() {
 	// Skin stylesheet
 	if ( $skin = themify_is_theme_skin() ) {
+		$parsed_skin = parse_url( themify_get( 'skin' ), PHP_URL_PATH );
+		$basedir_skin = basename( dirname( $parsed_skin ) );
 		wp_enqueue_style( 'themify-skin', themify_enque(themify_https_esc( $skin )), array( 'theme-style' ), THEMIFY_VERSION );
+		if ( is_rtl() && file_exists( trailingslashit( get_template_directory() ) . 'skins/' . $basedir_skin . '/rtl.css' ) ) {
+			wp_enqueue_style( 'themify-skin-rtl', themify_enque( themify_https_esc( trailingslashit( get_template_directory_uri() ) . 'skins/' . $basedir_skin . '/rtl.css' ) ), array( 'theme-style', 'themify-skin' ), THEMIFY_VERSION );
+		}
 	}
 
 	// User stylesheet
@@ -376,7 +380,6 @@ if( ! function_exists( 'themify_sticky_post_helper' ) ) {
 function themify_font_icons_admin_assets() {
 	wp_enqueue_style( 'themify-font-icons-css' );
 	wp_enqueue_style( 'themify-icons' );
-	wp_enqueue_style( 'google-fonts-admin' );
 	Themify_Icon_Picker::get_instance()->enqueue();
 }
 
@@ -564,7 +567,10 @@ function themify_get_image( $args ) {
 		if ( 0 === $height ) {
 			$args['crop'] = false;
 		}
-	
+
+		/** filter $img_url before it goes off to themify_do_img for processing **/
+		$img_url = apply_filters( 'themify_get_image_before_do_img', $img_url, $width, $height, $args );
+
 		// Set URL to use for final output.
 		$temp = themify_do_img( $img_url, $width, $height, (bool) $args['crop'] );
 		$img_url = $temp['url'];
@@ -966,7 +972,7 @@ function themify_get_theme_names(){
 
 	if ( false === ( $themes_list = get_transient( 'themify_themes_list' ) ) ) {
 
-		$response = wp_remote_get( 'http://themify.me/versions/versions.xml' );
+		$response = wp_remote_get( 'https://themify.me/versions/versions.xml' );
 		if( is_wp_error( $response ) ) {
 			echo '<h4>' . __('Can\'t load versions file.', 'themify') . '</h4><p>' . $response->get_error_code(). '</p>';
 			return false;
@@ -1257,7 +1263,7 @@ if ( ! function_exists( 'themify_lightbox_link_field' ) ) {
 			  		array(
 						'name' 	=> 'lightbox_link',
 						'label' => '',
-						'description' => __('Link Featured Image and Post Title to lightbox image, video or iframe URL <br/>(<a href="https://themify.me/docs/lightbox">learn more</a>)', 'themify'),
+						'description' => __('Link Featured Image and Post Title to lightbox image, video or iframe URL <br/>(<a href="https://themify.me/docs/lightbox" target="_blank">learn more</a>)', 'themify'),
 						'type' 	=> 'textbox',
 						'meta'	=> array(),
 						'before' => '',
@@ -1884,14 +1890,14 @@ if( ! function_exists( 'themify_is_woocommerce_active' ) ) {
 /**
  * Calls is_shop() in a safe manner
  *
+ * @note: this function should not be called before template_redirect,
+ * and also the value must not be cached.
+ *
  * @since 2.9.0
  * @return bool
  */
 function themify_is_shop() {
-	static $is_shop = null;
-	if ( $is_shop === null ) {
-		$is_shop = themify_is_woocommerce_active() && function_exists( 'is_shop' ) && is_shop();
-	}
+	$is_shop = themify_is_woocommerce_active() && function_exists( 'is_shop' ) && is_shop();
 	return $is_shop;
 }
 
@@ -2308,6 +2314,16 @@ function themify_enque( $url, $check = false ) {
 		$is_disabled = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
 		if( ! $is_disabled ) {
 		   $is_disabled =  themify_builder_get( 'setting-script_minification-min','builder_minified' )===null?false:true; 
+		}
+
+		/**
+		 * Disable minification in frontend editor, workaround to fix issues
+		 * with YUI Compressor used in deploy system.
+		 *
+		 * @related #7208
+		 */
+		if ( class_exists( 'Themify_Builder_Model' ) && Themify_Builder_Model::is_front_builder_activate() ) {
+			$is_disabled = true;
 		}
 	}
 	

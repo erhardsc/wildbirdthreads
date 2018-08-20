@@ -19,11 +19,7 @@ class Themify_Icon_Picker_FontAwesome extends Themify_Icon_Picker_Font {
 	 * @return bool
 	 */
 	function is_valid_icon( $name ) {
-		if( substr( $name, 0, 3 ) === 'fa-' ) {
-			return true;
-		}
-
-		return false;
+                return strpos( $name, 'fa-' ) === 0;
 	}
 
 	function get_classname( $icon ) {

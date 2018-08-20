@@ -1,7 +1,7 @@
 /*  
 Theme Name: Themify Shoppe
 Theme URI: https://themify.me/themes/shoppe
-Version: 1.2.7
+Version: 1.2.8
 Description: Created by <a href="http://www.themify.me">Themify</a>.
 Author: Themify
 Author URI: http://www.themify.me
@@ -1675,6 +1675,48 @@ FIXED HEADER
 #headerwrap.fixed-header #sticky_header_logo,
 #headerwrap.fixed-header #fixedheaderheaderwrapsitelogoa {
 	display:block;
+}
+
+/*
+HEADER VIDEO BACKGROUND
+================================================ */
+.big-video-wrap,
+.header-video-wrap{
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	z-index: 0;
+	position: absolute;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+
+video.tf-video{
+	position: absolute;
+	display: block;
+}
+.big-video-image {
+	position: absolute;
+	z-index: -2;
+}
+.header-video-wrap .header-video{
+	width: 100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	height: 100%;
+	transform: translate(-50%,-50%);
+	object-fit: cover;
+}
+
+/* Hide semi-transparent border when video and image are enabled so image isn't visible behind the video */
+#headerwrap[data-fullwidthvideo][data-bg] {
+	border-bottom-width: 0;
+	background-size: cover;
 }
 
 /*

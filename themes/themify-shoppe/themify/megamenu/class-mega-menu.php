@@ -152,6 +152,9 @@ if( ! class_exists('Themify_Mega_Menu_Walker') ) {
 			if ( ! empty( $children_elements[ $item->$id_field ] ) ) {
 				$item->classes[] = 'has-sub-menu';
 			}
+			if ( themify_is_menu_highlighted_link($item->ID) ) {
+				$item->classes[] = 'highlight-link';
+			}
 			if( ( (
 					'taxonomy' == $item->type || 'custom' == $item->type || ( 'post_type' == $item->type && 'page' == $item->object )
 				) && themify_is_mega_menu_type( $item->ID, 'mega' ) )
@@ -231,10 +234,6 @@ if( ! function_exists('themify_theme_mega_get_posts') ) {
 		if( $posts ) {
 			global $post;
 			ob_start();
-			if ($postPerPage != 5) {
-				$temp_width = (100 / intval($postPerPage)) - 2.4;
-				echo '<style>#main-nav .mega-menu-posts .post { width: '.$temp_width.'%; }</style>';
-			}
 			foreach( $posts as $post ) {
 				setup_postdata( $post );
 
@@ -334,6 +333,11 @@ function themify_is_mega_menu_type( $item_id, $type = 'mega' ) {
 	return false;
 }
 
+function themify_is_menu_highlighted_link( $item_id ) {
+			$highlight = get_post_meta( $item_id, '_themify_highlight_link', false );
+	return $highlight;
+}
+
 /**
  * Add the option to enable mega menu to taxonomy menu types
  *
@@ -355,10 +359,7 @@ function themify_menu_mega_option( $item_id, $item, $depth, $args ) {
 	</p>
 
 	<?php
-	if ( $depth > 0 ) {
-		return;
-	}
-	if ( 'taxonomy' == $item->type || 'custom' == $item->type || ( 'post_type' == $item->type && 'page' == $item->object ) ) {
+	if (  $depth <= 0 && ('taxonomy' == $item->type || 'custom' == $item->type || ( 'post_type' == $item->type && 'page' == $item->object )) ) {
 		$is_mega = themify_is_mega_menu_type( $item_id, 'mega' );
 		$is_column = themify_is_mega_menu_type( $item_id, 'column' );
 		$column_layout = get_post_meta( $item_id, '_themify_mega_menu_columns_layout', true );
@@ -391,8 +392,18 @@ function themify_menu_mega_option( $item_id, $item, $depth, $args ) {
 				?>
 			</div>
 		</div>
-		<?php
-	}
+		<?php }
+			$allow_hightlight = apply_filters( 'themify_menu_highlight_link', false);
+			if ($allow_hightlight) :
+			$highlight = get_post_meta( $item_id, '_themify_highlight_link', true );
+		?>
+			<div class="field-tf-highlight description description-thin"><br>
+				<label for="edit-menu-item-tf-highlight-<?php echo esc_attr( $item_id ); ?>">
+					<input type="checkbox" name="menu-item-tf-highlight[<?php echo esc_attr( $item_id ); ?>]" value="1" <?php echo ($highlight ? 'checked="checked"' : ''); ?> id="edit-menu-item-tf-highlight-<?php echo esc_attr( $item_id ) ?>" class="edit-menu-item-tf-highlight themify_field_tf-highlight widefat"> 
+				<?php _e( 'Highlight this link', 'themify' ) ?><br />
+				</label>
+			</div>
+		<?php endif;
 }
 add_action( 'wp_nav_menu_item_custom_fields', 'themify_menu_mega_option', 12, 4 );
 
@@ -406,6 +417,7 @@ function themify_update_mega_menu_option( $menu_id, $menu_item_db_id, $args ) {
 		'_themify_mega_menu_item_tax' => 'menu-item-tf-mega_tax',
 		'_themify_dropdown_columns'   => 'menu-item-tf-dropdown_columns',
 		'_themify_mega_menu_columns_layout'   => 'menu-item-tf-mega-columns-layout',
+		'_themify_highlight_link'   => 'menu-item-tf-highlight',
 	);
 
 	/**
@@ -447,6 +459,7 @@ function themify_remove_mega_menu_meta( $post_id ) {
 		delete_post_meta( $post_id, '_themify_mega_menu_column' );
 		delete_post_meta( $post_id, '_themify_mega_menu_column_sub_item' );
 		delete_post_meta( $post_id, '_themify_mega_menu_dual' );
+		delete_post_meta( $post_id, '_themify_highlight_link' );
 	}
 }
 add_action( 'delete_post', 'themify_remove_mega_menu_meta', 1, 3 );
@@ -540,7 +553,10 @@ class Themify_Widgets_Menu {
 			/* the widget class is stored in the menu item URL field */
 			$widget_class = ltrim( $_POST['menu-item-url'][ $menu_item_db_id ], '#' );
 			if ( isset( $wp_widget_factory->widgets[ $widget_class ] ) ) {
+				
 				$old_instance = get_post_meta( $menu_item_db_id, $this->meta_key, true );
+				if ( ! is_array( $old_instance ) )
+					$old_instance = array();
 				$new_instance = $wp_widget_factory->widgets[ $widget_class ]->update( $new_instance, $old_instance );
 				$this->save_meta( $this->meta_key, $new_instance, $menu_item_db_id );
 			}

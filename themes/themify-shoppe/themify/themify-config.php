@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Theme and Themify Framework Path and URI
- * @since 1.2.2
+ * @since 1.2.2 
  */
 defined( 'THEME_DIR' ) || define( 'THEME_DIR', get_template_directory() );
 defined( 'THEME_URI' ) || define( 'THEME_URI', get_template_directory_uri() );
@@ -51,7 +51,7 @@ function themify_config_init() {
 
 	/* 	Theme Config
  	****************************************************************************/
-	define( 'THEMIFY_VERSION', '3.6.0' );
+	define( 'THEMIFY_VERSION', '4.0.7' ); 
 
 	/* 	Run after update
  	***************************************************************************/

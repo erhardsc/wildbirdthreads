@@ -51,9 +51,9 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                         'mode'=>'sprite',
                         'label' => __('Slide Layout', 'builder-slider-pro'),
                         'options' => array(
-                            array('img' => 'image-left', 'value' => 'bsp-slide-content-left', 'label' => __('Left Aligned', 'builder-slider-pro')),
-                            array('img' => 'image-center', 'value' => 'bsp-slide-content-center', 'label' => __('Center Aligned', 'builder-slider-pro')),
-                            array('img' => 'image-right', 'value' => 'bsp-slide-content-right', 'label' => __('Right Aligned', 'builder-slider-pro')),
+                            array('img' => 'image_left', 'value' => 'bsp-slide-content-left', 'label' => __('Left Aligned', 'builder-slider-pro')),
+                            array('img' => 'image_center', 'value' => 'bsp-slide-content-center', 'label' => __('Center Aligned', 'builder-slider-pro')),
+                            array('img' => 'image_right', 'value' => 'bsp-slide-content-right', 'label' => __('Right Aligned', 'builder-slider-pro')),
                         ),
                         'default' => 'bsp-slide-content-center',
                         'render_callback' => array(
@@ -77,11 +77,11 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                         'option_js' => true,
                         'binding' => array(
                             'Image' => array(
-                                'show' => array('tb-group-element-Image'),
-                                'hide' => array('tb-group-element-Video')),
+                                'show' => array('tb_group_element_Image'),
+                                'hide' => array('tb_group_element_Video')),
                             'Video' => array(
-                                'show' => array('tb-group-element-Video'),
-                                'hide' => array('tb-group-element-Image')),
+                                'show' => array('tb_group_element_Video'),
+                                'hide' => array('tb_group_element_Image')),
                         ),
                     ),
                     array(
@@ -108,7 +108,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                                     'binding' => 'live',
                                     'repeater' => 'builder_slider_pro_slides'
                                 ),
-                                'wrap_with_class' => 'tb-group-element-Image'
+                                'wrap_with_class' => 'tb_group_element_Image'
                             ),
                         )
                     ),
@@ -122,7 +122,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                             'binding' => 'live',
                             'repeater' => 'builder_slider_pro_slides'
                         ),
-                        'wrap_with_class' => 'tb-group-element-Video'
+                        'wrap_with_class' => 'tb_group_element_Video'
                     ),
                     array(
                         'id' => 'builder-ps-slide-image',
@@ -195,7 +195,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
 								'type' => 'select',
 								'label' => __( 'Type', 'builder-slider-pro' ),
 								'options' => array(
-									'custom' => __( 'Custom', 'builder-slider-pro' ),
+									'custom' => __( 'Go to link', 'builder-slider-pro' ),
 									'next_slide' => __( 'Next slide', 'builder-slider-pro' ),
 									'prev_slide' => __( 'Previous slide', 'builder-slider-pro' ),
 								),
@@ -206,11 +206,11 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
 								),
 								'binding' => array(
 									'custom' => array(
-										'show' => array('tb-group-element-action-link')),
+										'show' => array('tb_group_element_action-link')),
 									'next_slide' => array(
-										'hide' => array('tb-group-element-action-link')),
+										'hide' => array('tb_group_element_action-link')),
 									'prev_slide' => array(
-										'hide' => array('tb-group-element-action-link')),
+										'hide' => array('tb_group_element_action-link')),
 								),
 							),
                             array(
@@ -232,7 +232,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                                     'binding' => 'live',
                                     'repeater' => 'builder_slider_pro_slides'
 								),
-								'wrap_with_class' => 'tb-group-element-action-link'
+								'wrap_with_class' => 'tb_group_element_action-link'
                             ),
                         ),
                         'separated' => 'top'
@@ -648,6 +648,34 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                 )
             ),
             array(
+                'id' => 'builder_ps_thumb_size',
+                'type' => 'multi',
+                'label' => __('Thumbnail Size', 'builder-slider-pro'),
+                'fields' => array(
+                    array(
+                        'id' => 'builder_ps_thumb_width',
+                        'type' => 'text',
+                        'label' => __('Thumbnail Width', 'builder-slider-pro'),
+                        'help' => __('px', 'builder-slider-pro'),
+                        'class' => 'medium',
+                        'render_callback' => array(
+                            'binding' => 'live'
+                        )
+                    ),
+                    array(
+                        'id' => 'builder_ps_thumb_height',
+                        'type' => 'text',
+                        'label' => __('Thumbnail Height', 'builder-slider-pro'),
+                        'help' => __('px', 'builder-slider-pro'),
+                        'class' => 'medium',
+                        'render_callback' => array(
+                            'binding' => 'live'
+                        )
+                    ),
+                ),
+                'wrap_with_class' => 'tb_group_element tb_group_element_thumb'
+            ),
+            array(
                 'id' => 'builder_ps_aa',
                 'type' => 'select',
                 'label' => __('Auto advance to next slide', 'builder-slider-pro'),
@@ -662,6 +690,11 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                     '8000' => __('8 Seconds', 'builder-slider-pro'),
                     '9000' => __('9 Seconds', 'builder-slider-pro'),
                     '10000' => __('10 Seconds', 'builder-slider-pro'),
+                    '11000' => __('11 Seconds', 'builder-slider-pro'),
+                    '12000' => __('12 Seconds', 'builder-slider-pro'),
+                    '13000' => __('13 Seconds', 'builder-slider-pro'),
+                    '14000' => __('14 Seconds', 'builder-slider-pro'),
+                    '15000' => __('15 Seconds', 'builder-slider-pro'),
                 ),
                 'separated' => 'top',
                 'render_callback' => array(
@@ -697,7 +730,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                 'id' => 'builder_ps_size',
                 'type' => 'multi',
                 'label' => __('Slider Size', 'builder-slider-pro'),
-                'wrap_with_class' => 'tb-checkbox-element tb-checkbox-element-fullscreen',
+                'wrap_with_class' => 'tb-checkbox_element tb-checkbox_element_fullscreen',
                 'fields' => array(
                     array(
                         'id' => 'builder_ps_width',
@@ -725,7 +758,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                 'id' => 'builder_ps_size_help',
                 'type' => 'help',
                 'label' => false,
-                'wrap_with_class' => 'tb-checkbox-element tb-checkbox-element-fullscreen',
+                'wrap_with_class' => 'tb-checkbox_element tb-checkbox_element_fullscreen',
                 'pushed' => 'pushed',
                 'help' => __('Default slider is auto fullwidth, so it displays the slider fullwidth and scales it proportionally. To achieve custom dimension, enter the slider width and height (e.g. enter width=1160px and height=600px).', 'builder-slider-pro')
             ),
@@ -743,34 +776,6 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
 			        'binding' => 'live'
 		        )
 	        ),
-            array(
-                'id' => 'builder_ps_thumb_size',
-                'type' => 'multi',
-                'label' => __('Thumbnail Size', 'builder-slider-pro'),
-                'fields' => array(
-                    array(
-                        'id' => 'builder_ps_thumb_width',
-                        'type' => 'text',
-                        'label' => __('Thumbnail Width', 'builder-slider-pro'),
-                        'help' => __('px', 'builder-slider-pro'),
-                        'class' => 'medium',
-                        'render_callback' => array(
-                            'binding' => 'live'
-                        )
-                    ),
-                    array(
-                        'id' => 'builder_ps_thumb_height',
-                        'type' => 'text',
-                        'label' => __('Thumbnail Height', 'builder-slider-pro'),
-                        'help' => __('px', 'builder-slider-pro'),
-                        'class' => 'medium',
-                        'render_callback' => array(
-                            'binding' => 'live'
-                        )
-                    ),
-                ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-thumb'
-            ),
             // Additional CSS
             array(
                 'type' => 'separator',
@@ -781,7 +786,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                 'type' => 'text',
                 'label' => __('Additional CSS Class', 'builder-slider-pro'),
                 'class' => 'large exclude-from-reset-field',
-                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'builder-slider-pro')),
+                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'builder-slider-pro')),
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -829,35 +834,23 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
     }
 
     public function get_styling() {
-        return array(
+        $general = array(
             //bacground
             self::get_seperator('image_bacground', __('Background', 'themify'), false),
             self::get_color('.module-pro-slider', 'background_color', __('Background Color', 'themify'), 'background-color'),
             //Title 
-            self::get_seperator('title', __('Title', 'builder-slider-pro'), false),
+            self::get_seperator('title', __('Slide Title', 'builder-slider-pro'), false),
             self::get_font_family('.module-pro-slider .bsp-slide-post-title', 'title_font_family'),
             self::get_font_size('.module-pro-slider .bsp-slide-post-title', 'font_size_title'),
             self::get_line_height('.module-pro-slider .bsp-slide-post-title', 'title_line_height'),
+			self::get_letter_spacing('.module-pro-slider .bsp-slide-post-title', 'letter_spacing_title'),
+			self::get_text_transform('.module-pro-slider .bsp-slide-post-title', 'text_transform_title'),
+			self::get_font_style('.module-pro-slider .bsp-slide-post-title', 'font_style_title'),
             //Text 
-            self::get_seperator('text', __('Text', 'builder-slider-pro')),
+            self::get_seperator('text', __('Slide Text', 'builder-slider-pro')),
             self::get_font_family(array('.module-pro-slider .bsp-slide-excerpt', '.module-pro-slider .bsp-slide-excerpt p'), 'text_font_family'),
             self::get_font_size(array('.module-pro-slider .bsp-slide-excerpt', '.module-pro-slider .bsp-slide-excerpt p'), 'text_font_size'),
             self::get_line_height(array('.module-pro-slider .bsp-slide-excerpt', '.module-pro-slider .bsp-slide-excerpt p'), 'text_line_height'),
-            //Action Button 
-            self::get_seperator('action', __('Action Button', 'builder-slider-pro')),
-            self::get_font_family('.module-pro-slider .bsp-slide-button', 'button_font_family'),
-            self::get_font_size('.module-pro-slider .bsp-slide-button', 'font_size_button'),
-            self::get_line_height('.module-pro-slider .bsp-slide-button', 'line_height_button'),
-            //Timer Bar
-            self::get_seperator('btn', __('Timer Bar', 'builder-slider-pro'), false),
-            self::get_color('.module-pro-slider .bsp-timer-bar', 'timer_bar_background_color', null, 'background-color'),
-            //Arrow
-            self::get_seperator('text', __('Arrow', 'builder-slider-pro')),
-			self::get_color('.module-pro-slider .sp-arrow', 'color', __('Color', 'themify'), 'color'),
-            //Pagination
-            self::get_seperator('text', __('Pagination', 'builder-slider-pro')),
-			self::get_color('.module-pro-slider .sp-button', 'pagination_color', __('Color', 'themify'), 'color'),
-			self::get_color('.module-pro-slider .sp-selected-button', 'pagination_active_color', __('Active Color', 'themify'), 'color'),
             // Padding
             self::get_seperator('padding', __('Padding', 'themify')),
             self::get_padding('.module-pro-slider'),
@@ -868,6 +861,64 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
             self::get_seperator('border', __('Border', 'themify')),
             self::get_border('.module-pro-slider')
         );
+        $controls = array(
+            //Timer Bar
+            self::get_seperator('btn', __('Timer Bar', 'builder-slider-pro'), false),
+            self::get_color('.module-pro-slider .bsp-timer-bar', 'timer_bar_background_color', null, 'background-color'),
+            //Arrow
+            self::get_seperator('text', __('Arrow', 'builder-slider-pro')),
+            self::get_color('.module-pro-slider .sp-arrow', 'b_c_arrow', __('Background Color', 'themify'), 'background-color'),
+			self::get_color('.module-pro-slider .sp-arrow', 'color', __('Color', 'themify'), 'color'),
+			self::get_padding('.module-pro-slider .sp-arrow','p_arrow'),
+            //Pagination
+            self::get_seperator('text', __('Pagination', 'builder-slider-pro')),
+			self::get_color('.module-pro-slider .sp-button', 'pagination_color', __('Color', 'themify'), 'color'),
+			self::get_color('.module-pro-slider .sp-selected-button', 'pagination_active_color', __('Active Color', 'themify'), 'color')
+		);
+        $action_button = array(
+			// Background
+			self::get_seperator('image_background',__('Background', 'themify'),false),
+            self::get_color('.module-pro-slider .bsp-slide-button', 'b_c_b', __('Background Color', 'themify'), 'background-color'),
+			self::get_color('.module-pro-slider .bsp-slide-button', 'c_b', __('Color', 'themify'), 'color'),
+            //Action Button
+			self::get_seperator('font',__('Font', 'builder-slider-pro')),
+            self::get_font_family('.module-pro-slider .bsp-slide-button', 'button_font_family'),
+            self::get_font_size('.module-pro-slider .bsp-slide-button', 'font_size_button'),
+            self::get_line_height('.module-pro-slider .bsp-slide-button', 'line_height_button'),
+			self::get_letter_spacing('.module-pro-slider .bsp-slide-button', 'l_s_b'),
+			self::get_text_transform('.module-pro-slider .bsp-slide-button', 't_t_b'),
+			self::get_font_style('.module-pro-slider .bsp-slide-button', 'f_sy_b','f_b_b'),
+            // Padding
+            self::get_seperator('padding', __('Padding', 'themify')),
+			self::get_padding('.module-pro-slider .bsp-slide-button','p_b'),
+            // Border
+            self::get_seperator('border', __('Border', 'themify')),
+			self::get_border('.module-pro-slider .bsp-slide-button','b_b'),
+            // Margin
+            self::get_seperator('margin', __('Margin', 'themify')),
+            self::get_margin('.module-pro-slider .bsp-slide-button','margin_button')
+		);
+
+		return array(
+			array(
+				'type' => 'tabs',
+				'id' => 'module-styling',
+				'tabs' => array(
+					'general' => array(
+						'label' => __('General', 'themify'),
+						'fields' => $general
+					),
+					'controls' => array(
+						'label' => __('Slider Controls', 'themify'),
+						'fields' => $controls
+					),
+					'action_button' => array(
+						'label' => __('Action Button', 'themify'),
+						'fields' => $action_button
+					)
+				)
+			)
+		);
     }
 
     public function get_animation() {
@@ -915,7 +966,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
         #>
 
         <div class="module module-<?php echo $this->slug; ?> pager-{{data.builder_ps_triggers_position}} pager-type-{{data.builder_ps_triggers_type}} {{data.css_slider_pro}}" data-thumbnail-width="{{ data.builder_ps_thumb_width }}" data-thumbnail-height="{{ data.builder_ps_thumb_height }}" data-autoplay="{{ data.builder_ps_aa }}" data-hover-pause="{{ data.builder_ps_hover_pause }}" data-timer-bar="{{ data.builder_ps_timer }}" data-slider-width="{{ data.builder_ps_fullscreen && data.builder_ps_fullscreen == 'fullscreen' ? '100%' : data.builder_ps_width }}" data-slider-height="{{ data.builder_ps_fullscreen && data.builder_ps_fullscreen == 'fullscreen' ? '100vh' : data.builder_ps_height }}">
-
+            <!--insert-->
             <# if( data.mod_title_slider ) { #>
             <?php echo $module_args['before_title']; ?>
             {{{ data.mod_title_slider }}}
@@ -924,11 +975,12 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
 
             <?php do_action('themify_builder_before_template_content_render'); ?>
 
-            <div class="themify_builder_slider_loader"></div>
+            <div class="tb_slider_loader"></div>
 
             <div class="slider-pro"  style="visibility: hidden;">
                 <div class="sp-slides">
                     <# if( data.builder_slider_pro_slides ) {
+                    var module_id = 'tb_element_cid_'+data.cid;
                     _.each( data.builder_slider_pro_slides, function( slide, index ) {
                     var isEmptySlide = ( '' == slide.builder_ps_slide_type || ( slide.builder_ps_slide_type === 'Image' && '' == slide['builder-ps-bg-image'] ) || ( slide.builder_ps_slide_type === 'Video' && '' == slide.builder_ps_vbg_option ) );
                     var slideBg = '';
@@ -938,23 +990,23 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
                     }
 
                     if( slide['builder-ps-bg-color'] ) {
-                    styles.push( '.sp-slide-' + index + ':before { background-color: ' + themifybuilderapp.Utils.toRGBA( slide['builder-ps-bg-color'] ) + '; }' );
+                    styles.push( '.' + module_id + ' .sp-slide-' + index + ':before { background-color: ' + themifybuilderapp.Utils.toRGBA( slide['builder-ps-bg-color'] ) + '; }' );
                     }
 
                     if( slide.builder_ps_text_color ) {
-                    styles.push( '.module-pro-slider .sp-slide-' + index + ' .bsp-slide-excerpt, .sp-slide-' + index + ' .bsp-slide-excerpt p, .module-pro-slider .sp-slide-' + index + ' .bsp-slide-post-title{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_text_color ) + '; }' );
+                    styles.push( '.' + module_id + '.module-pro-slider .sp-slide-' + index + ' .bsp-slide-excerpt, .' + module_id + ' .sp-slide-' + index + ' .bsp-slide-excerpt p,.' + module_id + '.module-pro-slider .sp-slide-' + index + ' .bsp-slide-post-title{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_text_color ) + '; }' );
                     }
 
                     if( slide.builder_ps_text_link_color ) {
-                    styles.push( '.sp-slide-' + index + ' .bsp-slide-excerpt a, .sp-slide-' + index + ' .bsp-slide-excerpt p a{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_text_link_color ) + '; }' );
+                    styles.push( '.' + module_id + ' .sp-slide-' + index + ' .bsp-slide-excerpt a, .' + module_id + ' .sp-slide-' + index + ' .bsp-slide-excerpt p a{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_text_link_color ) + '; }' );
                     }
 
                     if( slide.builder_ps_button_color ) {
-                    styles.push( '.sp-slide-' + index + ' a.bsp-slide-button{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_button_color ) + '; }' );
+                    styles.push( '.' + module_id + ' .sp-slide-' + index + ' a.bsp-slide-button{ color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_button_color ) + '; }' );
                     }
 
                     if( slide.builder_ps_button_bg ) {
-                    styles.push( '.sp-slide-' + index + ' a.bsp-slide-button{ background-color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_button_bg ) + '; }' );
+                    styles.push( '.' + module_id + ' .sp-slide-' + index + ' a.bsp-slide-button{ background-color: ' + themifybuilderapp.Utils.toRGBA( slide.builder_ps_button_bg ) + '; }' );
                     }
 
                     #>
@@ -1019,7 +1071,7 @@ class TB_Pro_Slider_Module extends Themify_Builder_Component_Module {
             </div><!-- .slider-pro -->
 
             <?php do_action('themify_builder_after_template_content_render'); ?>
-            <style type="text/css">{{{ styles.join('') }}}</style>
+            <style type="text/css">{{{  styles.join('') }}}</style>
         </div>
         <?php
     }

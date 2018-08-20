@@ -11,37 +11,49 @@
             var tabs = $(this);
             if (!tabs.data('tabify')) {
                 tabs.data('tabify', true);
-                $('ul.tab-nav:first li:first', tabs).addClass('current');
-                var tabLinks = $('ul.tab-nav:first li', tabs);
-                $(tabLinks).click(function () {
+                $('.tab-nav:first li', tabs).click(function () {  
                     $(this).addClass('current').attr('aria-expanded', 'true').siblings().removeClass('current').attr('aria-expanded', 'false');
-                    $('ul.tab-nav:first', tabs).siblings('.tab-content').attr('aria-hidden', 'true');
+                    $(this).closest('.module-tab').find('.tab-nav-current-active').text($(this).text());
                     var activeTab = $(this).find('a').attr('href');
-                    $(activeTab).attr('aria-hidden', 'false').trigger('resize');
-                    $('body').trigger('tb_tabs_switch', [activeTab, tabs]);
-                    Themify.triggerEvent(window, 'resize');
+                    $(activeTab,tabs).attr('aria-hidden', 'false').trigger('resize').siblings('.tab-content').attr('aria-hidden', 'true');
+                    Themify.body.trigger('tb_tabs_switch', [activeTab, tabs]);
+                    if(!Themify.is_builder_active){
+                        Themify.triggerEvent(window, 'resize');
+                    }
+					$(this).closest('.module-tab').find('.tab-nav-current-active').click();
                     return false;
-                });
-                $('ul.tab-nav:first', tabs).siblings('.tab-content').find('a[href^="#tab-"]').on('click', function (event) {
-                    event.preventDefault();
+                }).first().addClass('current');
+                $('.tab-nav:first', tabs).siblings('.tab-content').find('a[href^="#tab-"]').on('click', function (e) {
+                  
+                    e.preventDefault();
                     var dest = $(this).prop('hash').replace('#tab-', ''),
-                            contentID = $('ul.tab-nav:first', tabs).siblings('.tab-content').eq(dest - 1).prop('id');
+                        contentID = $('.tab-nav:first', tabs).siblings('.tab-content').eq(dest - 1).prop('id');
                     if ($('a[href^="#' + contentID + '"]').length > 0) {
                         $('a[href^="#' + contentID + '"]').trigger('click');
                     }
                 });
+                $('.tab-nav-current-active', tabs).click( function () {
+                	var $this = $(this);
+					if( $this.hasClass('clicked') ){
+						$this.removeClass('clicked')
+					}else{
+
+
+						if ( ( $this.position().left > 0 ) && ( $this.position().left <= $this.closest('.module-tab').width() / 2 ) ) {
+							$this.next('.tab-nav').removeClass('right-align').addClass('center-align');
+						}else if(  $this.position().left > $this.closest('.module-tab').width() / 2  ){
+							$this.next('.tab-nav').removeClass('center-align').addClass('right-align');
+						}else{
+							$this.next('.tab-nav').removeClass('center-align right-align')
+						}
+						$this.addClass('clicked');
+
+					}
+				});
+
             }
         });
     };
-	$( 'body' ).on( 'click', 'a[href*="#tab-"]', function(e) {
-		var hash = this.hash;
-		if ( $( this ).closest( '.tab-nav' ).length )
-			return;
-		if ( $( hash ).length && $( hash ).closest( '.module-tab' ).length ) {
-			$( hash ).closest( '.module-tab' ).find( '.tab-nav a[href="' + hash +'"]' ).click();
-			e.preventDefault();
-		}
-	} );
 
     // $('img.photo',this).themifyBuilderImagesLoaded(myFunction)
     // execute a callback when all images have loaded.
@@ -178,6 +190,7 @@ var ThemifyBuilderModuleJs;
         wow: null,
         is_mobile: null,
         fwvideos: [], // make it accessible to public
+		resized:0,
         init: function () {
             this.bindEvents();
         },
@@ -193,6 +206,12 @@ var ThemifyBuilderModuleJs;
                 $(window).load(this.window_load);
             }
 
+            if ( window.onresize ){
+            	this.window_resize()
+			}else{
+            	$(window).resize( this.window_resize );
+			}
+
         },
         /**
          * Executed on jQuery's document.ready() event.
@@ -206,6 +225,7 @@ var ThemifyBuilderModuleJs;
                     self.setupFullwidthRows();
                 });
             }
+            self.tabsClick();
             if (!Themify.is_builder_active) {
                 if (tbLocalScript.fullwidth_support === '') {
                     self.setupFullwidthRows();
@@ -215,21 +235,22 @@ var ThemifyBuilderModuleJs;
                     self.wowInit();
                 }
                 self.carousel();
-                self.InitScrollHighlight();
-                self.accordion();
                 self.touchdropdown();
                 self.tabs();
                 self.onInfScr();
                 self.menuModuleMobileStuff();
                 self.playFocusedVideoBg();
-                self.showcaseGallery();
-                self.galleryPagination();
-				self.readMoreLink();
+                self.alertModule();
                 $(window).on('hashchange', this.tabsDeepLink);
             }
             $(window).on('tfsmartresize.tblink', function () {
                 self.menuModuleMobileStuff(true);
             });
+            self.InitScrollHighlight();
+            self.showcaseGallery();
+			self.sliderGallery();
+            self.readMoreLink();
+            self.galleryPagination();
         },
         /**
          * Executed on JavaScript 'load' window event.
@@ -249,7 +270,30 @@ var ThemifyBuilderModuleJs;
                 }
                 self.tabsDeepLink();
             }
+            else{
+                self.wowApplyOnHover();
+            }
+            self.accordion();
         },
+		window_resize:function () {
+
+			clearTimeout(this.resized);
+			this.resized = setTimeout(function () {
+
+				var windowWidth = window.innerWidth;
+
+				$('.module-tab[data-tab-breakpoint]').each(function () {
+					if( parseInt( $(this).attr('data-tab-breakpoint') ) >= windowWidth ){
+						$(this).addClass('responsive-tab-style');
+					}else{
+						$(this).removeClass('responsive-tab-style');
+						$(this).find('.tab-nav').removeClass('right-align center-align');
+					}
+				});
+
+
+			}, 200);
+		},
         wowInit: function (callback, resync) {
             var self = ThemifyBuilderModuleJs;
             if (resync && self.wow) {
@@ -263,8 +307,9 @@ var ThemifyBuilderModuleJs;
                     if (typeof self.wow.__proto__ !== 'undefined') {
                         self.wow.__proto__.applyStyle = function (box, hidden) {
                             var duration = box.getAttribute('data-wow-duration'),
-                                    iteration = box.getAttribute('class').match(/animation_effect_repeat_(\d*)/),
-                                    delay = box.getAttribute('class').match(/animation_effect_delay_((?:\d+\.?\d*|\.\d+))/);
+                                cl = box.getAttribute('class'),
+                                iteration = cl.match(/animation_effect_repeat_(\d*)/),
+                                delay = cl.match(/animation_effect_delay_((?:\d+\.?\d*|\.\d+))/);
                             if (null !== delay) {
                                 delay = delay[1] + 's';
                             }
@@ -278,51 +323,50 @@ var ThemifyBuilderModuleJs;
                         };
                     }
                 }
-
-				function wowApplyOnHover() {
-					$(document).on({
-						mouseenter: function () {
-							var hoverAnimation = this.getAttribute('class').match(/hover-animation-(\w*)/),
-								animation = this.style.animationName;
-							if( '' != animation ){
-								$(this).css('animation-name','').removeClass( animation );
-							}
-							$(this).addClass('animated ' + hoverAnimation[1]);
-						},
-						mouseleave: function () {
-							var animation = this.getAttribute('class').match(/hover-animation-(\w*)/);
-							$(this).removeClass('animated ' + animation[1]);
-						}
-					}, '.hover-wow')
-				}
-
-                if (themify_vars.TB) {
-                    ThemifyBuilderModuleJs.animationOnScroll(resync);
-                }
+                self.animationOnScroll(resync);
                 self.wow = new WOW({
                     live: true,
                     offset: typeof tbLocalScript !== 'undefined' && tbLocalScript ? parseInt(tbLocalScript.animationOffset) : 100
                 });
                 self.wow.init();
                 wowDuckPunch();
-				wowApplyOnHover();
+                if(!Themify.is_builder_active){
+                    self.wowApplyOnHover();
+                }
             }
             callback = callback || wowCallback;
 			if (typeof tbLocalScript !== 'undefined'
 				&& typeof tbLocalScript.animationInviewSelectors !== 'undefined'
 				&& ( $(tbLocalScript.animationInviewSelectors.toString()).length || $('.hover-wow').length ) ){
-				if (!ThemifyBuilderModuleJs.wow) {
+				if (!self.wow) {
                     Themify.LoadCss(tbLocalScript.builder_url + '/css/animate.min.css', null, null, null, function () {
                         Themify.LoadAsync(themify_vars.url + '/js/wow.min.js', callback, null, null, function () {
-                            return (ThemifyBuilderModuleJs.wow);
+                            return (self.wow);
                         });
                     });
                 }
                 else {
                     callback();
-                    return (ThemifyBuilderModuleJs.wow);
+                    return (self.wow);
                 }
             }
+        },
+        wowApplyOnHover:function () {
+                var is_working = false;
+                $(document).off('mouseenter','.hover-wow').on('mouseenter','.hover-wow',function () {
+                    if(is_working===false){
+                        is_working = true;
+                        var hoverAnimation = this.getAttribute('class').match(/hover-animation-(\w*)/),
+                            animation = this.style.animationName;
+                        if( '' != animation ){
+                            $(this).css('animation-name','').removeClass( animation );
+                        }
+                        $(this).one('animationend webkitAnimationEnd',function(){
+                            $(this).removeClass('animated ' + hoverAnimation[1]);
+                            is_working = false;
+                        }).addClass('animated ' + hoverAnimation[1]);
+                    }
+                });
         },
         setupFullwidthRows: function (el) {
             if (tbLocalScript.fullwidth_support !== '') {
@@ -374,7 +418,7 @@ var ThemifyBuilderModuleJs;
             function getCurrentValue(prop) {
                 var val = $this.data(type + '-' + prop);
                 if (val === undefined) {
-                    if (type !== 'destop') {
+                    if (type !== 'desktop') {
                         for (var i = arr.indexOf(type) + 1; i < 4; ++i) {
                             if (arr[i] !== undefined) {
                                 val = $this.data(arr[i] + '-' + prop);
@@ -395,7 +439,7 @@ var ThemifyBuilderModuleJs;
                         right = outherWith - left - row.outerWidth();
 
                 // set to zero when zoom is enabled
-                if (row.hasClass('themify_builder_zooming_50') || row.hasClass('themify_builder_zooming_75')) {
+                if (row.hasClass('tb_zooming_50') || row.hasClass('tb_zooming_75')) {
                     left = 0;
                     right = 0;
                 }
@@ -477,7 +521,7 @@ var ThemifyBuilderModuleJs;
                 var i = -1 !== l.indexOf("?") ? "&" : "?";
                 return r = l.split("#"), l = r[0] + i + e + "=" + n, 'undefined' !== typeof r[1] && null !== r[1] && (l += "#" + r[1]), l
             }
-            return l
+            return l;
         },
         onInfScr: function () {
             var self = ThemifyBuilderModuleJs;
@@ -498,36 +542,36 @@ var ThemifyBuilderModuleJs;
             });
         },
         InitScrollHighlight: function () {
-            if (tbLocalScript.loadScrollHighlight == true && $('div[class*=tb_section-]').length > 0) {
-                Themify.LoadAsync(tbLocalScript.builder_url + '/js/themify.scroll-highlight.js', this.ScrollHighlightCallBack, null, null, function () {
+            if (tbLocalScript.loadScrollHighlight == true && (Themify.is_builder_active || $('div[class*=tb_section-]').length > 0)) {
+                Themify.LoadAsync(tbLocalScript.builder_url + '/js/themify.scroll-highlight.js', function(){
+					Themify.body.themifyScrollHighlight( tbScrollHighlight ? tbScrollHighlight : {});
+					
+                    }, null, null, function () {
                     return('undefined' !== typeof $.fn.themifyScrollHighlight);
                 });
             }
         },
-        ScrollHighlightCallBack: function () {
-            $('body').themifyScrollHighlight( tbScrollHighlight ? tbScrollHighlight : {});
-        },
         // Row, col, sub-col, sub_row: Background Slider
         backgroundSlider: function ($bgSlider) {
-            $bgSlider = $bgSlider || $('.row-slider, .column-slider, .subrow-slider');
+            $bgSlider = $bgSlider || $('.row-slider, .column-slider, .subrow-slider, .sub_column-slider');
             function callBack() {
                 var themifySectionVars = {
-                    autoplay: tbLocalScript.backgroundSlider.autoplay,
-                    speed: tbLocalScript.backgroundSlider.speed
+                    autoplay: tbLocalScript.backgroundSlider.autoplay
                 };
                 // Parse injected vars
                 themifySectionVars.autoplay = parseInt(themifySectionVars.autoplay, 10);
                 if (themifySectionVars.autoplay <= 10) {
                     themifySectionVars.autoplay *= 1000;
                 }
-                themifySectionVars.speed = parseInt(themifySectionVars.speed, 10);
                 // Initialize slider
                 $bgSlider.each(function () {
                     var $thisRowSlider = $(this),
-                            $backel = $thisRowSlider.parent(),
-                            rsImages = [],
-                            rsImagesAlt = [],
-                            bgMode = $thisRowSlider.data('bgmode');
+						$backel = $thisRowSlider.parent(),
+						rsImages = [],
+						rsImagesAlt = [],
+						imagesCount,
+						bgMode = $thisRowSlider.data('bgmode'),
+						speed = $thisRowSlider.data('sliderspeed');
 
                     // Initialize images array with URLs
                     $thisRowSlider.find('li').each(function () {
@@ -535,9 +579,11 @@ var ThemifyBuilderModuleJs;
                         rsImagesAlt.push($(this).attr('data-bg-alt'));
                     });
 
-                    // Call backstretch for the first time
+					imagesCount = ( rsImages.length > 4 ) ? 4 : rsImages.length;
+
+					// Call backstretch for the first time
                     $backel.tb_backstretch(rsImages, {
-                        speed: themifySectionVars.speed,
+                        speed: parseInt( speed ),
                         duration: themifySectionVars.autoplay,
                         mode: bgMode
                     });
@@ -562,7 +608,57 @@ var ThemifyBuilderModuleJs;
                         thisBGS.show($(this).data('index'));
                     });
 
-                    // Add alt tag
+                    // Active Dot
+                    var sliderDots = $thisRowSlider.find( '.row-slider-slides > li' ),
+                            currentClass = 'row-slider-dot-active';
+
+                    if( sliderDots.length ) {
+						sliderDots.eq( 0 ).addClass( currentClass );
+
+						$thisRowSlider.parent().on( 'tb_backstretch.show', function( e, data ) {
+							var currentDot = sliderDots.eq( thisBGS.index );
+
+							if( currentDot.length ) {
+								sliderDots.removeClass( currentClass );
+								currentDot.addClass( currentClass );
+							}
+						} );
+                    }
+
+                    if ($thisRowSlider.attr('data-bgmode') === 'kenburns-effect') {
+
+						var lastIndex,
+							kenburnsActive = 0,
+							createKenburnIndex = function(){
+								return (kenburnsActive + 1 > imagesCount) ? kenburnsActive = 1 : ++kenburnsActive;
+							};
+
+						$thisRowSlider.parent().on('tb_backstretch.before', function (e, data) {
+
+							setTimeout(function () {
+
+								if (lastIndex != data.index) {
+									var $img = data.$wrap.find('img').last();
+									$img.addClass('kenburns-effect' + createKenburnIndex());
+									lastIndex = data.index;
+								}
+
+							}, 50);
+
+						}).on('tb_backstretch.after', function (e, data) {
+
+							var $img = data.$wrap.find('img').last(),
+									expr = /kenburns-effect\d/;
+							if (!expr.test($img.attr('class'))) {
+									$img.addClass('kenburns-effect' + createKenburnIndex());
+									lastIndex = data.index;
+							}
+
+						});
+
+                    }
+
+					// Add alt tag
                     $(window).on('backstretch.before backstretch.show', function (e, instance, index) {
                         // Needed for col styling icon and row grid menu to be above row and sub-row top bars.
                         if (Themify.is_builder_active) {
@@ -590,62 +686,79 @@ var ThemifyBuilderModuleJs;
         },
         // Row: Fullwidth video background
         fullwidthVideo: function ($videoElm, parent) {
-            if (this._isMobile()) {
-                $('.big-video-wrap').remove();
-                return;
+            if ($videoElm) {
+                $videoElm = $videoElm.data('fullwidthvideo')? $videoElm : $('[data-fullwidthvideo]', $videoElm);
             }
-            if (!parent) {
-                parent = $('.themify_builder');
-            }
+
+            parent = parent || $('.themify_builder');
             $videoElm = $videoElm || $('[data-fullwidthvideo]', parent);
+
             if ($videoElm.length > 0) {
+                
                 var self = this,
-                        $is_youtube = [],
-                        $is_vimeo = [],
-                        $is_local = [];
+                    is_mobile = this._isMobile(),
+                    is_youtube = [],
+                    is_vimeo = [],
+                    is_local = [];
 
                 $videoElm.each(function (i) {
                     var $video = $(this),
-                            url = $video.data('fullwidthvideo');
+                        url = $video.data('fullwidthvideo');
                     if (!url) {
                         return true;
                     }
+
                     $video.children('.big-video-wrap').remove();
                     var provider = Themify.parseVideo(url);
                     if (provider.type === 'youtube') {
-                        if (provider.id) {
-                            $is_youtube.push({'el': $video, 'id': provider.id});
+                        if (!is_mobile && provider.id) {
+                            is_youtube.push({'el': $video, 'id': provider.id});
                         }
-                    }
+                    } 
                     else if (provider.type === 'vimeo') {
-                        if (provider.id) {
-                            $is_vimeo.push({'el': $video, 'id': provider.id});
+                        if (!is_mobile && provider.id) {
+                            is_vimeo.push({'el': $video, 'id': provider.id});
                         }
-                    }
-                    else {
-                        $is_local.push($video);
+                    } else {
+                        is_local.push($video);
                     }
                 });
-
-                if ($is_local.length > 0) {
-                    Themify.LoadAsync(
-                            themify_vars.url + '/js/bigvideo.js',
-                            function () {
-                                self.fullwidthVideoCallBack($is_local);
-                            },
-                            null,
-                            null,
-                            function () {
-                                return ('undefined' !== typeof $.fn.ThemifyBgVideo);
-                            }
-                    );
+                $videoElm = null;
+                if (is_local.length > 0) {
+                    if(!is_mobile){
+                        Themify.LoadAsync(
+                                themify_vars.url + '/js/bigvideo.js',
+                                function () {
+                                    self.fullwidthVideoCallBack(is_local);
+                                    is_local = null;
+                                },
+                                null,
+                                null,
+                                function () {
+                                    return ('undefined' !== typeof $.fn.ThemifyBgVideo);
+                                }
+                        );
+                    }
+                    else{
+                        for(var i=0,len=is_local.length;i<len;++i){
+                           var videoURL = is_local[i].data('fullwidthvideo'),
+                               id = Themify.hash(i + '-' + videoURL),
+                               videoEl = '<div class="big-video-wrap">'
+                                   +'<video class="video-'+id +'" muted="true" autoplay="true" loop="true" playsinline="true" >' +
+                                   '<source src="' + videoURL + '" type="video/mp4">' +
+                                   '</video></div>';
+                           is_local[i][0].insertAdjacentHTML('afterbegin',videoEl);
+                       }
+                       is_local = null;
+                   }
                 }
 
-                if ($is_vimeo.length > 0) {
+                if (is_vimeo.length > 0) {
                     Themify.LoadAsync(
                             tbLocalScript.builder_url + '/js/froogaloop.min.js',
                             function () {
-                                self.fullwidthVimeoCallBack($is_vimeo);
+                                self.fullwidthVimeoCallBack(is_vimeo);
+                                is_vimeo = null;
                             },
                             null,
                             null,
@@ -654,12 +767,13 @@ var ThemifyBuilderModuleJs;
                             }
                     );
                 }
-                if ($is_youtube.length > 0) {
+                if (is_youtube.length > 0) {
                     if (!$.fn.ThemifyYTBPlayer) {
                         Themify.LoadAsync(
                                 tbLocalScript.builder_url + '/js/themify-youtube-bg.js',
                                 function () {
-                                    self.fullwidthYoutobeCallBack($is_youtube);
+                                    self.fullwidthYoutobeCallBack(is_youtube);
+                                    is_youtube = null;
                                 },
                                 null,
                                 null,
@@ -667,14 +781,11 @@ var ThemifyBuilderModuleJs;
                                     return typeof $.fn.ThemifyYTBPlayer !== 'undefined';
                                 }
                         );
+                    } else {
+                        self.fullwidthYoutobeCallBack(is_youtube);
                     }
-                    else {
-                        self.fullwidthYoutobeCallBack($is_youtube);
-                    }
-
                 }
             }
-
         },
         videoParams: function ($el) {
             var mute = 'mute' === $el.data('mutevideo'),
@@ -684,25 +795,23 @@ var ThemifyBuilderModuleJs;
         },
         // Row: Fullwidth video background
         fullwidthVideoCallBack: function ($videos) {
-            var self = ThemifyBuilderModuleJs;
-            $.each($videos, function (i, elm) {
-                var $video = $(elm),
-                        videoURL = $video.data('fullwidthvideo'),
-                        hash = Themify.hash(i + '-' + videoURL);
-                var params = self.videoParams($video);
-                $video.ThemifyBgVideo({
+            for(var i=0,len=$videos.length;i<len;++i){
+                  var videoURL = $videos[i].data('fullwidthvideo'),
+                    hash = Themify.hash(i + '-' + videoURL);
+                var params = ThemifyBuilderModuleJs.videoParams($videos[i]);
+                $videos[i].ThemifyBgVideo({
                     url: videoURL,
                     doLoop: params.loop,
                     ambient: params.mute,
                     id: hash
                 });
-            });
+            }
         },
         fullwidthYoutobeCallBack: function ($videos) {
             var self = this;
             if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
                 Themify.LoadAsync(
-                        "//www.youtube.com/iframe_api",
+                        '//www.youtube.com/iframe_api',
                         function () {
                             window.onYouTubePlayerAPIReady = _each;
                         },
@@ -717,59 +826,72 @@ var ThemifyBuilderModuleJs;
                 _each();
             }
             function _each() {
-                $.each($videos, function (i, elm) {
-                    var params = self.videoParams(elm.el);
-                    elm.el.ThemifyYTBPlayer({
-                        videoID: elm.id,
-                        id: elm.el.closest('.themify_builder_content').data('postid') + '_' + i,
+                for(var i=0,len=$videos.length;i<len;++i){
+                    var params = self.videoParams($videos[i].el);
+                    $videos[i].el.ThemifyYTBPlayer({
+                        videoID: $videos[i].id,
+                        id: $videos[i].el.closest('.themify_builder_content').data('postid') + '_' + i,
                         mute: params.mute,
                         loop: params.loop,
                         mobileFallbackImage: tbLocalScript.videoPoster
                     });
-                });
+                }
             }
 
         },
         fullwidthVimeoCallBack: function ($videos) {
             var self = this;
-            if (typeof self.fullwidthVimeoCallBack.counter === 'undefined') {
+             if (typeof self.fullwidthVimeoCallBack.counter === 'undefined') {
                 self.fullwidthVimeoCallBack.counter = 1;
-                $(window).on('tfsmartresize', function (e) {
-                    if (!e.isTrigger) {
-                        $.each($videos, function (i, elm) {
-                            VimeoVideo(elm.el.children('.themify-video-vmieo'));
-                        });
+                $(window).on('tfsmartresize.tfVideo', function vimeoResize(e) {console.log(e.isTrigger);
+                    for(var i in $videos){
+                        if($videos[i]){
+                            var ch = $videos[i].el.children('.themify-video-vmieo');
+                            if(ch.length>0){
+                                VimeoVideo(ch);
+                            }
+                            else{
+                                delete $videos[i];
+                                $videos[i] = null;
+                            }
+                        }
+                    }
+                    if($videos.length===0){
+                        self.fullwidthVimeoCallBack.counter = 'undefined';
+                        $(window).off('tfsmartresize.tfVideo', vimeoResize);
                     }
                 });
 
             }
             function VimeoVideo($video) {
                 var width = $video.outerWidth(true),
-                        height = $video.outerHeight(true),
-                        pHeight = Math.ceil(width / 1.7), //1.7 ~ 16/9 aspectratio
-                        iframe = $video.children('iframe');
+                    height = $video.outerHeight(true),
+                    pHeight = Math.ceil(width / 1.7), //1.7 ~ 16/9 aspectratio
+                    iframe = $video.find('iframe');
                 iframe.width(width).height(pHeight).css({
                     left: 0,
                     top: (height - pHeight) / 2
                 });
             }
-            $.each($videos, function (i, elm) {
-                var $video = elm.el,
-                        params = self.videoParams($video),
-                        $iframe = $('<div class="big-video-wrap themify-video-vmieo"><iframe id="themify-vimeo-' + i + '" src="//player.vimeo.com/video/' + elm.id + '?api=1&portrait=0&title=0&title=0&badge=0&player_id=themify-vimeo-' + i + '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>');
-                $video.prepend($iframe);
-                var player = $f($('#themify-vimeo-' + i)[0]);
-                player.addEvent('ready', function () {
-                    player.api('setLoop', params.loop);
-                    player.api('setVolume', params.mute ? 0 : 1);
-                    player.api('fullscreen', 0);
-                    if ($video.children('.big-video-wrap').length > 1) {
-                        $video.children('.big-video-wrap').slice(1).remove();
-                    }
-                    VimeoVideo($iframe);
-                    player.api('play');
-                });
-            });
+            for(var i in $videos){
+                 if($videos[i]){
+                 var $video = $videos[i].el,
+                    params = self.videoParams($video);
+                    $video[0].insertAdjacentHTML('afterbegin','<div class="big-video-wrap themify-video-vmieo"><iframe id="themify-vimeo-' + i + '" src="https://player.vimeo.com/video/' + $videos[i].id + '?api=1&portrait=0&title=0&badge=0&player_id=themify-vimeo-' + i + '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>');
+                    var player = $f($('#themify-vimeo-' + i)[0]);
+                    player.addEvent('ready', function () {
+                        player.api('setLoop', params.loop);
+                        player.api('setVolume', params.mute ? 0 : 1);
+                        player.api('fullscreen', 0);
+                        var v = $video.children('.themify-video-vmieo');
+                        if (v.length > 1) {
+                            v.slice(1).remove();
+                        }
+                        VimeoVideo(v);
+                        player.api('play');
+                    });
+                 }
+            }
         },
         playFocusedVideoBg: function () {
             var self = ThemifyBuilderModuleJs,
@@ -906,39 +1028,46 @@ var ThemifyBuilderModuleJs;
 			}
 		},
         carouselCalback: function (el) {
-            var self = this;
-            $('.themify_builder_slider', el).each(function () {
-                if ($(this).closest('.caroufredsel_wrapper').length > 0) {
-                    return;
-                }
-                var $this = $(this),
-                        img_length = $this.find('img').length,
-                        $height = (typeof $this.data('height') === 'undefined') ? 'variable' : $this.data('height'),
+            var self = this,
+                isMobile = function() {
+                        return tbLocalScript && tbLocalScript.breakpoints
+                        ? tbLocalScript.breakpoints.mobile > window.innerWidth : self._isMobile();
+                };
+
+                $( '.themify_builder_slider', el ).each( function () {
+                    if( $( this ).closest( '.caroufredsel_wrapper' ).length > 0 ) {
+                        return;
+                    }
+
+                var $this = $( this ),
+                        img_length = $this.find( 'img' ).length,
+                        $height = ( typeof $this.data( 'height' ) === 'undefined' ) ? 'variable' : $this.data( 'height' ),
+                        visibleItems = isMobile() && $this.data( 'mob-visible' ) ? $this.data( 'mob-visible' ) : { min: 1, max: $this.data( 'visible' ) },
                         $args = {
                             responsive: true,
                             circular: true,
                             infinite: true,
                             height: $height,
                             items: {
-                                visible: {min: 1, max: $this.data('visible')},
+                                visible: visibleItems,
                                 width: 150,
                                 height: 'variable'
                             },
-                            onCreate: function (items) {
+                            onCreate: function( items ) {
                                 $('.themify_builder_slider_wrap').css({'visibility': 'visible', 'height': 'auto'});
                                 $this.trigger('updateSizes');
-                                $('.themify_builder_slider_loader').remove();
+                                $('.tb_slider_loader').remove();
 
-                                if ( 'auto' === $height ) {
-									ThemifyBuilderModuleJs.sliderAutoHeight( $this );
-								}
+                                if( 'auto' === $height ) {
+                                    ThemifyBuilderModuleJs.sliderAutoHeight( $this );
+                                }
                             }
                         };
 
                 // fix the one slide problem
                 if ($this.children().length < 2) {
                     $('.themify_builder_slider_wrap').css({'visibility': 'visible', 'height': 'auto'});
-                    $('.themify_builder_slider_loader').remove();
+                    $('.tb_slider_loader').remove();
                     $(window).resize();
                     return;
                 }
@@ -949,7 +1078,7 @@ var ThemifyBuilderModuleJs;
                         play: true,
                         timeoutDuration: parseInt($this.data('auto-scroll') * 1000)
                     };
-                }
+                } 
                 else if ($this.data('effect') !== 'continuously' && (typeof $this.data('auto-scroll') !== 'undefined' || parseInt($this.data('auto-scroll')) === 0)) {
                     $args.auto = false;
                 }
@@ -999,9 +1128,12 @@ var ThemifyBuilderModuleJs;
                     $args.infinite = false;
                 }
 
-
+				if( $this.data( 'sync' ) ) {
+					$args.synchronise = [$this.data( 'sync' ), false];
+				}
+				
                 if (img_length > 0) {
-                    $this.imagesLoaded().always(function () {
+                    $this.imagesLoaded(function () {
                         self.carouselInitSwipe($this, $args);
                     });
                 } else {
@@ -1011,13 +1143,23 @@ var ThemifyBuilderModuleJs;
                 $('.mejs__video').on('resize', function (e) {
                     e.stopPropagation();
                 });
+
                 $(window).on('tfsmartresize', function () {
                     $('.mejs__video').resize();
                     $this.trigger('updateSizes');
 
-					if ( 'auto' === $height ) {
-						ThemifyBuilderModuleJs.sliderAutoHeight($this);
-					}
+                    if ( 'auto' === $height ) {
+                            ThemifyBuilderModuleJs.sliderAutoHeight($this);
+                    }
+
+                    var vMode;
+                    if( ( ! vMode || vMode === 'desktop' ) && $this.data( 'mob-visible' ) && isMobile() ) {
+                        vMode = 'mobile';
+                        $this.trigger( 'finish' ).trigger( 'configuration', { items: { visible: $this.data( 'mob-visible' ) } } );
+                    } else if( ! vMode || vMode === 'mobile' ) {
+                        vMode = 'desktop';
+                        $this.trigger( 'finish' ).trigger( 'configuration', { items: { visible: $this.data( 'visible' ) } } );
+                    }
                 });
 
             });
@@ -1039,7 +1181,7 @@ var ThemifyBuilderModuleJs;
             });
 
 			if( $args.auto && $args.auto.timeoutDuration === 0 && $args.next && $args.prev && $args.scroll ) {
-				$( 'body' ).on( 'click', [$args.next, $args.prev].join(), function() {
+				Themify.body.on( 'click', [$args.next, $args.prev].join(), function() {
 					$this.trigger( 'finish' );
 					$this.trigger( $( this ).is( $args.next ) ? 'next' : 'prev', [{duration: $args.scroll.duration * 2}]);
 				} );
@@ -1058,8 +1200,8 @@ var ThemifyBuilderModuleJs;
             if (el) {
                 self.backgroundSlider(el.find('.row-slider, .column-slider, .subrow-slider'));
             } else {
-				self.backgroundSlider();
-			}
+                self.backgroundSlider();
+            }
             var zoomScrolling = null,
                     zoom = null,
                     bgscrolling = null;
@@ -1077,18 +1219,20 @@ var ThemifyBuilderModuleJs;
                     if (el.hasClass('builder-parallax-scrolling')) {
                         bgscrolling = bgscrolling.add(el);
                     }
-
                 }
             }
             if (zoomScrolling === null || zoomScrolling.length > 0) {
                 self.backgroundZoom(zoomScrolling);
             }
+            zoomScrolling = null;
             if (zoom === null || zoom.length > 0) {
                 self.backgroundZooming(zoom);
             }
+            zoom = null;
             if (tbLocalScript.isParallaxActive && (bgscrolling === null || bgscrolling.length > 0)) {
                 self.backgroundScrolling(bgscrolling);
             }
+            bgscrolling = null;
             self.menuModuleMobileStuff(false, el);
             if (tbLocalScript.isAnimationActive) {
                 self.wowInit(null, el);
@@ -1112,12 +1256,17 @@ var ThemifyBuilderModuleJs;
             }
         },
         accordion: function () {
-            $('body').off('click.themify', '.accordion-title').on('click.themify', '.accordion-title', function (e) {
+            Themify.body.off('click.themify', '.accordion-title').on('click.themify', '.accordion-title', function (e) {
                 var $this = $(this),
                         $panel = $this.next(),
                         $item = $this.closest('li'),
+						$parent = $item.parent(),
                         type = $this.closest('.module.module-accordion').data('behavior'),
                         def = $item.toggleClass('current').siblings().removeClass('current'); /* keep "current" classname for backward compatibility */
+
+				if( ! $parent.hasClass( 'tf-init-accordion' ) ) {
+					$parent.addClass( 'tf-init-accordion' );
+				}
 
                 if ('accordion' === type) {
                     def.find('.accordion-content').slideUp().attr('aria-expanded', 'false').closest('li').removeClass('builder-accordion-active');
@@ -1148,11 +1297,11 @@ var ThemifyBuilderModuleJs;
                     $panel.attr('aria-expanded', 'true');
 
                     // Show map marker properly in the center when tab is opened
-                    var existing_maps = $($panel).hasClass('default-closed') ? $panel.find(".themify_map") : false;
-                    if (existing_maps.length) {
-                        for (var i = 0; i < existing_maps.length; i++) { // use loop for multiple map instances in one tab
+                    var existing_maps = $panel.hasClass('default-closed') ? $panel.find('.themify_map') : false;
+                    if (existing_maps && existing_maps.length>0) {
+                        for (var i = 0; i < existing_maps.length; ++i) { // use loop for multiple map instances in one tab
                             var current_map = $(existing_maps[i]).data('gmap_object'); // get the existing map object from saved in node
-                            if (typeof current_map.already_centered !== "undefined" && !current_map.already_centered)
+                            if (typeof current_map.already_centered !== 'undefined' && !current_map.already_centered)
                                 current_map.already_centered = false;
                             if (!current_map.already_centered) { // prevent recentering
                                 var currCenter = current_map.getCenter();
@@ -1164,18 +1313,41 @@ var ThemifyBuilderModuleJs;
                     }
                 }
 
-                $('body').trigger('tb_accordion_switch', [$panel]);
-                Themify.triggerEvent(window, 'resize');
+                Themify.body.trigger('tb_accordion_switch', [$panel]);
+                if (!Themify.is_builder_active) {
+                    Themify.triggerEvent(window, 'resize');
+                }
                 e.preventDefault();
             });
         },
         tabs: function (el) {
-            $('.module.module-tab', el).each(function () {
-                var $height = $('.tab-nav:first', this).outerHeight();
+            var items= $('.module.module-tab', el);
+            if(el && el.hasClass('module-tab')){
+                items = items.add(el);
+            }
+            items.each(function () {
+                var tab = $('.tab-nav:first', this),
+                    $height = tab.outerHeight();
                 if ($height > 200) {
-                    $(".tab-nav:first", this).siblings(".tab-content").css('min-height', $height);
+                    tab.siblings('.tab-content').css('min-height', $height);
                 }
-            }).tabify();
+                if (Themify.is_builder_active) {
+                    $(this).data('tabify',false);
+                }
+                $(this).tabify();
+            });
+        },
+        tabsClick:function(){
+                Themify.body.off( 'click' ,'a[href*="#tab-"]').on( 'click','a[href*="#tab-"]',  function(e) {
+                    
+                    if ( $( this ).closest( '.tab-nav' ).length )
+                                    return;
+                    var hash = $( this.hash);
+                    if ( hash.length && hash.closest( '.module-tab' ).length ) {
+                        hash.closest( '.module-tab' ).find( '.tab-nav a[href="' + this.hash +'"]' ).click();
+                        e.preventDefault();
+                    }
+            } );  
         },
         tabsDeepLink: function () {
             var hash = decodeURIComponent( window.location.hash );
@@ -1210,7 +1382,7 @@ var ThemifyBuilderModuleJs;
                         var rect = this.getBoundingClientRect();
                         if (rect.bottom >= 0 && rect.top <= height) {
                             var zoom = 140 - (rect.top + this.offsetHeight) / (height + this.offsetHeight) * 40;
-                            $(this).css('background-size', zoom + '%')
+                            $(this).css('background-size', zoom + '%');
                         }
                     });
                 }
@@ -1237,17 +1409,18 @@ var ThemifyBuilderModuleJs;
             }
 
             function doZooming(e) {
-                var zoomingClass = 'active-zooming';
+                 
                 if (e !== null) {
                     el = $(selector);
                 }
                 if (el.length > 0) {
                     var height = window.innerHeight,
                             clientHeight = document.documentElement.clientHeight,
-                            bclientHeight = document.body.clientHeight;
+                            bclientHeight = document.body.clientHeight,
+                            zoomingClass = 'active-zooming';
 
                     el.each(function () {
-                        if (!$(this).hasClass(zoomingClass) && isZoomingElementInViewport(this, height, clientHeight, bclientHeight)) {
+                        if (!this.classList.contains(zoomingClass) && isZoomingElementInViewport(this, height, clientHeight, bclientHeight)) {
                             $(this).addClass(zoomingClass);
                         }
                     });
@@ -1267,13 +1440,12 @@ var ThemifyBuilderModuleJs;
             function doAnimation() {
                 resync = resync || false;
                 // On scrolling animation
-                var $body = $('body');
-                if ($body.find(selectors).length > 0) {
-                    if (!$body.hasClass('animation-running')) {
-                        $body.addClass('animation-running');
+                if ($(selectors).length > 0) {
+                    if (!Themify.body.hasClass('animation-running')) {
+                        Themify.body.addClass('animation-running');
                     }
-                } else if ($body.hasClass('animation-running')) {
-                    $body.removeClass('animation-running');
+                } else if (Themify.body.hasClass('animation-running')) {
+                    Themify.body.removeClass('animation-running');
                 }
 
                 // Core Builder Animation
@@ -1293,7 +1465,7 @@ var ThemifyBuilderModuleJs;
                     }
                 }
             }
-            $('body').addClass('animation-on');
+           Themify.body.addClass('animation-on');
             doAnimation();
         },
         setupBodyClasses: function () {
@@ -1315,7 +1487,7 @@ var ThemifyBuilderModuleJs;
                     }
                 });
             }
-            $('body').addClass(classes.join(' '));
+            Themify.body.addClass(classes.join(' '));
         },
         _isTouch: function () {
             var isTouchDevice = this._isMobile(),
@@ -1329,7 +1501,7 @@ var ThemifyBuilderModuleJs;
             return this.is_mobile;
         },
         galleryPagination: function () {
-            $('body').delegate('.builder_gallery_nav a', 'click', function (e) {
+           Themify.body.on('click','.builder_gallery_nav a',  function (e) {
                 e.preventDefault();
                 var $wrap = $(this).closest('.module-gallery');
                 $.ajax({
@@ -1350,18 +1522,35 @@ var ThemifyBuilderModuleJs;
             });
         },
         showcaseGallery: function () {
-            $('body').on('click', '.module-gallery.layout-showcase a', function (e) {
+            Themify.body.on('click', '.module-gallery.layout-showcase a', function (e) {
                 e.preventDefault();
                 var showcaseContainer = $(this).closest('.gallery').find('.gallery-showcase-image'),
                         titleBox = showcaseContainer.find('.gallery-showcase-title');
 
                 titleBox.css({opacity: '', visibility: ''});
                 showcaseContainer.find('img').prop('src', $(this).data('image'));
-                showcaseContainer.find('#gallery-showcase-title').html($(this).prop('title'));
-                showcaseContainer.find('#gallery-showcase-caption').html($(this).data('caption'));
+                showcaseContainer.find('.gallery-showcase-title').html($(this).prop('title'));
+                showcaseContainer.find('.gallery-showcase-caption').html($(this).data('caption'));
                 !$.trim(titleBox.text()) && titleBox.css({opacity: 0, visibility: 'hidden'});
             });
         },
+		sliderGallery: function() {
+			var galleries = $( '.module-gallery.layout-slider' );
+
+			galleries.length && galleries.each( function() {
+				var slides = $( '.themify_builder_slider', this );
+
+				if( slides.length === 2 ) {
+					var items = slides.eq(1).children( 'li' );
+					items.on( 'click', function( e ) {
+						e.preventDefault();
+
+						slides.eq(0).trigger( 'slideTo', items.index( this ) );
+
+					} );
+				}
+			} );
+		},
         parallaxScrollingInit: function (el, is_live) {
             if (tbLocalScript.isParallaxScrollActive) {
                 if (el) {
@@ -1413,18 +1602,16 @@ var ThemifyBuilderModuleJs;
 
             if (menuModules.length > 0) {
                 var windowWidth = window.innerWidth,
-                        $body = $('body'),
                         closeMenu = function () {
                             $('.mobile-menu-module')
                                     .empty()
                                     .prop('class', 'mobile-menu-module')
                                     .next('.body-overlay')
                                     .removeClass('body-overlay-on');
-                            $body.removeClass('menu-module-left menu-module-right');
+                            Themify.body.removeClass('menu-module-left menu-module-right');
                         };
-                if ($body.find('.mobile-menu-module').length === 0) {
-                    $body
-                            .append('<div class="themify_builder"><div class="mobile-menu-module"></div><div class="body-overlay"></div></div>');
+                if ($('.mobile-menu-module').length === 0) {
+                    Themify.body[0].insertAdjacentHTML('beforeend','<div class="themify_builder"><div class="mobile-menu-module"></div><div class="body-overlay"></div></div>');
                 }
 
                 menuModules.each(function () {
@@ -1451,13 +1638,13 @@ var ThemifyBuilderModuleJs;
 
                                 $this.next('style').html(styleContent);
                             }
-                            $this.append('<a class="menu-module-burger"></a>');
+                            $this[0].insertAdjacentHTML('beforeend','<a class="menu-module-burger"></a>');
                         }
                     }
                 });
 
                 if (!is_resize && !Themify.is_builder_active) {
-                    $body.on('click', '.menu-module-burger', function (e) {
+                    Themify.body.on('click', '.menu-module-burger', function (e) {
                         e.preventDefault();
 
                         var menuDirection = $(this).parent().data('menu-direction'),
@@ -1467,8 +1654,10 @@ var ThemifyBuilderModuleJs;
 
                         customStyle = customStyle ? customStyle[0] : '';
                         menuContent = menuContent.removeAttr('id').removeAttr('class').addClass('nav');
-                        menuContent.find('ul').prev('a').append('<i class="toggle-menu fa fa-angle-down"></i>');
-                        $body.addClass('menu-module-' + menuDirection);
+                        if( menuContent.find('ul').length ){
+                            menuContent.find('ul').prev('a').append('<i class="toggle-menu fa fa-angle-down"></i>');
+                        }
+                        Themify.body.addClass('menu-module-' + menuDirection);
                         $('.mobile-menu-module').addClass(menuDirection + ' ' + menuUI + ' ' + customStyle)
                                 .html(menuContent)
                                 .prepend('<a class="menu-close"></a>')
@@ -1491,7 +1680,7 @@ var ThemifyBuilderModuleJs;
                             })
                             .on('click', '.mobile-menu-module > .menu-close, .mobile-menu-module + .body-overlay', closeMenu);
                 } else {
-                    closeMenu()
+                    closeMenu();
                 }
             }
         },
@@ -1519,9 +1708,9 @@ var ThemifyBuilderModuleJs;
 						set_custom_width = is_desktop || prev === 'desktop';
 
 					if (is_desktop) {
-						$( 'body' ).removeClass( 'tb_responsive_mode' );
+						Themify.body.removeClass( 'tb_responsive_mode' );
 					} else {
-						$( 'body' ).addClass( 'tb_responsive_mode' );
+						Themify.body.addClass( 'tb_responsive_mode' );
 					}
 
 					for (var i = 0, len = rows.length; i < len; ++i) {
@@ -1599,23 +1788,110 @@ var ThemifyBuilderModuleJs;
 				}
 			} );
         },
-		readMoreLink: function(){
-			if( $( '.module-text-more' ).length ){
-				$( '.module-text-more' ).parent().nextAll().each(function(){
-					$( this ).toggle(0);
-				});
-				$( '.module-text-more' ).on('click',function(e){
-					e.preventDefault();
-					$( this ).parent().nextAll().each(function(){
-						$( this ).toggle( 400 );
-					});
-					$( this ).parent().remove();
-				})
-			}
-		}
-    };
+        readMoreLink: function () {
+            Themify.body.on('click','.module-text-more', function (e) {
+                e.preventDefault();
+                if($(this).hasClass('tb-text-more-link')) {
+                    $(this).removeClass("tb-text-more-link").addClass("tb-text-less-link");
+                    $(this).parent().find('.more-text').slideDown(400, "linear");
 
-    // Initialize
-    ThemifyBuilderModuleJs.init();
+                } else {
+                    $(this).removeClass("tb-text-less-link").addClass("tb-text-more-link");
+                    $(this).parent().find('.more-text').slideUp(400, "linear");
+                }
+            } );
+        },
+        alertModule: function(el) {
+                var alertBox = $( '.module.module-alert',el );
+                if(el && el.hasClass('module-alert')){
+                    alertBox = alertBox.add(el);
+                }
+                var isNumber = function( number ) {
+                                return number && ! isNaN( parseFloat( number ) ) && isFinite( number );
+                        },
+                        setCookie = function( name, value, days ) {
+                                var date = new Date();
+                                date.setTime( date.getTime() + ( days * 24 * 60 * 60 * 1000 ) );
 
-}(jQuery, window, document));
+                                document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/";
+                        },
+                        getCookie = function( name ) {
+                                name = name + '=';
+                                var ca = document.cookie.split( ';' );
+
+                                for( var i = 0,len=ca.length; i < len; ++i ) {
+                                        var c = ca[i];
+                                        while( c.charAt(0) === ' ' ) {
+                                                c = c.substring( 1 );
+                                        }
+                                        if ( c.indexOf( name ) === 0)  {
+                                                return c.substring( name.length, c.length );
+                                        }
+                                }
+                                return '';
+                        },
+                        closeAlert = function( $button ) {
+
+                                var buttonMessage, alertBox,
+                                        speed = 400;
+
+                                if( $button ) {
+                                        buttonMessage = $button.data( 'alert-message' );
+                                        alertBox = buttonMessage ? $button.closest( '.alert-inner' ) : $button.closest( '.module-alert' );
+                                } else {
+                                        alertBox = $( this );
+                                }
+
+                                alertBox.slideUp( speed, function() {
+                                        if( buttonMessage && ! alertBox.parent().find( '.alert-message' ).length ) {
+                                                var message = $( '<div class="alert-message" />' ).html( buttonMessage + '<div class="alert-close ti-close" />' );
+
+                                                alertBox.parent().html( message );
+                                                message.hide().slideDown( speed );
+                                        }
+                                } );
+                        };
+
+                alertBox.each( function() {
+                        var $this = $( this ),
+                                currentViews = 0,
+                                currentLimit = 0,
+                                alertID = $this.data( 'module-id' ),
+                                alertLimit = $this.data( 'alert-limit' ),
+                                autoClose = $this.data( 'auto-close' );
+
+                        if( isNumber( alertLimit ) ) {
+                                var cookies = getCookie( alertID );
+
+                                if( cookies ) {
+                                        cookies = cookies.split( '|' );
+
+                                        if( cookies[1] ) {
+                                                currentLimit = + cookies[0];
+                                                currentViews = + cookies[1];
+                                        }
+                                }
+
+                                if( alertLimit !== currentLimit ) {
+                                        setCookie( alertID, alertLimit + '|1', 365 );
+                                } else if( alertLimit > currentViews ) {
+                                        ++currentViews;
+                                        setCookie( alertID, alertLimit + '|' + currentViews, 365 );
+                                }
+                        }
+
+                        if(isNumber( autoClose ) ) {
+                                setTimeout( closeAlert.bind( this ), autoClose * 1000 );
+                        }
+                } );
+                Themify.body.on( 'click', '.module-alert .alert-close', function( e ) {
+                        e.preventDefault();
+                        closeAlert( $( this ) );
+                } );
+        }
+	};
+
+	// Initialize
+	ThemifyBuilderModuleJs.init();
+
+}( jQuery, window, document ) );

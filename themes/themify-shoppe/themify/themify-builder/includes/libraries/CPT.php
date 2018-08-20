@@ -223,7 +223,7 @@ class CPT {
 		);
 
 		// if the variable is not a reserved variable
-		if(!in_array($var, $reserved)) {
+		if(!in_array($var, $reserved,true)) {
 
 			// write variable and value
 			$this->$var = $value;
@@ -290,10 +290,10 @@ class CPT {
 		$name = strtolower($name);
 
 		// replace spaces with hyphen
-		$name = str_replace(" ", "-", $name);
+		$name = str_replace(' ', '-', $name);
 
 		// replace underscore with hyphen
-		$name = str_replace("_", "-", $name);
+		$name = str_replace('_', '-', $name);
 
 		return $name;
 	}
@@ -779,10 +779,9 @@ class CPT {
 	function add_taxonomy_filters() {
 
 		global $typenow;
-		global $wp_query;
 
 		// must set this to the post type you want the filter(s) displayed on
-		if($typenow == $this->post_type_name){
+		if($typenow === $this->post_type_name){
 
 			// if custom filters are defined use those
 			if(is_array($this->filters)) {
@@ -960,7 +959,7 @@ class CPT {
 	function sort_columns($vars) {
 
 		// cycle through all sortable columns submitted by the user
-		foreach($this->sortable as $column => $values) {
+		foreach($this->sortable as $values) {
 
 			// retrieve the meta key from the user submitted array of sortable columns
 			$meta_key = $values[0];
@@ -969,12 +968,12 @@ class CPT {
 			if(taxonomy_exists($meta_key)) {
 
 				// sort by taxonomy
-				$key = "taxonomy";
+				$key = 'taxonomy';
 
 			} else {
 
 				// else by meta key
-				$key = "meta_key";
+				$key = 'meta_key';
 
 			}
 
@@ -992,7 +991,7 @@ class CPT {
 			}
 
 			// Check if we're viewing this post type
-			if (isset($vars['post_type']) && $this->post_type_name == $vars['post_type']) {
+			if (isset($vars['post_type']) && $this->post_type_name === $vars['post_type']) {
 
 				// find the meta key we want to order posts by
 				if (isset($vars['orderby']) && $meta_key == $vars['orderby']) {
@@ -1023,18 +1022,18 @@ class CPT {
 		@param  mixed  $icon        a string of the name of the icon to use
 	*/
 
-	function menu_icon($icon = "dashicons-admin-page") {
+	function menu_icon($icon = 'dashicons-admin-page') {
 
 		// WP 3.8 changed the icon system to use an icon font.
 		// http://melchoyce.github.io/dashicons/
 
-		if(is_string($icon) && stripos($icon, "dashicons") !== FALSE) {
+		if(is_string($icon) && stripos($icon, 'dashicons') !== FALSE) {
 
-			$this->options["menu_icon"] = $icon;
+			$this->options['menu_icon'] = $icon;
 
 		} else {
 			// set a default
-			$this->options["menu_icon"] = "dashicons-admin-page";
+			$this->options['menu_icon'] = 'dashicons-admin-page';
 
 		}
 	}

@@ -7,7 +7,7 @@ $builder_id = (int) $builder_id;
     <?php
     foreach ($builder_output as $key => $row) {
         if (!empty($row)) {
-            if (isset($row['row_order'])) {
+            if (!isset($row['row_order'])) {
                 $row['row_order'] = $key; // Fix issue with import content has same row_order number
             }
             Themify_Builder_Component_Row::template($key, $row, $builder_id, true);

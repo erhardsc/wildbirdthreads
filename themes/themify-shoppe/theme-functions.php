@@ -1060,6 +1060,11 @@ function themify_theme_header_design_options() {
 			'title' => __( 'Header Boxed Content', 'themify' ),
 		),
 		array(
+			'value' => 'header-bottom',
+			'img'   => 'images/layout-icons/header-bottom.png',
+			'title' => __( 'Header Bottom', 'themify' ),
+		),
+		array(
 			'value' => 'none', 
 			'img'   => 'images/layout-icons/none.png',
 			'title' => __( 'No Header ', 'themify' ),

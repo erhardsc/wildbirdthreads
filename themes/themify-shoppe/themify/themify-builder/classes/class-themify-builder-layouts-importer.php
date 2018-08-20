@@ -85,16 +85,14 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 	 */
 	function import_start( $file ) {
 		if ( ! is_file($file) ) {
-			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />';
-			echo __( 'The file does not exist, please try again.', 'themify' ) . '</p>';
+			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />', __( 'The file does not exist, please try again.', 'themify' ), '</p>';
 			die();
 		}
 
 		$import_data = $this->parse( $file );
 
 		if ( is_wp_error( $import_data ) ) {
-			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />';
-			echo esc_html( $import_data->get_error_message() ) . '</p>';
+			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />',esc_html( $import_data->get_error_message() ),'</p>';
 			die();
 		}
 
@@ -140,10 +138,9 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 		$file = wp_import_handle_upload();
 
 		if ( isset( $file['error'] ) ) {
-			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />';
-			echo esc_html( $file['error'] ) . '</p>';
+			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />',esc_html( $file['error'] ) , '</p>';
 			return false;
-		} else if ( ! file_exists( $file['file'] ) ) {
+		} elseif ( ! file_exists( $file['file'] ) ) {
 			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />';
 			printf( __( 'The export file could not be found at <code>%s</code>. It is likely that this was caused by a permissions problem.', 'themify' ), esc_html( $file['file'] ) );
 			echo '</p>';
@@ -153,8 +150,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 		$this->id = (int) $file['id'];
 		$import_data = $this->parse( $file['file'] );
 		if ( is_wp_error( $import_data ) ) {
-			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />';
-			echo esc_html( $import_data->get_error_message() ) . '</p>';
+			echo '<p><strong>' . __( 'Sorry, there has been an error.', 'themify' ) . '</strong><br />',esc_html( $import_data->get_error_message() ) , '</p>';
 			return false;
 		}
 
@@ -183,10 +179,11 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			$this->authors = $import_data['authors'];
 		// no author information, grab it from the posts
 		} else {
+                        $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 			foreach ( $import_data['posts'] as $post ) {
 				$login = sanitize_user( $post['post_author'], true );
 				if ( empty( $login ) ) {
-					if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
+					if ( $debug ) {
 						printf( __( 'Failed to import author %s. Their posts will be attributed to the current user.', 'themify' ), esc_html( $post['post_author'] ) );
 						echo '<br />';
 					}
@@ -212,11 +209,11 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			return;
 
 		$create_users = $this->allow_create_users();
-
+                $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 		foreach ( (array) $_POST['imported_authors'] as $i => $old_login ) {
 			// Multisite adds strtolower to sanitize_user. Need to sanitize here to stop breakage in process_posts.
 			$santized_old_login = sanitize_user( $old_login, true );
-			$old_id = isset( $this->authors[$old_login]['author_id'] ) ? intval($this->authors[$old_login]['author_id']) : false;
+			$old_id = isset( $this->authors[$old_login]['author_id'] ) ? (int)$this->authors[$old_login]['author_id'] : false;
 
 			if ( ! empty( $_POST['user_map'][$i] ) ) {
 				$user = get_userdata( intval($_POST['user_map'][$i]) );
@@ -228,7 +225,8 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			} else if ( $create_users ) {
 				if ( ! empty($_POST['user_new'][$i]) ) {
 					$user_id = wp_create_user( $_POST['user_new'][$i], wp_generate_password() );
-				} else if ( $this->version != '1.0' ) {
+				} 
+                                elseif ( $this->version != '1.0' ) {
 					$user_data = array(
 						'user_login' => $old_login,
 						'user_pass' => wp_generate_password(),
@@ -244,12 +242,11 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 					if ( $old_id )
 						$this->processed_authors[$old_id] = $user_id;
 					$this->author_mapping[$santized_old_login] = $user_id;
-				} else {
-					if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
+				} 
+                                elseif ( $debug ) {
 						printf( __( 'Failed to create new user for %s. Their posts will be attributed to the current user.', 'themify' ), esc_html($this->authors[$old_login]['author_display_name']) );
-						echo ' ' . $user_id->get_error_message();
-						echo '<br />';
-					}
+						echo ' ' , $user_id->get_error_message(),'<br />';
+					
 				}
 			}
 
@@ -272,7 +269,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 
 		if ( empty( $this->categories ) )
 			return;
-
+                $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 		foreach ( $this->categories as $cat ) {
 			// if the category already exists leave it alone
 			$term_id = term_exists( $cat['category_nicename'], 'category' );
@@ -296,13 +293,9 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			if ( ! is_wp_error( $id ) ) {
 				if ( isset($cat['term_id']) )
 					$this->processed_terms[intval($cat['term_id'])] = $id;
-			} else {
-				if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
-					printf( __( 'Failed to import category %s', 'themify' ), esc_html($cat['category_nicename']) );
-					echo ': ' . $id->get_error_message();
-					echo '<br />';
-				}
-				continue;
+			} elseif ( $debug ) {
+                            printf( __( 'Failed to import category %s', 'themify' ), esc_html($cat['category_nicename']) );
+                            echo ': ' , $id->get_error_message(),'<br />';
 			}
 		}
 
@@ -319,7 +312,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 
 		if ( empty( $this->tags ) )
 			return;
-
+                $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 		foreach ( $this->tags as $tag ) {
 			// if the tag already exists leave it alone
 			$term_id = term_exists( $tag['tag_slug'], 'post_tag' );
@@ -337,13 +330,10 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			if ( ! is_wp_error( $id ) ) {
 				if ( isset($tag['term_id']) )
 					$this->processed_terms[intval($tag['term_id'])] = $id['term_id'];
-			} else {
-				if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
-					printf( __( 'Failed to import post tag %s', 'themify' ), esc_html($tag['tag_name']) );
-					echo ': ' . $id->get_error_message();
-					echo '<br />';
-				}
-				continue;
+			} elseif ($debug) {
+                                printf( __( 'Failed to import post tag %s', 'themify' ), esc_html($tag['tag_name']) );
+                                echo ': ',$id->get_error_message(),'<br />';
+			
 			}
 		}
 
@@ -360,7 +350,8 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 
 		if ( empty( $this->terms ) )
 			return;
-
+                
+                $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 		foreach ( $this->terms as $term ) {
 			// if the term already exists in the correct taxonomy leave it alone
 			$term_id = term_exists( $term['slug'], $term['term_taxonomy'] );
@@ -384,14 +375,10 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			if ( ! is_wp_error( $id ) ) {
 				if ( isset($term['term_id']) )
 					$this->processed_terms[intval($term['term_id'])] = $id['term_id'];
-			} else {
-				if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
-					printf( __( 'Failed to import %s %s', 'themify' ), esc_html($term['term_taxonomy']), esc_html($term['term_name']) );
-					echo ': ' . $id->get_error_message();
-					echo '<br />';
-				}
-				continue;
-			}
+			} else if ( $debug) {
+                                printf( __( 'Failed to import %s %s', 'themify' ), esc_html($term['term_taxonomy']), esc_html($term['term_name']) );
+                                echo ': ' ,$id->get_error_message(),'<br />';
+                        }
 		}
 
 		unset( $this->terms );
@@ -407,12 +394,12 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 	 */
 	function process_posts() {
 		$this->posts = apply_filters( 'wp_import_posts', $this->posts );
-
+                $debug = defined('IMPORT_DEBUG') && IMPORT_DEBUG;
 		foreach ( $this->posts as $post ) {
 			$post = apply_filters( 'wp_import_post_data_raw', $post );
 
 			if ( ! post_type_exists( $post['post_type'] ) ) {
-				if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
+				if ( $debug ) {
 					printf( __( 'Failed to import &#8220;%s&#8221;: Invalid post type %s', 'themify' ),
 						esc_html($post['post_title']), esc_html($post['post_type']) );
 					echo '<br />';
@@ -421,13 +408,10 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 				continue;
 			}
 
-			if ( isset( $this->processed_posts[$post['post_id']] ) && ! empty( $post['post_id'] ) )
+			if ( $post['status'] === 'auto-draft' || (! empty( $post['post_id'] ) && isset( $this->processed_posts[$post['post_id']] )))
 				continue;
 
-			if ( $post['status'] == 'auto-draft' )
-				continue;
-
-			if ( 'nav_menu_item' == $post['post_type'] ) {
+			if ( 'nav_menu_item' === $post['post_type'] ) {
 				$this->process_menu_item( $post );
 				continue;
 			}
@@ -435,7 +419,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 			$post_type_object = get_post_type_object( $post['post_type'] );
 
 			$post_exists = post_exists( $post['post_title'], '', $post['post_date'] );
-			if ( $post_exists && get_post_type( $post_exists ) == $post['post_type'] ) {
+			if ( $post_exists && get_post_type( $post_exists ) === $post['post_type'] ) {
 				//printf( __('%s &#8220;%s&#8221; already exists.', 'themify'), $post_type_object->labels->singular_name, esc_html($post['post_title']) );
 				//echo '<br />';
 				$comment_post_ID = $post_id = $post_exists;
@@ -454,10 +438,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 
 				// map the post author
 				$author = sanitize_user( $post['post_author'], true );
-				if ( isset( $this->author_mapping[$author] ) )
-					$author = $this->author_mapping[$author];
-				else
-					$author = (int) get_current_user_id();
+				$author = isset( $this->author_mapping[$author] ) ?$this->author_mapping[$author]:((int) get_current_user_id());
 
 				$postdata = array(
 					'import_id' => $post['post_id'], 'post_author' => $author, 'post_date' => $post['post_date'],
@@ -472,7 +453,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 				$original_post_ID = $post['post_id'];
 				$postdata = apply_filters( 'wp_import_post_data_processed', $postdata, $post );
 
-				if ( 'attachment' == $postdata['post_type'] ) {
+				if ( 'attachment' === $postdata['post_type'] ) {
 					$remote_url = ! empty($post['attachment_url']) ? $post['attachment_url'] : $post['guid'];
 
 					// try to use _wp_attached file for upload folder placement to ensure the same location as the export site
@@ -480,7 +461,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 					$postdata['upload_date'] = $post['post_date'];
 					if ( isset( $post['postmeta'] ) ) {
 						foreach( $post['postmeta'] as $meta ) {
-							if ( $meta['key'] == '_wp_attached_file' ) {
+							if ( $meta['key'] === '_wp_attached_file' ) {
 								if ( preg_match( '%^[0-9]{4}/[0-9]{2}%', $meta['value'], $matches ) )
 									$postdata['upload_date'] = $matches[0];
 								break;
@@ -495,11 +476,10 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 				}
 
 				if ( is_wp_error( $post_id ) ) {
-					if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
+					if ( $debug ) {
 						printf( __( 'Failed to import %s &#8220;%s&#8221;', 'themify' ),
 						$post_type_object->labels->singular_name, esc_html($post['post_title']) );
-						echo ': ' . $post_id->get_error_message();
-						echo '<br />';
+						echo ': ' , $post_id->get_error_message(),'<br />';
 					}
 					continue;
 				}
@@ -521,7 +501,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 				$terms_to_set = array();
 				foreach ( $post['terms'] as $term ) {
 					// back compat with WXR 1.0 map 'tag' to 'post_tag'
-					$taxonomy = ( 'tag' == $term['domain'] ) ? 'post_tag' : $term['domain'];
+					$taxonomy = 'tag' === $term['domain']  ? 'post_tag' : $term['domain'];
 					$term_exists = term_exists( $term['slug'], $taxonomy );
 					$term_id = is_array( $term_exists ) ? $term_exists['term_id'] : $term_exists;
 					if ( ! $term_id ) {
@@ -530,10 +510,9 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 							$term_id = $t['term_id'];
 							do_action( 'wp_import_insert_term', $t, $term, $post_id, $post );
 						} else {
-							if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
+							if ( $debug ) {
 								printf( __( 'Failed to import %s %s', 'themify' ), esc_html($taxonomy), esc_html($term['name']) );
-								echo ': ' . $t->get_error_message();
-								echo '<br />';
+								echo ': ' , $t->get_error_message(),'<br />';
 							}
 							do_action( 'wp_import_insert_term_failed', $t, $term, $post_id, $post );
 							continue;
@@ -608,7 +587,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 					$key = apply_filters( 'import_post_meta_key', $meta['key'], $post_id, $post );
 					$value = false;
 
-					if ( '_edit_last' == $key ) {
+					if ( '_edit_last' === $key ) {
 						if ( isset( $this->processed_authors[intval($meta['value'])] ) )
 							$value = $this->processed_authors[intval($meta['value'])];
 						else
@@ -624,7 +603,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 						do_action( 'import_post_meta', $post_id, $key, $value );
 
 						// if the post has a featured image, take note of this in case of remap
-						if ( '_thumbnail_id' == $key )
+						if ( '_thumbnail_id' === $key )
 							$this->featured_images[$post_id] = (int) $value;
 					}
 				}
@@ -656,7 +635,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 		if ( isset($item['terms']) ) {
 			// loop through terms, assume first nav_menu term is correct menu
 			foreach ( $item['terms'] as $term ) {
-				if ( 'nav_menu' == $term['domain'] ) {
+				if ( 'nav_menu' === $term['domain'] ) {
 					$menu_slug = $term['slug'];
 					break;
 				}
@@ -681,21 +660,21 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 
 		foreach ( $item['postmeta'] as $meta )
 			$$meta['key'] = $meta['value'];
-
-		if ( 'taxonomy' == $_menu_item_type && isset( $this->processed_terms[intval($_menu_item_object_id)] ) ) {
-			$_menu_item_object_id = $this->processed_terms[intval($_menu_item_object_id)];
-		} else if ( 'post_type' == $_menu_item_type && isset( $this->processed_posts[intval($_menu_item_object_id)] ) ) {
-			$_menu_item_object_id = $this->processed_posts[intval($_menu_item_object_id)];
-		} else if ( 'custom' != $_menu_item_type ) {
+                $_menu_item_object_id = (int)$_menu_item_object_id;
+		if ( 'taxonomy' === $_menu_item_type && isset( $this->processed_terms[$_menu_item_object_id] ) ) {
+			$_menu_item_object_id = $this->processed_terms[$_menu_item_object_id];
+		} else if ( 'post_type' === $_menu_item_type && isset( $this->processed_posts[$_menu_item_object_id] ) ) {
+			$_menu_item_object_id = $this->processed_posts[$_menu_item_object_id];
+		} else if ( 'custom' !== $_menu_item_type ) {
 			// associated object is missing or not imported yet, we'll retry later
 			$this->missing_menu_items[] = $item;
 			return;
 		}
-
-		if ( isset( $this->processed_menu_items[intval($_menu_item_menu_item_parent)] ) ) {
-			$_menu_item_menu_item_parent = $this->processed_menu_items[intval($_menu_item_menu_item_parent)];
+                $_menu_item_menu_item_parent = (int)$_menu_item_menu_item_parent;
+		if ( isset( $this->processed_menu_items[$_menu_item_menu_item_parent] ) ) {
+			$_menu_item_menu_item_parent = $this->processed_menu_items[$_menu_item_menu_item_parent];
 		} else if ( $_menu_item_menu_item_parent ) {
-			$this->menu_item_orphans[intval($item['post_id'])] = (int) $_menu_item_menu_item_parent;
+			$this->menu_item_orphans[intval($item['post_id'])] = $_menu_item_menu_item_parent;
 			$_menu_item_menu_item_parent = 0;
 		}
 
@@ -932,9 +911,7 @@ class Themify_Builder_Layouts_Importer extends WP_Importer {
 	function is_valid_meta_key( $key ) {
 		// skip attachment metadata since we'll regenerate it from scratch
 		// skip _edit_lock as not relevant for import
-		if ( in_array( $key, array( '_wp_attached_file', '_wp_attachment_metadata', '_edit_lock' ) ) )
-			return false;
-		return $key;
+		return in_array( $key, array( '_wp_attached_file', '_wp_attachment_metadata', '_edit_lock' ),true )?false:$key;
 	}
 
 	/**

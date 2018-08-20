@@ -31,11 +31,7 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 		$category = isset( $module['mod_settings']['category_highlight'] ) ? $module['mod_settings']['category_highlight'] : '';
 		$slug_query = isset( $module['mod_settings']['query_slug_highlight'] ) ? $module['mod_settings']['query_slug_highlight'] : '';
 
-		if ( 'category' === $type ) {
-			return sprintf( '%s : %s', __('Category', 'themify'), $category );
-		} else {
-			return sprintf( '%s : %s', __('Slugs', 'themify'), $slug_query );
-		}
+		return 'category' === $type?sprintf( '%s : %s', __('Category', 'themify'), $category ):sprintf( '%s : %s', __('Slugs', 'themify'), $slug_query );
 	}
 
 	public function get_options() {
@@ -82,14 +78,14 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 					'taxonomy' => 'highlight-category'
 				),
 				'help' => sprintf(__('Add more <a href="%s" target="_blank">highlight posts</a>', 'themify'), admin_url('post-new.php?post_type=highlight')),
-				'wrap_with_class' => 'tb-group-element tb-group-element-category'
+				'wrap_with_class' => 'tb_group_element tb_group_element_category'
 			),
 			array(
 				'id' => 'query_slug_highlight',
 				'type' => 'text',
 				'label' => __('Highlight Slugs', 'themify'),
 				'class' => 'large',
-				'wrap_with_class' => 'tb-group-element tb-group-element-post_slug',
+				'wrap_with_class' => 'tb_group_element tb_group_element_post_slug',
 				'help' => '<br/>' . __( 'Insert Highlight slug. Multiple slug should be separated by comma (,)', 'themify')
 			),
 			array(
@@ -218,7 +214,7 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') )
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') )
 			)
 		);
 	}
@@ -232,6 +228,7 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family( array( '.module-highlight .post-title', '.module-highlight .post-title a' )),
+                        self::get_element_font_weight( array( '.module-highlight .post-title', '.module-highlight .post-title a' )),
                         self::get_color( array( '.module-highlight .post', '.module-highlight h1', '.module-highlight h2', '.module-highlight h3:not(.module-title)', '.module-highlight h4', '.module-highlight h5', '.module-highlight h6', '.module-highlight .post-title', '.module-highlight .post-title a' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-highlight .post'),
                         self::get_line_height('.module-highlight .post'),
@@ -239,6 +236,7 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-highlight .post'),
                         self::get_text_transform('.module-highlight .post'),
                         self::get_font_style('.module-highlight .post'),
+                        self::get_text_decoration('.module-highlight .post','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-highlight a','link_color'),
@@ -258,16 +256,19 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family( array( '.module-highlight .post-title', '.module-highlight .post-title a' ),'font_family_title'),
+                        self::get_element_font_weight( array( '.module-highlight .post-title', '.module-highlight .post-title a' ),'font_weight_title'),
                         self::get_color(array( '.module-highlight .post-title', '.module-highlight .post-title a' ),'font_color_title',__('Font Color', 'themify')),
                         self::get_color(array( '.module-highlight .post-title:hover', '.module-highlight .post-title a:hover' ),'font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size('.module-highlight .post-title','font_size_title'),
-                        self::get_line_height('.module-highlight .post-title','line_height_title')
+                        self::get_line_height('.module-highlight .post-title','line_height_title'),
+						self::get_letter_spacing('.module-highlight .post-title', 'letter_spacing_title')
 		);
 
 		$highlight_content = array(
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-highlight .highlight-post .post-content','font_family_content'),
+                        self::get_element_font_weight('.module-highlight .highlight-post .post-content','font_weight_content'),
                         self::get_color('.module-highlight .highlight-post .post-content','font_color_content',__('Font Color', 'themify')),
                         self::get_font_size('.module-highlight .highlight-post .post-content','font_size_content'),
                         self::get_line_height('.module-highlight .highlight-post .post-content','line_height_content')
@@ -350,11 +351,11 @@ class TB_Highlight_Module extends Themify_Builder_Component_Module {
 			'order_highlight' => $order,
 			'orderby_highlight' => $orderby,
 			'display_highlight' => $display,
-			'hide_feat_img_highlight' => $image == 'yes' ? 'no' : 'yes',
+			'hide_feat_img_highlight' => $image === 'yes' ? 'no' : 'yes',
 			'image_size_highlight' => '',
 			'img_width_highlight' => $image_w,
 			'img_height_highlight' => $image_h,
-			'hide_post_title_highlight' => $title == 'yes' ? 'no' : 'yes',
+			'hide_post_title_highlight' => $title === 'yes' ? 'no' : 'yes',
 			'hide_post_date_highlight' => '',
 			'hide_post_meta_highlight' => '',
 			'hide_page_nav_highlight' => 'yes',

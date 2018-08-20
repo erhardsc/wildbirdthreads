@@ -24,8 +24,8 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'image_zoom_icon' => '',
         'lightbox_width' => '',
         'lightbox_height' => '',
-        'lightbox_size_unit_width' => 'pixels',
-        'lightbox_size_unit_height' => 'pixels',
+	    'lightbox_width_unit' => 'px',
+	    'lightbox_height_unit' => 'px',
         'alt_image' => '',
         'caption_image' => '',
         'css_image' => '',
@@ -39,8 +39,8 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     unset($mod_settings);
     $animation_effect = self::parse_animation_effect($fields_args['animation_effect'], $fields_args);
 
-    $lightbox_size_unit_width = $fields_args['lightbox_size_unit_width'] === 'pixels' ? 'px' : '%';
-    $lightbox_size_unit_height = $fields_args['lightbox_size_unit_height'] === 'pixels' ? 'px' : '%';
+    $lightbox_size_unit_width = $fields_args['lightbox_width_unit']?$fields_args['lightbox_width_unit']:'px';
+    $lightbox_size_unit_height = $fields_args['lightbox_height_unit']?$fields_args['lightbox_height_unit']:'px';
 
     $container_class = implode(' ', apply_filters('themify_builder_module_classes', array(
         'module', 'module-' . $mod_name, $module_ID, $fields_args['appearance_image'], $fields_args['style_image'], $fields_args['css_image'], $animation_effect
@@ -91,7 +91,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module image -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php if ($fields_args['mod_title_image'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_image'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
@@ -131,11 +131,11 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
                     </h3>
                 <?php endif; ?>
 
-                <?php if ($fields_args['caption_image'] !== ''): ?>
+                    <?php if ($fields_args['caption_image'] !== ''): ?>
                     <div class="image-caption">
                         <?php echo apply_filters('themify_builder_module_content', $fields_args['caption_image']); ?>
-                    </div>
-                    <!-- /image-caption -->
+                </div>
+                <!-- /image-caption -->
                 <?php endif; ?>
             </div>
             <!-- /image-content -->

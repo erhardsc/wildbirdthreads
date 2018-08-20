@@ -9,17 +9,19 @@
 if( ! class_exists( 'Themify_Microdata' ) ) :
 class Themify_Microdata {
 
-	var $output = array();
+    private $output = array();
 
 	function __construct() {
-		add_action( 'themify_body_start', array( $this, 'schema_markup_homepage' ) );
-		add_action( 'themify_content_start', array( $this, 'schema_markup_page' ) );
-		add_action( 'themify_post_start', array( $this, 'schema_markup_post' ) );
-		add_action( 'themify_body_end', array( $this, 'display_schema_markup' ) );
-		add_filter( 'get_avatar', array( $this, 'authorbox_microdata' ) );
 		if( is_admin() ) {
 			add_filter( 'themify_metabox/user/fields', array( $this, 'custom_user_meta_fields' ) );
 		}
+                else{
+                    add_action( 'themify_body_start', array( $this, 'schema_markup_homepage' ) );
+                    add_action( 'themify_content_start', array( $this, 'schema_markup_page' ) );
+                    add_action( 'themify_post_start', array( $this, 'schema_markup_post' ) );
+                    add_action( 'themify_body_end', array( $this, 'display_schema_markup' ) );
+                    add_filter( 'get_avatar', array( $this, 'authorbox_microdata' ) );
+                }
 		if ( themify_is_woocommerce_active() ) {
 			add_action( 'woocommerce_after_shop_loop_item', array( $this, 'schema_markup_wc_product' ) );
 		}
@@ -56,12 +58,12 @@ class Themify_Microdata {
 
 		$post_title         = get_the_title();
 		$date_added         = get_the_time('c');
-		$date_modified      = get_the_time('c');
+		$date_modified      = $date_added;
 		$permalink          = get_permalink();
 		$excerpt            = $post->post_excerpt;
 		$comments           = get_comments(array('post_id' => $post->ID));
 		$comment_count      = get_comments_number($post->ID);
-		$post_image         = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), $size = 'large' );
+		$post_image         = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'large' );
 		$current_page_url   = $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 		$author             = get_the_author();
 		$author_description = get_the_author_meta('description');
@@ -75,7 +77,7 @@ class Themify_Microdata {
 			$post_schema_type = 'ProfilePage';
 		} elseif ( is_search() ) {
 			$post_schema_type = 'SearchResultsPage';
-		} elseif ( themify_is_woocommerce_active() && themify_is_shop() ) {
+		} elseif ( themify_is_shop() ) {
 			$post_schema_type = 'Store';
 		} elseif ( themify_is_woocommerce_active() && is_product() ) {
 			$post_schema_type = 'Product';
@@ -85,7 +87,7 @@ class Themify_Microdata {
 
 		// Page
 		if( is_page() && ! post_password_required() ) {
-	       if( ! ( themify_is_woocommerce_active() && themify_is_shop() ) ) {
+                    if( ! (  themify_is_shop() ) ) {
 				$microdata = array(
 					'@context' => 'https://schema.org',
 					'@type' => $post_schema_type,
@@ -124,7 +126,7 @@ class Themify_Microdata {
 		}
 
 		// Profile Page
-		if ( is_author() ) {
+		elseif ( is_author() ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -149,7 +151,7 @@ class Themify_Microdata {
 		}
 
 		// Search Page
-		if ( is_search() ) {
+		elseif ( is_search() ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -160,9 +162,8 @@ class Themify_Microdata {
 			);
 			$this->output[] = $microdata;
 		}
-
 		// Shop Page
-		if ( themify_is_woocommerce_active() && themify_is_shop() ) {
+		elseif ( themify_is_shop() ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -178,11 +179,11 @@ class Themify_Microdata {
 
 	// Posts
 	function schema_markup_post() {
-		global $post, $themify;
+		global $post;
 
 		$post_title     = get_the_title();
 		$date_added     = get_the_time('c');
-		$date_modified  = get_the_time('c');
+		$date_modified  = $date_added;
 		$permalink      = get_permalink();
 		$author         = get_the_author();
 		$excerpt        = get_the_excerpt();
@@ -203,26 +204,26 @@ class Themify_Microdata {
 		$comment_count  = get_comments_number($post->ID);
 		$post_types     = array( 'post', 'press' );
 		$creative_types = array( 'audio', 'highlight', 'quote', 'portfolio', 'testimonial', 'video' );
-		$post_image     = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), $size = 'large' );
+		$post_image     = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'large' );
 		// Cases
 		if ( is_singular('post') ) {
 			$post_schema_type = 'BlogPosting';
-		} elseif ( in_array( $post->post_type, $creative_types ) ) {
+		} elseif ( in_array( $post->post_type, $creative_types,true ) ) {
 			$post_schema_type = 'CreativeWork';
-		} elseif ( $post->post_type == 'team' ) {
+		} elseif ( $post->post_type === 'team' ) {
 			$post_schema_type = 'Person';
-		} elseif ( $post->post_type == 'event' ) {
+		} elseif ( $post->post_type === 'event' ) {
 			$post_schema_type = 'Event';
-		} elseif ( $post->post_type == 'gallery' ) {
+		} elseif ( $post->post_type === 'gallery' ) {
 			$post_schema_type = 'ImageGallery';
-		} elseif ( $post->post_type == 'press' ) {
+		} elseif ( $post->post_type === 'press' ) {
 			$post_schema_type = 'NewsArticle';
 		} else {
 			$post_schema_type = 'Article';
 		}
-
-		// Post
-		if ( in_array( $post->post_type, $post_types ) && ! post_password_required() ) {
+                if(! post_password_required()){
+                    // Post
+                    if ( in_array( $post->post_type, $post_types,true )) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -258,7 +259,7 @@ class Themify_Microdata {
 					'height' => $post_image[2]
 				);
 			}
-			if ( is_single() && $comment_count > 0 ) {
+			if ( $comment_count > 0 && is_single() ) {
 				foreach ( $comments as $comment ) {
 					$microdata['comment'][] = array(
 						'@type' => 'Comment',
@@ -272,10 +273,8 @@ class Themify_Microdata {
 			}
 			$this->output[] = $microdata;
 		}
-
 		// Event
-		if ( $post->post_type == 'event' && ! post_password_required() ) {
-			global $themify_event;
+		elseif ( $post->post_type === 'event' ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -312,7 +311,7 @@ class Themify_Microdata {
 		}
 
 		// Gallery
-		if ( $post->post_type == 'gallery' && ! post_password_required() ) {
+		elseif ( $post->post_type === 'gallery' ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -348,7 +347,7 @@ class Themify_Microdata {
 					'height' => $post_image[2]
 				);
 			}
-			if ( is_single() && $comment_count > 0 ) {
+			if ( $comment_count > 0 && is_single() ) {
 				foreach ( $comments as $comment ) {
 					$microdata['comment'][] = array(
 						'@type' => 'Comment',
@@ -362,9 +361,8 @@ class Themify_Microdata {
 			}
 			$this->output[] = $microdata;
 		}
-
 		// Audio, Highlight, Quote, Portfolio, Testimonial, Video
-		if ( in_array( $post->post_type, $creative_types ) && ! post_password_required() ) {
+		elseif ( in_array( $post->post_type, $creative_types,true ) ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -386,7 +384,7 @@ class Themify_Microdata {
 					'height' => $post_image[2]
 				);
 			}
-			if ( $post->post_type == 'post' && is_single() ) {
+			if ( $post->post_type === 'post' && is_single() ) {
 				if ( $comment_count > 0 ) {
 					foreach ( $comments as $comment ) {
 						$microdata['comment'][] = array(
@@ -430,9 +428,8 @@ class Themify_Microdata {
 			}
 			$this->output[] = $microdata;
 		}
-
 		// Team
-		if ( $post->post_type == 'team' && ! post_password_required() ) {
+		elseif ( $post->post_type === 'team' ) {
 			$microdata = array(
 				'@context' => 'https://schema.org',
 				'@type' => $post_schema_type,
@@ -453,21 +450,20 @@ class Themify_Microdata {
 			}
 			$this->output[] = $microdata;
 		}
+            }
 
 	}
 
 	// WooCommerce Products
 	function schema_markup_wc_product() {
-		global $post, $product;
-
-		$post_title = $product->get_title();
-		$permalink  = $product->get_permalink();
-		$excerpt    = $post->post_excerpt;
-		$price      = $product->get_price();
-		$currency   = apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
-
 		// Product
 		if ( !is_singular('product') && ! post_password_required() ) {
+                        global $post, $product;
+
+                        $post_title = $product->get_title();
+                        $excerpt    = $post->post_excerpt;
+                        $price      = $product->get_price();
+                        $currency   = apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
 			// Output only for product loops, not single product.
 			// Single product metadata added by WooCommerce.
 			$microdata = array(
@@ -483,7 +479,7 @@ class Themify_Microdata {
 				)
 			);
 			if( has_post_thumbnail() ) {
-				$post_image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), $size = 'large' );
+				$post_image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ),  'large' );
 				$microdata['image'] = array(
 					'@type' => 'ImageObject',
 					'url' => $post_image[0],
@@ -502,6 +498,7 @@ class Themify_Microdata {
 			echo '<!-- SCHEMA BEGIN --><script type="application/ld+json">';
 			echo json_encode( $this->output );
 			echo '</script><!-- /SCHEMA END -->';
+                        $this->output = array();
 		}
 	}
 
@@ -538,7 +535,6 @@ class Themify_Microdata {
 	}
 
 	function fetch_video_meta( $video_url ) {
-		$image_url = '';
 
 		if ( preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $video_url, $match ) ) {
 			$request = wp_remote_get( "https://www.youtube.com/oembed?url=". urlencode( $video_url ) ."&format=json" );

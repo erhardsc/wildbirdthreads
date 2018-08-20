@@ -43,7 +43,7 @@ if (0 != $fields_args['child_of']) {
 // keep option to query by ID, for backward compatibility
 if ('top-level' !== $fields_args['child_of'] && preg_match('/\D/', $fields_args['child_of'])) {
     $term = get_term_by('slug', $fields_args['child_of'], 'product_cat');
-    if (!is_wp_error($term)) {
+    if ( ! is_wp_error( $term ) && isset( $term->term_id ) ) {
         $fields_args['child_of'] = $args['child_of'] = $term->term_id;
     }
 }

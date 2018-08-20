@@ -93,6 +93,17 @@
 				}, 2000);
 			});
 
+			// Fix Animation conflict
+			for( var i in rellax_items ) {
+				rellax_items[i].el.addEventListener( 'animationstart', function(e) {
+					this.data.runningAnimation = true;
+				}.bind( rellax_items[i] ), false );
+
+				rellax_items[i].el.addEventListener( 'animationend', function() {
+					this.data.runningAnimation = false;
+				}.bind( rellax_items[i] ), false );
+			}
+
 			// Start the loop
 			update();
 			// The loop does nothing if the scrollPosition did not change
@@ -113,7 +124,7 @@
 							// the current scroll position's value, so that the elements are still positioned based on HTML layout
 							posY = dataPercentage || self.options.center ? (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop) : 0,
 							//blockTop = posY + el.getBoundingClientRect().top,
-							blockTop = jQuery(el).offset().top,
+							blockTop = el.offsetTop + jQuery( el.offsetParent ).offset().top,
 							blockHeight = el.offsetHeight || el.clientHeight || el.scrollHeight,
 							// apparently parallax equation everyone uses
 							percentage = dataPercentage ? dataPercentage : (posY - blockTop + screenY) / (blockHeight + screenY);
@@ -174,24 +185,41 @@
 
 					for (var i in rellax_items) {
 						var block = rellax_items[i],
-							percentage = block.data.reverse ? ( ( block.data.top + block.data.height ) - posY ) - screenY : ( posY + screenY ) - ( block.data.top + block.data.height ),		
-							position = updatePosition(percentage, block);
-
-						if ( block.data.reverse ) {
-							position = Math.max( position, -( screenY - block.data.height ) );
-							position = Math.min( position, ( screenY / 4 ) );
-						}
+							position = getPosition( block );
 
 						var translate = 'translate3d(0,' + position + 'px,0)';
-						block.el.dataset.currentPos=position;
+						block.el.dataset.currentPos = position;
 
 						if (block.data.fade) {
-							var bounding = rellax_items[i].el.getBoundingClientRect(),
+							var bounding = block.el.getBoundingClientRect(),
 								offset = (bounding.bottom - screenY * 0.15);
-							rellax_items[i].el.style['opacity'] = bounding.bottom >= 0 && offset <= block.data.height ? offset / block.data.height : (bounding.top > 0 ? 1 : '');
+							block.el.style['opacity'] = bounding.bottom >= 0 && offset <= block.data.height ? offset / block.data.height : (bounding.top > 0 ? 1 : '');
 						}
-						rellax_items[i].el.style[transformProp] = translate;
+
+						if( block.data.runningAnimation && block.el.style.position !== 'absolute' ) {
+							block.el.style.position = 'relative';
+							block.el.style.top = position + 'px';
+							block.el.style[transformProp] = '';
+						} else {
+							if( block.el.style.top ) {
+								block.el.style.position = block.el.style.top = '';
+							}
+							
+							block.el.style[transformProp] = translate;
+						}
+
 					}
+				},
+				getPosition = function( el ) {
+					var percentage = el.data.reverse ? ( ( el.data.top + el.data.height ) - posY ) - screenY : ( posY + screenY ) - ( el.data.top + el.data.height ),
+						position = updatePosition(percentage, el);
+
+					if ( el.data.reverse ) {
+						position = Math.max( position, -( screenY - el.data.height ) );
+						position = Math.min( position, ( screenY / 4 ) );
+					}
+
+					return position;
 				};
 		Rellax.destroy = function (index) {
 			function destroy(item, i) {

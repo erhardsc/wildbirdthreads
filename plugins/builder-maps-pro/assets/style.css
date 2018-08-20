@@ -3,10 +3,9 @@
 	min-height: 55px;
 	color: #333;
 }
-.module-maps-pro img {
+.module-maps-pro img:not(.gm-fullscreen-control) {
 	max-width: inherit !important; /* required */
 }
-
 .module-maps-pro .maps-pro-canvas {
 	max-width: 100% !important;
 }

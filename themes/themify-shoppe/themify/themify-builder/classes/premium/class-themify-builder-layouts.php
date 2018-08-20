@@ -61,36 +61,35 @@ class Themify_Builder_Layouts {
             $this->register_layout();
             if(is_admin()){
                 $this->register_providers();
-				// Builder write panel
-				add_filter( 'themify_do_metaboxes', array( $this, 'layout_write_panels' ), 11 );
-				add_filter( 'themify_post_types', array( $this, 'extend_post_types' ) );
-				add_action( 'add_meta_boxes_tbuilder_layout_part', array( $this, 'custom_meta_boxes' ) );
+                // Builder write panel
+                add_filter( 'themify_do_metaboxes', array( $this, 'layout_write_panels' ), 11 );
+                add_filter( 'themify_post_types', array( $this, 'extend_post_types' ) );
+                add_action( 'add_meta_boxes_tbuilder_layout_part', array( $this, 'custom_meta_boxes' ) );
 
-				add_action( 'wp_ajax_tb_load_layout', array( $this, 'load_layout_ajaxify' ), 10 );
-				add_action( 'wp_ajax_tb_set_layout', array( $this, 'set_layout_ajaxify' ), 10 );
-				add_action( 'wp_ajax_tb_custom_layout_form', array( $this, 'custom_layout_form_ajaxify' ), 10 );
-				add_action( 'wp_ajax_tb_save_custom_layout', array( $this, 'save_custom_layout_ajaxify' ), 10 );
+                add_action( 'wp_ajax_tb_load_layout', array( $this, 'load_layout_ajaxify' ), 10 );
+                add_action( 'wp_ajax_tb_set_layout', array( $this, 'set_layout_ajaxify' ), 10 );
+                add_action( 'wp_ajax_tb_custom_layout_form', array( $this, 'custom_layout_form_ajaxify' ), 10 );
+                add_action( 'wp_ajax_tb_save_custom_layout', array( $this, 'save_custom_layout_ajaxify' ), 10 );
 
-				// Quick Edit Links
-				add_filter( 'post_row_actions', array( $this, 'row_actions' ) );
-				add_filter( 'page_row_actions', array( $this, 'row_actions' ) );
-				add_filter( 'bulk_actions-edit-tbuilder_layout_part', array( $this, 'row_bulk_actions' ) );
-				add_filter( 'bulk_actions-edit-tbuilder_layout', array( $this, 'row_bulk_actions' ) );
-				add_filter( 'handle_bulk_actions-edit-tbuilder_layout_part', array( $this, 'export_row_bulk' ), 10, 3);
-				add_filter( 'handle_bulk_actions-edit-tbuilder_layout', array( $this, 'export_row_bulk' ), 10, 3);
-				add_action( 'admin_init', array( $this, 'duplicate_action' ) );
-				add_action( 'admin_init', array( $this, 'export_row' ) );
+                // Quick Edit Links
+                add_filter( 'post_row_actions', array( $this, 'row_actions' ) );
+                add_filter( 'page_row_actions', array( $this, 'row_actions' ) );
+                add_filter( 'bulk_actions-edit-tbuilder_layout_part', array( $this, 'row_bulk_actions' ) );
+                add_filter( 'bulk_actions-edit-tbuilder_layout', array( $this, 'row_bulk_actions' ) );
+                add_filter( 'handle_bulk_actions-edit-tbuilder_layout_part', array( $this, 'export_row_bulk' ), 10, 3);
+                add_filter( 'handle_bulk_actions-edit-tbuilder_layout', array( $this, 'export_row_bulk' ), 10, 3);
+                add_action( 'admin_init', array( $this, 'duplicate_action' ) );
+                add_action( 'admin_init', array( $this, 'export_row' ) );
 
-				add_action( 'admin_init', array( $this, 'cleanup_builtin_layouts' ) );
-				add_filter( 'themify_builder_post_types_support', array( $this, 'add_builder_support' ) );
-				
-				// Ajax hook for Layout and Layout Parts import file.
-				add_action('wp_ajax_tbuilder_plupload_layout', array( $this, 'row_bulk_import'));
-				add_action('admin_head-edit.php', array( $this, 'row_bulk_import_button'));
+                add_action( 'admin_init', array( $this, 'cleanup_builtin_layouts' ) );
+                add_filter( 'themify_builder_post_types_support', array( $this, 'add_builder_support' ) );
+
+                // Ajax hook for Layout and Layout Parts import file.
+                add_action('wp_ajax_tbuilder_plupload_layout', array( $this, 'row_bulk_import'));
+                add_action('admin_head-edit.php', array( $this, 'row_bulk_import_button'));
             }
-            add_filter( 'template_include', array( $this, 'template_singular_layout' ) );
             add_shortcode( 'themify_layout_part', array( $this, 'layout_part_shortcode' ) );
-			add_filter( 'template_include', array( $this, 'template_singular_layout' ) );
+            add_filter( 'template_include', array( $this, 'template_singular_layout' ) );
 	}
 
 
@@ -119,11 +118,7 @@ class Themify_Builder_Layouts {
 	 * @since 2.0.0
 	 */
 	public  function get_provider( $id ) {
-		if( isset( $this->provider_instances[ $id ] ) ) {
-			return $this->provider_instances[ $id ];
-		}
-
-		return false;
+		return isset( $this->provider_instances[ $id ] )?$this->provider_instances[ $id ]:false;
 	}
 
 	/**
@@ -133,7 +128,7 @@ class Themify_Builder_Layouts {
 	 */
 	public function register_layout() {
 		if ( ! class_exists( 'CPT' ) ) {
-			include THEMIFY_BUILDER_LIBRARIES_DIR . '/' . 'CPT.php';
+			include THEMIFY_BUILDER_LIBRARIES_DIR . '/CPT.php';
 		}
 
 		// create a template custom post type
@@ -295,7 +290,7 @@ class Themify_Builder_Layouts {
 	 */
 	public function layout_part_info() {
 		$layout_part = get_post();
-		echo '<div>' . __( 'To display this Layout Part, insert this shortcode:', 'themify' ) . '<br/>
+		echo '<div>' , __( 'To display this Layout Part, insert this shortcode:', 'themify' ) , '<br/>
 		<input type="text" readonly="readonly" class="widefat" onclick="this.select()" value="' . esc_attr( '[themify_layout_part id="' . $layout_part->ID . '"]' ) . '" />';
 		if ( ! empty( $layout_part->post_name ) ) {
 			echo '<input type="text" readonly="readonly" class="widefat" onclick="this.select()" value="' . esc_attr( '[themify_layout_part slug="' . $layout_part->post_name . '"]' ) . '" />';
@@ -347,7 +342,6 @@ class Themify_Builder_Layouts {
 	 * @access public
 	 */
 	public function set_layout_ajaxify() {
-		global $ThemifyBuilder;
 		check_ajax_referer( 'tb_load_nonce', 'nonce' );
 		$template_slug = $_POST['layout_slug'];
 		$current_builder_id = (int) $_POST['id'];
@@ -365,12 +359,16 @@ class Themify_Builder_Layouts {
                             foreach ($builder_data as $data ) {
                                     $data['row_order'] = $count;
                                     $old_builder_data[] = $data;
-                                    $count++;
+                                    ++$count;
                             }
                             $builder_data = $old_builder_data;
                         }
                        
 			$response = $GLOBALS['ThemifyBuilder_Data_Manager']->save_data( $builder_data, $current_builder_id, 'layout' );
+                        global $ThemifyBuilder;
+                        if(!empty($response['css']) && ($fonts = $ThemifyBuilder->stylesheet->enqueue_fonts( array() ))){
+                            $response['css']['fonts'] = $fonts;
+                        }
 			$response['status'] = 'success';
 			$response['msg'] = '';
 		} else {
@@ -392,30 +390,32 @@ class Themify_Builder_Layouts {
 	 * @return string
 	 */
 	public function layout_part_shortcode( $atts ) {
-		global $ThemifyBuilder;
-		extract( shortcode_atts( array(
-			'id' => '',
-			'slug' => ''
-		), $atts ));
-
+		
+		
 		$args = array(
-			'post_type' => $this->layout_part->post_type_name,
-			'post_status' => 'publish',
-			'numberposts' => 1
+                    'post_type' => $this->layout_part->post_type_name,
+                    'post_status' => 'publish',
+                    'numberposts' => 1,
+                    'orderby'=>'ID',
+                    'order'=>'ASC'
 		);
-		if ( ! empty( $slug ) ) $args['name'] = $slug;
-		if ( ! empty( $id ) ) $args['p'] = $id;
+                if ( ! empty( $atts['slug'] ) ){
+                    $args['name'] = $atts['slug'];
+                }
+		if ( ! empty( $atts['id'] ) ){
+                    $args['p'] = $atts['id'];
+                }
 		$template = get_posts( $args );
 		$output = '';
-
 		if ( $template ) {
-			$builder_data = $ThemifyBuilder->get_builder_data( $template[0]->ID );
-			if ( ! empty( $builder_data ) ) {
-                            $output = Themify_Builder_Component_Base::retrieve_template( 'builder-layout-part-output.php', array( 'builder_output' => $builder_data, 'builder_id' => $template[0]->ID ), '', '', false );
-                            if(!TFCache::is_ajax()){
-                                $output = $ThemifyBuilder->get_builder_stylesheet($output).$output;
-                            }
-			}
+                    global $ThemifyBuilder;
+                    $builder_data = $ThemifyBuilder->get_builder_data( $template[0]->ID );
+                    if ( ! empty( $builder_data ) ) {
+                        $output = Themify_Builder_Component_Base::retrieve_template( 'builder-layout-part-output.php', array( 'builder_output' => $builder_data, 'builder_id' => $template[0]->ID), '', '', false );
+                        if(!TFCache::is_ajax()){
+                            $output = $ThemifyBuilder->get_builder_stylesheet($output).$output;
+                        }
+                    }
 		}
 
 		return $output;
@@ -499,14 +499,14 @@ class Themify_Builder_Layouts {
 	public function row_actions( $actions ) {
 		global $post;
 		$builder_link = sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( get_permalink( $post->ID ) . '#builder_active' ), __('Themify Builder', 'themify' ));
-		if ( ( $this->layout->post_type_name == get_post_type() ) || ( $this->layout_part->post_type_name == get_post_type() ) ) {
+		if ( $this->layout->post_type_name === get_post_type()  ||  $this->layout_part->post_type_name === get_post_type()) {
 			$actions['themify-builder-duplicate'] = sprintf( '<a href="%s">%s</a>', wp_nonce_url( admin_url( 'post.php?post=' . $post->ID . '&action=duplicate_tbuilder' ), 'duplicate_themify_builder' ), __('Duplicate', 'themify') );
 			$actions['tbuilder-export'] = sprintf( '<a href="%s">%s</a>', wp_nonce_url( admin_url( 'post.php?post=' . $post->ID . '&action=tbuilder_export' ), 'tbuilder_layout_export' ), __('Export', 'themify') );
 			$actions['themify-builder'] = $builder_link;
 		} else {
 			// print builder links on another post types
 			$registered_post_types = themify_post_types();
-			if ( in_array( get_post_type(), $registered_post_types ) ) 
+			if ( in_array( get_post_type(), $registered_post_types,true ) ) 
 				$actions['themify-builder'] = $builder_link;
 		}
 
@@ -556,10 +556,10 @@ class Themify_Builder_Layouts {
 		$data['import'] = ($type == 'tbuilder_layout_part') ? 'Layout Parts' : 'Layouts';
 
 		foreach ( $pIds as $pId ) {
-			array_push($data['content'], array( 
-									'title' => get_the_title($pId),
-									'settings' => get_post_meta( $pId, '_themify_builder_settings_json', true )
-								) );
+                        $data['content'][] =  array( 
+                                                    'title' => get_the_title($pId),
+                                                    'settings' => get_post_meta( $pId, '_themify_builder_settings_json', true )
+                                                );
 		}
 		
 		if ( ! function_exists( 'WP_Filesystem' ) ) {
@@ -580,10 +580,10 @@ class Themify_Builder_Layouts {
 				ob_start();
 				header('Pragma: public');
 				header('Expires: 0');
-				header("Content-type: application/force-download");
+				header('Content-type: application/force-download');
 				header('Content-Disposition: attachment; filename="' . $file . '"');
-				header("Content-Transfer-Encoding: Binary"); 
-				header("Content-length: ".filesize($file));
+				header('Content-Transfer-Encoding: Binary'); 
+				header('Content-length: '.filesize($file));
 				header('Connection: close');
 				ob_clean();
 				flush();
@@ -629,7 +629,7 @@ class Themify_Builder_Layouts {
 		$file = wp_handle_upload($_FILES[$imgid . 'async-upload'], array('test_form' => true, 'action' => 'tbuilder_plupload_layout'));
 
 		// if $file returns error, return it and exit the function
-		if ( isset( $file['error'] ) && ! empty( $file['error'] ) ) {
+		if (! empty( $file['error'] ) ) {
 			echo json_encode($file);
 			exit;
 		}
@@ -688,7 +688,7 @@ class Themify_Builder_Layouts {
 		$post_type = get_current_screen()->post_type;
 
 		if( 'tbuilder_layout' !== $post_type && 'tbuilder_layout_part' !== $post_type )
-        return;
+                     return;
 
 		$message = 'tbuilder_layout' !== $post_type? 'Layouts' : 'Layout Parts';
 		// Enqueue media scripts
@@ -734,7 +734,6 @@ class Themify_Builder_Layouts {
 					text-decoration: none;
 					border: none;
 					border: 1px solid #ccc;
-					-webkit-border-radius: 2px;
 					border-radius: 2px;
 					background: #f7f7f7;
 					text-shadow: none;
@@ -744,7 +743,6 @@ class Themify_Builder_Layouts {
 					color: #0073aa;
 					cursor: pointer;
 					outline: 0;
-					-webkit-box-shadow: none;
 					box-shadow: none;
 					height:auto;
 				}
@@ -872,9 +870,12 @@ class Themify_Builder_Layouts {
 			'meta_key' => '_themify_builder_prebuilt_layout',
 			'meta_value' => 'yes'
 		));
-		if( $posts->have_posts() ) : while( $posts->have_posts() ) : $posts->the_post();
-			wp_delete_post( $post->ID, true );
-		endwhile; endif;
+		if( $posts->have_posts() ) { 
+                    while( $posts->have_posts() ) {
+                        $posts->the_post();
+                        wp_delete_post( $post->ID, true );
+                    }  
+                }
 		wp_reset_postdata();
 
 		update_option( 'themify_builder_cleanup_builtin_layouts', 'yes' );
@@ -942,8 +943,8 @@ class Themify_Builder_Layouts_Provider {
 	public function get_list_output() {
 		$layouts = $this->get_layouts();
 		if( ! empty( $layouts ) ) : ?>
-			<div id="themify_builder_tabs_<?php echo $this->get_id(); ?>" class="themify_builder_tab">
-				<ul class="themify_builder_layout_lists">
+			<div id="tb_tabs_<?php echo $this->get_id(); ?>" class="tb_tab">
+				<ul class="tb_layout_lists">
 
 					<?php foreach( $layouts as $layout ) : ?>
 					<li class="layout_preview_list">
@@ -967,18 +968,15 @@ class Themify_Builder_Layouts_Provider {
 	 * @return array
 	 */
 	public function get_layouts_from_file( $path ) {
-		static $layouts = null;
-                if($layouts===null){
-                    $layouts = array();
-                    if( is_file( $path ) ) {
-                            foreach( include( $path ) as $layout ) {
-                                    $layouts[] = array(
-                                            'title' => $layout['title'],
-                                            'slug' => $layout['data'],
-                                            'thumbnail' => sprintf( '<img src="%s">', $layout['thumb'] ),
-                                    );
-                            }
-                    }
+                $layouts = array();
+                if( is_file( $path ) ) {
+                        foreach( include( $path ) as $layout ) {
+                                $layouts[] = array(
+                                        'title' => $layout['title'],
+                                        'slug' => $layout['data'],
+                                        'thumbnail' => sprintf( '<img src="%s">', $layout['thumb'] ),
+                                );
+                        }
                 }
 		return $layouts;
 	}
@@ -1037,29 +1035,26 @@ class Themify_Builder_Layouts_Provider_Custom extends Themify_Builder_Layouts_Pr
 	 * @return array
 	 */
 	public function get_layouts() {
-            static $layouts = null;
-            if($layouts===null){
-                global $post;
-                $layouts = array();
-                $posts = new WP_Query( array(
-                        'post_type' => 'tbuilder_layout',
-                        'posts_per_page' => -1,
-                        'orderby' => 'title',
-                        'order' => 'ASC',
-                ));
+            global $post;
+            $layouts = array();
+            $posts = new WP_Query( array(
+                    'post_type' => 'tbuilder_layout',
+                    'posts_per_page' => -1,
+                    'orderby' => 'title',
+                    'order' => 'ASC',
+            ));
 
-                if( $posts->have_posts() ){
-                    while( $posts->have_posts() ){
-                        $posts->the_post();
-                        $layouts[] = array(
-                                'title' => get_the_title(),
-                                'slug' => $post->post_name,
-                                'thumbnail' => has_post_thumbnail() ? get_the_post_thumbnail(null, 'thumbnail', array( 150, 150 ) ) : sprintf( '<img src="%s">', 'http://placehold.it/150x150' ),
-                        );
-                    } 
-                }
-                wp_reset_postdata();
+            if( $posts->have_posts() ){
+                while( $posts->have_posts() ){
+                    $posts->the_post();
+                    $layouts[] = array(
+                            'title' => get_the_title(),
+                            'slug' => $post->post_name,
+                            'thumbnail' => has_post_thumbnail() ? get_the_post_thumbnail(null, 'thumbnail', array( 150, 150 ) ) : sprintf( '<img src="%s">', 'http://placehold.it/150x150' ),
+                    );
+                } 
             }
+            wp_reset_postdata();
             return $layouts;
 	}
 
@@ -1111,13 +1106,15 @@ class Themify_Builder_Layouts_Provider_Pre_Designed extends Themify_Builder_Layo
 
 	public function get_list_output() {
             ?>
-		<div id="themify_builder_tabs_pre-designed" class="themify_builder_tab">
-			<input type="text" placeholder="<?php _e( 'Search', 'themify' ); ?>" id="themify_builder_layout_search" />
-			<span class="tb_row_filter_active tb_filter_layouts"><?php _e('All','themify')?></span>
-			<ul id="themify_builder_pre-designed-filter" style="display: none;">
-				<li><a href="#" class="all"><?php _e( 'All', 'themify' ); ?></a></li>
-			</ul>
-			<div id="themify_builder_load_layout_error" style="display: none;">
+		<div id="tb_tabs_pre-designed" class="tb_tab">
+			<input type="text" placeholder="<?php _e( 'Search', 'themify' ); ?>" id="tb_layout_search" />
+			<div class="tb_ui_dropdown">
+				<span class="tb_ui_dropdown_label"><?php _e('All','themify')?></span>
+				<ul class="tb_ui_dropdown_items">
+					<li><a href="#" class="all"><?php _e( 'All', 'themify' ); ?></a></li>
+				</ul>
+			</div>
+			<div id="tb_load_layout_error" style="display: none;">
 				<?php _e( 'There was an error in load layouts, please make sure your internet is connected and check if Themify site is available.', 'themify' ); ?>
 			</div>
 		</div>
@@ -1128,7 +1125,7 @@ class Themify_Builder_Layouts_Provider_Pre_Designed extends Themify_Builder_Layo
             ?>
             
                 <script type="text/html" id="tmpl-themify-builder-layout-item">
-                    <ul class="themify_builder_layout_lists">
+                    <ul class="tb_layout_lists">
                             <# jQuery.each( data, function( i, e ) { #>
                             <li class="layout_preview_list" data-category="{{{e.category}}}">
                                     <div class="layout_preview" data-id="{{{e.id}}}" data-slug="{{{e.slug}}}" data-group="pre-designed">

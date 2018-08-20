@@ -54,7 +54,7 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
      * @var array $meta_box
      */
     protected $meta_box = array();
-
+    
 
     /**
      * Constructor.
@@ -100,7 +100,7 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
 
         foreach ($options as $field) {
             // sanitization, check for existence of needed keys
-            if (!( isset($field['type']) && isset($field['id']) && isset($module[$field['id']]) )) {
+            if (!isset($field['type'],$field['id'],$module[$field['id']])) {
                 continue;
             }
             // text, textarea, and wp_editor field types
@@ -411,7 +411,7 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
     }
 
     public function get_visual_type() {
-        return 'ajax';
+        return 'live';
     }
 
     protected static function get_module_args() {
@@ -455,26 +455,26 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
         $module_form_settings = $this->get_form_settings();
         ?>
         <form id="tb_module_settings">
-            <div id="themify_builder_lightbox_options_tab_items">
+            <div id="tb_lightbox_options_tab_items">
                 <?php
                 foreach ($module_form_settings as $setting_key => $setting):
                     if (!empty($setting['options'])):
                         ?>
                         <li <?php if ($setting_key === 'setting'): ?>class="current"<?php endif; ?>>
-                            <a href="#themify_builder_options_<?php echo $setting_key; ?>"><?php echo esc_attr($setting['name']); ?></a>
+                            <a href="#tb_options_<?php echo $setting_key; ?>"><?php echo esc_attr($setting['name']); ?></a>
                         </li>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
             <?php $this->get_save_btn( esc_html__( 'Done', 'themify' ) ); ?>
             <?php foreach ($module_form_settings as $setting_key => $setting): ?>
-                <div id="themify_builder_options_<?php echo $setting_key; ?>" class="themify_builder_options_tab_wrapper">
+                <div id="tb_options_<?php echo $setting_key; ?>" class="tb_options_tab_wrapper">
                     <?php
                     if ($setting_key === 'styling') {
                         self::get_breakpoint_switcher();
                     }
                     ?>
-                    <div class="themify_builder_options_tab_content">
+                    <div class="tb_options_tab_content">
                         <?php
                         if (!empty($setting['options'])) {
 
@@ -485,7 +485,7 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
                                 if ('styling' === $setting_key) {
                                     ?>
                                     <p>
-                                        <a href="#" class="reset-styling" data-reset="module">
+                                        <a href="#" class="reset-styling">
                                             <i class="ti-close"></i>
                                             <?php _e('Reset Styling', 'themify') ?>
                                         </a>
@@ -523,21 +523,18 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
         if (!Themify_Builder_Model::check_module_active($mod['mod_name'])) {
             return false;
         }
-        $output = '';
         $mod['mod_settings'] = isset($mod['mod_settings']) ? $mod['mod_settings'] : array();
 
         $mod_id = $mod['mod_name'] . '-' . $builder_id . '-' . implode('-', $identifier);
-        $output .= PHP_EOL; // add line break
+        $output = PHP_EOL; // add line break
 
-        $mod['mod_settings'] = wp_parse_args($mod['mod_settings'], self::get_module_args());
-		if ( !empty($mod['mod_settings']) ) {
-			ob_start();
-			do_action('themify_builder_background_styling',$builder_id,$mod,$mod_id,'module');
-			$output .= ob_get_clean();
-			// add line break
-			$output .= PHP_EOL;
+        $mod['mod_settings'] = $mod['mod_settings']+self::get_module_args();
+        ob_start();
+        do_action('themify_builder_background_styling',$builder_id,$mod,$mod_id,'module');
+        $output .= ob_get_clean();
+        // add line break
+        $output .= PHP_EOL;
 			
-		}
         // render the module
         $output .= Themify_Builder_Model::$modules[ $mod['mod_name'] ]->render($mod['mod_name'], $mod_id, $builder_id, $mod['mod_settings']);
         // add line break
@@ -564,6 +561,7 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
             // Font
             self::get_seperator('module_title_font', __('Font', 'themify')),
             self::get_font_family($selector, 'font_family_module_title'),
+			self::get_element_font_weight($selector, 'font_weight_module_title'),
             self::get_color($selector, 'font_color_module_title', __('Font Color', 'themify')),
             self::get_font_size($selector, 'font_size_module_title'),
             self::get_line_height($selector, 'line_height_module_title'),
@@ -581,7 +579,12 @@ class Themify_Builder_Component_Module extends Themify_Builder_Component_Base {
         $module['mod_settings'] = wp_parse_args( $module['mod_settings'], array(
             '_render_plain_content' => true
         ) );
+
+        // Remove format text filter including do_shortcode
+        if (!Themify_Builder_Model::is_front_builder_activate()) {
+            remove_filter('themify_builder_module_content', array('Themify_Builder_Model', 'format_text'));
+        }
         return self::template( $module, 0, false );
     }
-
+     
 }

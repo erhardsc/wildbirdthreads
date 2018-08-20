@@ -115,7 +115,7 @@ function themify_theme_customizer_definition( $args ) {
 				'type'    => 'Themify_Color_Control',
 				'color_label' => __( 'Accent Background Hover', 'themify' ),
 			),
-			'selector' => 'input[type=reset]:hover, input[type=submit]:hover, button:hover, .icon-menu .icon-menu-count:hover, #headerwrap #cart-icon:hover, #main-nav .has-mega-column .product-categories li:hover > .count, .woocommerce .wc-products .product .add_to_cart_button:hover, .woocommerce ul.products li.product .add_to_cart_button:hover, .woocommerce #content input.button:hover, .woocommerce #respond input#submit:hover, .woocommerce #content input.button.alt:hover, .woocommerce #respond input#submit.alt:hover, .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover, .woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce input.button.alt:hover, .woocommerce-page #content input.button:hover, .woocommerce-page #respond input#submit:hover, .woocommerce-page #content input.button.alt:hover, .woocommerce-page #respond input#submit.alt:hover, .woocommerce-page a.button:hover, .woocommerce-page button.button:hover, .woocommerce-page input.button:hover, .woocommerce-page a.button.alt:hover, .woocommerce-page button.button.alt:hover, .woocommerce-page input.button.alt:hover, .wishlist-button.wishlisted:hover, .woocommerce ul.products li.product a.wishlisted:hover',
+			'selector' => 'input[type=reset]:hover, input[type=submit]:hover, button:hover, .icon-menu .icon-menu-count:hover, #headerwrap #cart-icon:hover, #main-nav .has-mega-column .product-categories li:hover > .count, .woocommerce .wc-products .product .add_to_cart_button:hover, .woocommerce ul.products li.product .add_to_cart_button:hover, .woocommerce #content input.button:hover, .woocommerce #respond input#submit:hover, .woocommerce #content input.button.alt:hover, .woocommerce #respond input#submit.alt:hover, .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover, .woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce input.button.alt:hover, .woocommerce-page #content input.button:hover, .woocommerce-page #respond input#submit:hover, .woocommerce-page #content input.button.alt:hover, .woocommerce-page #respond input#submit.alt:hover, .woocommerce-page a.button:hover, .woocommerce-page button.button:hover, .woocommerce-page input.button:hover, .woocommerce-page a.button.alt:hover, .woocommerce-page button.button.alt:hover, .woocommerce-page input.button.alt:hover, .wishlist-button.wishlisted:hover, .woocommerce ul.products li.product a.wishlisted:hover, #cart-wrap .button:hover',
 			'prop' => 'background',
 		),
 		
@@ -125,7 +125,7 @@ function themify_theme_customizer_definition( $args ) {
 				'type'    => 'Themify_Color_Control',
 				'color_label' => __( 'Accent Background Color', 'themify' ),
 			),
-			'selector' => 'input[type=reset], input[type=submit], button, .icon-menu .icon-menu-count, #headerwrap #cart-icon, #main-nav .has-mega-column .product-categories li:hover > .count, #pagewrap .wpf_slider.ui-slider .ui-widget-header, .back-top a:before, #site-description, .woocommerce .wc-products .product .add_to_cart_button, .woocommerce ul.products li.product .add_to_cart_button, .woocommerce #content input.button, .woocommerce #respond input#submit, .woocommerce #content input.button.alt, .woocommerce #respond input#submit.alt, .woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt, .woocommerce-page #content input.button, .woocommerce-page #respond input#submit, .woocommerce-page #content input.button.alt, .woocommerce-page #respond input#submit.alt, .woocommerce-page a.button, .woocommerce-page button.button, .woocommerce-page input.button, .woocommerce-page a.button.alt, .woocommerce-page button.button.alt, .woocommerce-page input.button.alt, .woocommerce span.onsale:before, .woocommerce-page span.onsale:before, .wishlist-button.wishlisted, .woocommerce ul.products li.product a.wishlisted',
+			'selector' => 'input[type=reset], input[type=submit], button, .icon-menu .icon-menu-count, #headerwrap #cart-icon, #main-nav .has-mega-column .product-categories li:hover > .count, #pagewrap .wpf_slider.ui-slider .ui-widget-header, .back-top a:before, #site-description, .woocommerce .wc-products .product .add_to_cart_button, .woocommerce ul.products li.product .add_to_cart_button, .woocommerce #content input.button, .woocommerce #respond input#submit, .woocommerce #content input.button.alt, .woocommerce #respond input#submit.alt, .woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt, .woocommerce-page #content input.button, .woocommerce-page #respond input#submit, .woocommerce-page #content input.button.alt, .woocommerce-page #respond input#submit.alt, .woocommerce-page a.button, .woocommerce-page button.button, .woocommerce-page input.button, .woocommerce-page a.button.alt, .woocommerce-page button.button.alt, .woocommerce-page input.button.alt, .woocommerce span.onsale:before, .woocommerce-page span.onsale:before, .wishlist-button.wishlisted, .woocommerce ul.products li.product a.wishlisted, #cart-wrap .button',
 			'prop' => 'background',
 		),
 		
@@ -459,6 +459,15 @@ function themify_theme_customizer_definition( $args ) {
 			'prop' => 'logo',
 		),
 
+		'site-logo_margin' => array(
+			'control' => array(
+				'type'    => 'Themify_Margin_Control',
+				'label'   => __( 'Site Logo Margin', 'themify' ),
+			),
+			'selector' => '#site-logo',
+			'prop' => 'margin',
+		),
+
 		// This element is not CSS, but markup written by site_description()
 		'site-tagline' => array(
 			'control' => array(
@@ -467,6 +476,15 @@ function themify_theme_customizer_definition( $args ) {
 			),
 			'selector' => '#site-description',
 			'prop' => 'tagline',
+		),
+
+		'site-tagline_margin' => array(
+			'control' => array(
+				'type'    => 'Themify_Margin_Control',
+				'label'   => __( 'Site Tagline Margin', 'themify' ),
+			),
+			'selector' => '#site-description',
+			'prop' => 'margin',
 		),
 
 		'end_titletagline_acc' => $themify_customizer->accordion_end(),
@@ -491,7 +509,7 @@ function themify_theme_customizer_definition( $args ) {
 				'label'   => __( 'Menu Link Color', 'themify' ),
 				'show_label' => false,
 			),
-			'selector' => '#main-nav a',
+			'selector' => '#main-nav a, .transparent-header #main-nav a',
 			'prop' => 'color',
 		),
 
@@ -554,7 +572,7 @@ function themify_theme_customizer_definition( $args ) {
 				'label'   => __( 'Menu Link Hover Color', 'themify' ),
 				'show_label' => false,
 			),
-			'selector' => '#main-nav a:hover',
+			'selector' => '#main-nav a:hover, .transparent-header #main-nav a:hover',
 			'prop' => 'color',
 		),
 
@@ -765,7 +783,7 @@ function themify_theme_customizer_definition( $args ) {
 		// Accordion End   ---------------------------
 
 		// Accordion Start ---------------------------
-		'start_shop_acc' => $themify_customizer->accordion_start( __( 'Shop', 'themify' ) ),
+		'start_shop_acc' => $themify_customizer->accordion_start( __( 'Shop', 'themify' ), 'themify_options', 'themify_is_woocommerce_active' ),
 		
 		'shop_product_title_font' => array(
 			'control' => array(

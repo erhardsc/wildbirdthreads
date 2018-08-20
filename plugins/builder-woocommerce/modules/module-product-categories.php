@@ -38,7 +38,7 @@ class TB_Product_Categories_Module extends Themify_Builder_Component_Module {
                                 'mode'=>'sprite',
 				'label' => __('Layout', 'builder-wc'),
 				'options' => array(
-					array('img' => 'list-post', 'value' => 1, 'label' => __('1 Column', 'builder-wc')),
+					array('img' => 'list_post', 'value' => 1, 'label' => __('1 Column', 'builder-wc')),
 					array('img' => 'grid2', 'value' => 2, 'label' => __('2 Columns', 'builder-wc')),
 					array('img' => 'grid3', 'value' => 3, 'label' => __('3 Columns', 'builder-wc')),
 					array('img' => 'grid4', 'value' => 4, 'label' => __('4 Columns', 'builder-wc'),'selected'=>true),
@@ -117,15 +117,15 @@ class TB_Product_Categories_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'builder-wc'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'builder-wc') )
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'builder-wc') )
 			)
 		);
 	}
 
 	public function get_default_settings() {
 		return array(
-			'latest_products' => 3,
-			'columns' => 4
+			'latest_products' => '3',
+			'columns' => '4'
 		);
 	}
 
@@ -145,14 +145,17 @@ class TB_Product_Categories_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family('.module-product-categories'),
-                        self::get_color('.module-product-categories','font_color',__('Font Color', 'themify')),
+                        self::get_color('.module-product-categories .products .product a','font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-product-categories'),
                         self::get_line_height('.module-product-categories'),
-                        self::get_text_align('.module-product-categories'),
+                        self::get_text_align('.module-product-categories .products .product'),
+						self::get_text_transform('.module-product-categories .products .product h3', 'text_transform_title'),
+						self::get_font_style('.module-product-categories .products .product h3', 'font_style_title'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
-                        self::get_color('.module-product-categories a','link_color'),
-                        self::get_text_decoration('.module-product-categories a'),
+                        self::get_color('.module.module-product-categories a h3','link_color'),
+                        self::get_color('.module.module-product-categories a h3:hover','link_color_hover'),
+                        self::get_text_decoration('.module.module-product-categories a h3'),
 			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding('.module-product-categories'),
@@ -180,9 +183,9 @@ function themify_builder_field_product_categories( $field, $module_name ) {
 				'value_field' => 'slug',
 			) );
         $dropdown = str_replace('<select','<select data-control-type="change" data-control-binding="refresh" ',$dropdown);
-	echo '<div class="themify_builder_field ' . $field['id'] . '">
-		<div class="themify_builder_label">'. $field['label'] .'</div>
-		<div class="themify_builder_input"><div class="selectwrapper">',$dropdown,'</div>';
+	echo '<div class="tb_field ' . $field['id'] . '">
+		<div class="tb_label">'. $field['label'] .'</div>
+		<div class="tb_input"><div class="selectwrapper">',$dropdown,'</div>';
     
         if( isset( $field['description'] ) ){
             echo '<p class="description">' . $field['description'] . '</p>';

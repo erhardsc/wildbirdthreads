@@ -1343,7 +1343,7 @@ function themify_theme_page_theme_design_meta_box( $args = array() ) {
 						'meta'		=> array(),
 					),
 				),
-				'description' => __('Video format: mp4. Note: video background does not play on mobile, background image will be used as fallback.', 'themify'),
+				'description' => __('Video format: mp4. Note: video background does not play on some mobile devices, background image will be used as fallback.', 'themify'),
 				'before' => '',
 				'after' => '',
 				'separator' => ''

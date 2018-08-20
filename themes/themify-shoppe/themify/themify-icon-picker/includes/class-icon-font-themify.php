@@ -19,11 +19,7 @@ class Themify_Icon_Picker_Themify extends Themify_Icon_Picker_Font {
 	 * @return bool
 	 */
 	function is_valid_icon( $name ) {
-		if( substr( $name, 0, 3 ) === 'ti-' ) {
-			return true;
-		}
-
-		return false;
+		return strpos( $name, 'ti-' ) === 0;
 	}
 
 	function get_classname( $icon ) {

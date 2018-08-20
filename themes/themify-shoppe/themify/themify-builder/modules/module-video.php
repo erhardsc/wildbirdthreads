@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class TB_Video_Module extends Themify_Builder_Component_Module {
 	function __construct() {
+                self::$texts['title_video'] =  __('Video Title', 'themify');
+                self::$texts['caption_video'] = __('Video Caption', 'themify');
 		parent::__construct(array(
 			'name' => __('Video', 'themify'),
 			'slug' => 'video'
@@ -33,10 +35,10 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 				'label' => __('Video Style', 'themify'),
                                 'mode'=>'sprite',
 				'options' => array(
-					array('img' => 'video-top', 'value' => 'video-top', 'label' => __('Video Top', 'themify')),
-					array('img' => 'video-left', 'value' => 'video-left', 'label' => __('Video Left', 'themify')),
-					array('img' => 'video-right', 'value' => 'video-right', 'label' => __('Video Right', 'themify')),
-					array('img' => 'video-overlay', 'value' => 'video-overlay', 'label' => __('Video Overlay', 'themify'))
+					array('img' => 'video_top', 'value' => 'video-top', 'label' => __('Video Top', 'themify')),
+					array('img' => 'video_left', 'value' => 'video-left', 'label' => __('Video Left', 'themify')),
+					array('img' => 'video_right', 'value' => 'video-right', 'label' => __('Video Right', 'themify')),
+					array('img' => 'video_overlay', 'value' => 'video-overlay', 'label' => __('Video Overlay', 'themify'))
 				),
 				'render_callback' => array(
 					'binding' => 'live',
@@ -78,7 +80,7 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'title_video',
 				'type' => 'text',
-				'label' => __('Video Title', 'themify'),
+				'label' =>self::$texts['title_video'],
 				'class' => 'xlarge',
                                 'render_callback' => array(
                                     'live-selector'=>'.video-title'
@@ -93,7 +95,7 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'caption_video',
 				'type' => 'textarea',
-				'label' => __('Video Caption', 'themify'),
+				'label' => self::$texts['caption_video'],
 				'class' => 'fullwidth',
                                 'render_callback' => array(
                                     'live-selector'=>'.video-caption'
@@ -109,7 +111,7 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling', 'themify' ) )
+				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify' ) )
 			)
 		);
 	}
@@ -133,6 +135,7 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(array( '.module-video .video-content', '.module-video .video-title', '.module-video .video-title a' )),
+                        self::get_element_font_weight(array( '.module-video .video-content', '.module-video .video-title', '.module-video .video-title a' )),
                         self::get_color(array( '.module-video .video-content', '.module-video .video-title', '.module-video .video-title a', '.module-video h1', '.module-video h2', '.module-video h3:not(.module-title)', '.module-video h4', '.module-video h5', '.module-video h6' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size( '.module-video .video-content'),
                         self::get_line_height('.module-video .video-content'),
@@ -140,6 +143,7 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-video .video-content'),
                         self::get_text_transform('.module-video .video-content'),
                         self::get_font_style('.module-video .video-content'),
+                        self::get_text_decoration('.module-video .video-content','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-video a','link_color'),
@@ -159,16 +163,26 @@ class TB_Video_Module extends Themify_Builder_Component_Module {
 		$video_title = array(
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family(array( '.module-video .video-title', '.module-video .video-title a' ),'font_family_title'),
+                        self::get_element_font_weight(array( '.module-video .video-title', '.module-video .video-title a' ),'font_weight_title'),
                         self::get_color(array( '.module-video .video-title', '.module-video .video-title a' ),'font_color_title',__('Font Color', 'themify')),
                         self::get_color( array( '.module-video .video-title:hover', '.module-video .video-title a:hover' ),'font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size( '.module-video .video-title','font_size_title'),
-                        self::get_line_height('.module-video .video-title','line_height_title')
+                        self::get_line_height('.module-video .video-title','line_height_title'),
+						self::get_letter_spacing('.module-video .video-title', 'letter_spacing_title'),
+						self::get_text_transform('.module-video .video-title', 'text_transform_title'),
+						self::get_font_style('.module-video .video-title', 'font_title','font_title_bold'),
 		);
 
 		$video_caption = array(
+						// Background
+						self::get_seperator('image_bacground', __('Caption Overlay', 'themify'), false),
+						self::get_color('.module-video.video-overlay .video-wrap + .video-content', 'background_color_video_caption', __('Overlay', 'themify'), 'background-color'),
+						self::get_color('.module-video.video-overlay:hover .video-wrap + .video-content', 'b_c_h_v_caption', __('Overlay Hover', 'themify'), 'background-color'),
+						self::get_color(array('.module-video.video-overlay:hover .video-content .video-title', '.module-video.video-overlay:hover .video-content .video-caption'), 'f_c_h_v_caption', __('Overlay Hover Font Color', 'themify')),
                         // Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-video .video-content .video-caption','font_family_caption'),
+                        self::get_element_font_weight('.module-video .video-content .video-caption','font_weight_caption'),
                         self::get_color('.module-video .video-content .video-caption','font_color_caption',__('Font Color', 'themify')),
                         self::get_font_size('.module-video .video-content .video-caption','font_size_caption'),
                         self::get_line_height('.module-video .video-content .video-caption','line_height_caption')

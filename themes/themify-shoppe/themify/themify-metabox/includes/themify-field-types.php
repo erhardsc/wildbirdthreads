@@ -61,7 +61,7 @@ function themify_meta_field_image( $args ) {
 		<span class="themify_field_description"><?php echo wp_kses_post( $meta_box['description'] ); ?></span>
 	<?php endif; // meta_box description ?>
 
-	<script type="text/javascript" defer>
+	<script type="text/javascript">
 		jQuery(function($){
 			var $remove = $('#remove-<?php echo esc_js( $meta_box['name'] ); ?>');
 			$remove.find('a').on('click', function(e){
@@ -179,20 +179,20 @@ function themify_meta_field_date( $args ) {
 	$meta_value = $args['meta_value'];
 	extract($args, EXTR_OVERWRITE);
 
-	if ( isset( $meta_box['meta']['default'] ) && $meta_box['meta']['default'] != '' ) {
+	if ( !empty( $meta_box['meta']['default'] )) {
 		$default = $meta_box['meta']['default'];
 	} else {
 		$default = '';
 	}
 
-	$required = ( isset( $meta_box['meta']['required'] ) && true == $meta_box['meta']['required'] ) ? 'required' : '';
+	$required = !empty( $meta_box['meta']['required'] ) ? 'required' : '';
 
-	$pick  = isset( $meta_box['meta']['pick'] ) && '' != $meta_box['meta']['pick'] ? $meta_box['meta']['pick']  : __( 'Pick Date', 'themify' );
-	$close = isset( $meta_box['meta']['close'] ) && '' != $meta_box['meta']['close'] ? $meta_box['meta']['close'] : __( 'Done', 'themify' );
-	$clear = isset( $meta_box['meta']['clear'] ) && '' != $meta_box['meta']['clear'] ? $meta_box['meta']['clear'] : __( 'Clear', 'themify' );
-	$date_format = isset( $meta_box['meta']['date_format'] ) && '' != $meta_box['meta']['date_format'] ? $meta_box['meta']['date_format'] : 'yy-mm-dd';
-	$time_format = isset( $meta_box['meta']['time_format'] ) && '' != $meta_box['meta']['time_format'] ? $meta_box['meta']['time_format'] : 'hh:mm tt';
-	$timeseparator = isset( $meta_box['meta']['timeseparator'] ) && '' != $meta_box['meta']['timeseparator'] ? $meta_box['meta']['timeseparator'] : ' @ ';
+	$pick  = !empty( $meta_box['meta']['pick'] )? $meta_box['meta']['pick']  : __( 'Pick Date', 'themify' );
+	$close = !empty( $meta_box['meta']['close'] )  ? $meta_box['meta']['close'] : __( 'Done', 'themify' );
+	$clear = !empty( $meta_box['meta']['clear'] ) ? $meta_box['meta']['clear'] : __( 'Clear', 'themify' );
+	$date_format = !empty( $meta_box['meta']['date_format'] ) ? $meta_box['meta']['date_format'] : 'yy-mm-dd';
+	$time_format = !empty( $meta_box['meta']['time_format'] ) ? $meta_box['meta']['time_format'] : 'hh:mm tt';
+	$timeseparator = !empty( $meta_box['meta']['timeseparator'] ) ? $meta_box['meta']['timeseparator'] : ' @ ';
 
 	$html = sprintf( '
 		<div class="disableDateField"></div>
@@ -203,7 +203,7 @@ function themify_meta_field_date( $args ) {
 	$required, esc_attr( $meta_box['name'] ), esc_attr( $meta_box['name'] ), esc_attr( $meta_value? $meta_value : $default ), 'clear-'.esc_attr( $meta_box['name'] ), esc_attr( $pick ), esc_attr( $close ), esc_attr( $date_format ), esc_attr( $time_format ), esc_attr( $timeseparator ), get_option( 'start_of_week', '0' ),
 	'clear-'.esc_attr( $meta_box['name'] ), esc_attr( $meta_box['name'] ), esc_attr( $clear ), $meta_value? 'themifyFadeIn' : '' );
 
-	if(isset($meta_box['label']) && '' != $meta_box['label'])
+	if(!empty($meta_box['label']) )
 		$html = sprintf('<label for="%s">%s %s</label>', esc_attr( $meta_box['name'] ), $html, esc_attr( $meta_box['label'] ));
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
@@ -234,7 +234,7 @@ function themify_meta_field_color( $args ) {
 	<input type="button" class="button clearColor" value="' . __('&times;', 'themify') . '">',
 		esc_attr( $meta_box['name'] ), esc_attr( $meta_box['name'] ), esc_attr( $meta_value? $meta_value : $default ), esc_attr( $format ) );
 
-	if(isset($meta_box['label']) && '' != $meta_box['label'])
+	if(!empty($meta_box['label']))
 		$html = sprintf('<label for="%s">%s %s</label>', esc_attr( $meta_box['name'] ), $html, esc_attr( $meta_box['label'] ));
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
@@ -260,7 +260,7 @@ function themify_meta_field_layout( $args ) {
 	$ops_html = '';
 
 	foreach ( $meta_box['meta'] as $options ) {
-		if ( ( '' == $meta_value || !$meta_value || !isset($meta_value)) && ( isset( $options['selected'] ) && $options['selected'] ) ) {
+		if (  empty($meta_value) && !empty( $options['selected'] )) {
 			$meta_value = $options['value'];
 		}
 		if ( $meta_value == $options['value'] ) {
@@ -288,7 +288,7 @@ function themify_meta_field_layout( $args ) {
 	$html = sprintf('%s<input type="hidden" name="%s" value="%s" class="val" />',
 		$ops_html, esc_attr( $meta_box['name'] ), esc_attr( $meta_value ));
 
-	if(isset($meta_box['label']) && '' != $meta_box['label'])
+	if(!empty($meta_box['label']))
 		$html = sprintf('<label for="%s">%s %s</label>', esc_attr( $meta_box['name'] ), $html, esc_attr( $meta_box['label'] ));
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
@@ -314,7 +314,7 @@ function themify_meta_field_dropdownbutton( $args ) {
 	$name = '';
 	extract($args, EXTR_OVERWRITE);
 
-	if(isset($meta_box['main']) && $meta_box['main']) {
+	if(!empty($meta_box['main'])) {
 		$metakey = $meta_box['name'];
 		$meta_class = 'ddbtn-all';
 	} else {
@@ -331,10 +331,10 @@ function themify_meta_field_dropdownbutton( $args ) {
 		$toggle_class .= 'themify-toggle ';
 		$toggle_class .= (is_array($meta_box['toggle'])) ? implode(' ', $meta_box['toggle']) : $meta_box['toggle'];
 	}
-	if( isset($meta_box['default_toggle']) && $meta_box['default_toggle'] == 'hidden' ){
+	if( isset($meta_box['default_toggle']) && $meta_box['default_toggle'] === 'hidden' ){
 		$ext_attr = 'style="display:none;"';
 	}
-	if( isset($meta_box['enable_toggle']) && $meta_box['enable_toggle'] == true ) {
+	if( !empty($meta_box['enable_toggle']) ) {
 		$toggle_class .= ' enable_toggle';
 		$toggle_enable = true;
 	}
@@ -345,7 +345,7 @@ function themify_meta_field_dropdownbutton( $args ) {
 
 	foreach($meta_box['states'] as $state) {
 		$state['icon'] = sprintf( $state['icon'], THEMIFY_METABOX_URI . '/img' );
-		if($state['value'] == $meta_value) {
+		if($state['value'] === $meta_value) {
 			$first = '
 			<div class="first-ddbtn">
 				<a href="#" data-val="'.esc_attr( $state['value'] ).'" data-name="'.esc_attr( $state['name'] ).'" title="'.esc_attr( $state['title'] ).'">
@@ -386,8 +386,8 @@ function themify_meta_field_dropdownbutton( $args ) {
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] ) ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] ) )  $html .= $meta_box['after'];
 
 	echo $html;
 }
@@ -415,7 +415,7 @@ function themify_meta_field_dropdown( $args ) {
 	foreach($meta_box['meta'] as $option){
 		$ops_html .= sprintf('<option value="%s" %s>%s</option>',
 			esc_attr( $option['value'] ),
-			isset( $meta_value ) && '' != $meta_value? selected( $meta_value, esc_attr( $option['value'] ), false )
+			!empty( $meta_value )? selected( $meta_value, esc_attr( $option['value'] ), false )
 				: selected( isset( $option['selected'] )? $option['selected'] : '', true, false ),
 			esc_html( $option['name'] )
 		);
@@ -428,8 +428,8 @@ function themify_meta_field_dropdown( $args ) {
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] ) ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] )  )  $html .= $meta_box['after'];
 
 	echo $html;
 }
@@ -448,8 +448,8 @@ function themify_meta_field_radio( $args ) {
 
 	$html = '';
 	foreach ( $meta_box['meta'] as $k => $option ) {
-		$radio_selected = ( isset( $option['selected'] ) && $option['selected'] && '' == $meta_value ) || ( isset( $meta_box['default'] ) && $option['value'] == $meta_box['default'] && '' == $meta_value ) ? 'checked="checked"' : checked( $meta_value, esc_attr( $option['value'] ), false );
-		$disabled = isset( $option['disabled'] ) && $option['disabled'] == true ? 'disabled="disabled"' : '';
+		$radio_selected = ( !empty( $option['selected'] ) && '' == $meta_value ) || ( isset( $meta_box['default'] ) && $option['value'] == $meta_box['default'] && '' == $meta_value ) ? 'checked="checked"' : checked( $meta_value, esc_attr( $option['value'] ), false );
+		$disabled = !empty( $option['disabled'] )  ? 'disabled="disabled"' : '';
 
 		$rid = $meta_box['name'] . '-' . esc_attr( $option['value'] );
 		$html .= sprintf( '<input type="radio" name="%s" id="%s" value="%s" %s %s /><label for="%s" class="selectit">%s</label>',
@@ -488,12 +488,12 @@ function themify_meta_field_separator( $args ) {
 	$toggle_class = isset( $args['toggle_class'] ) ? $args['toggle_class'] : '';
 	$ext_attr = isset( $args['ext_attr'] ) ? $args['ext_attr'] : '';
 
-	$html = isset($meta_box['meta']['html']) && '' != $meta_box['meta']['html']? $meta_box['meta']['html'] : '<hr class="meta_fields_separator" />';
+	$html = !empty($meta_box['meta']['html']) ? $meta_box['meta']['html'] : '<hr class="meta_fields_separator" />';
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
 
 	$out = '<div class="themify_field_row clearfix ' . esc_attr( $toggle_class ) . '" ' . esc_attr( $ext_attr );
-	if ( isset( $args['data_hide'] ) && ! empty( $args['data_hide'] ) ) {
+	if (  ! empty( $args['data_hide'] ) ) {
 		$out .= ' data-hide="' . esc_attr( $args['data_hide'] ) . '"';
 	}
 	$out .= '>' . $html . '</div>';
@@ -519,7 +519,7 @@ function themify_meta_field_checkbox( $args ) {
 	$html = sprintf('<input type="checkbox" id="%s" name="%s" %s class="%s" data-val="%s" />',
 		esc_attr( $meta_box['name'] ), esc_attr( $meta_box['name'] ), $checked, esc_attr( $meta_box['name'] ).'-toggle-control', esc_attr( $meta_box['name'] ));
 
-	if ( isset( $meta_box['label'] ) && '' != $meta_box['label'] ) {
+	if ( !empty( $meta_box['label'] )  ) {
 		$html = sprintf( '<label for="%s">%s %s</label>', esc_attr( $meta_box['name'] ), $html, esc_attr( $meta_box['label'] ) );
 	}
 
@@ -527,8 +527,8 @@ function themify_meta_field_checkbox( $args ) {
 		$html .= themify_meta_field_get_description( $meta_box['description'] );
 	}
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] )  ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] ) )  $html .= $meta_box['after'];
 
 	echo $html;
 }
@@ -549,7 +549,7 @@ function themify_meta_field_textbox( $args ) {
 		$meta_value = $meta_box['default'];
 	}
 
-	if ( isset( $meta_box['meta']['size'] ) && '' != $meta_box['meta']['size'] ) {
+	if ( !empty( $meta_box['meta']['size'] )  ) {
 		$class = $meta_box['meta']['size'];
 	} else {
 		$class = '';
@@ -558,7 +558,7 @@ function themify_meta_field_textbox( $args ) {
 	$html = sprintf('<input type="text" id="%s" name="%s" value="%s" size="55" class="themify_input_field %s" />',
 		esc_attr( $meta_box['name'] ), esc_attr( $meta_box['name'] ), esc_attr( $meta_value ), $class);
 
-	if ( isset( $meta_box['label'] ) && '' != $meta_box['label'] ) {
+	if ( !empty( $meta_box['label'] ) ) {
 		$html = themify_meta_field_get_label($html, $meta_box);
 	}
 
@@ -566,8 +566,8 @@ function themify_meta_field_textbox( $args ) {
 		$html .= themify_meta_field_get_description( $meta_box['description'] );
 	}
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] ) ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] ) )  $html .= $meta_box['after'];
 
 	echo $html;
 }
@@ -598,8 +598,8 @@ function themify_meta_field_textarea( $args ) {
 		$html .= themify_meta_field_get_description( $meta_box['description'] );
 	}
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] ) ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] ) )  $html .= $meta_box['after'];
 
 	echo $html;
 }
@@ -635,7 +635,7 @@ function themify_meta_field_video( $args ) {
 		<?php themify_uploader($meta_box['name'], $featimg_uploader_args) ?>
 	</div>
 
-	<script type="text/javascript" defer>
+	<script type="text/javascript">
 		jQuery(function($){
 			$('#remove-<?php echo esc_js( $meta_box['name'] ); ?>').find('a').on('click', function(e){
 				e.preventDefault();
@@ -665,8 +665,8 @@ function themify_meta_field_video( $args ) {
 
 	$html .= isset( $meta_box['description'] )? themify_meta_field_get_description($meta_box['description']) : '';
 
-	if( isset( $meta_box['before'] ) && $meta_box['before'] ) $html = $meta_box['before'] . $html;
-	if( isset( $meta_box['after'] ) && $meta_box['after'] )  $html .= $meta_box['after'];
+	if( !empty( $meta_box['before'] ) ) $html = $meta_box['before'] . $html;
+	if( !empty( $meta_box['after'] ) )  $html .= $meta_box['after'];
 
 	$html = $html . '<!-- Themify Video END -->';
 	echo $html;
@@ -681,9 +681,9 @@ function themify_meta_field_video( $args ) {
  * @since 1.3.2
  */
 function themify_meta_field_get_label( $html, $meta_box, $echo = false ) {
-	$label_for = ( isset( $meta_box['name'] ) && '' != $meta_box['name'] ) ? esc_attr( $meta_box['name'] ) : '';
-	if ( isset( $meta_box['label'] ) && '' != $meta_box['label'] ) {
-		if ( isset( $meta_box['label_before'] ) && $meta_box['label_before'] ) {
+	$label_for = !empty( $meta_box['name'] )  ? esc_attr( $meta_box['name'] ) : '';
+	if ( !empty( $meta_box['label'] )) {
+		if ( !empty( $meta_box['label_before'] )  ) {
 			$html = sprintf( '<label for="%s">%s %s</label>', $label_for, wp_kses_post( $meta_box['label'] ), $html );
 		} else {
 			$html = sprintf( '<label for="%s">%s %s</label>', $label_for, $html, wp_kses_post( $meta_box['label'] ) );
@@ -703,7 +703,7 @@ function themify_meta_field_get_label( $html, $meta_box, $echo = false ) {
  * @return string
  */
 function themify_meta_field_get_description( $desc = '' ) {
-	return ( isset( $desc ) && '' != $desc ) ? '<span class="themify_field_description">' . wp_kses_post( $desc ) . '</span>' : '';
+	return !empty( $desc )? '<span class="themify_field_description">' . wp_kses_post( $desc ) . '</span>' : '';
 }
 
 function themify_meta_field_assignments( $args ) {
@@ -714,8 +714,7 @@ function themify_meta_field_assignments( $args ) {
 	if( '' == $selected )
 		$selected = array();
 	$post_types = apply_filters( 'themify_assignments_post_types', get_post_types( array( 'public' => true ) ) );
-	unset( $post_types['page'] );
-	unset( $post_types['attachment'] );
+	unset( $post_types['page'],$post_types['attachment'] );
 	if( isset( $field['exclude_post_types'] ) ) {
 		foreach( $field['exclude_post_types'] as $type ) {
 			unset( $post_types[$type] );

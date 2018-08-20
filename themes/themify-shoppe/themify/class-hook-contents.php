@@ -81,33 +81,34 @@ class Themify_Hooks {
 		unset( $logic['roles'] );
 
 		if ( ! empty( $logic ) ) {
+                        $post_type = get_post_type();
 			$visible = false; // if any condition is set for a hook, hide it on all pages of the site except for the chosen ones.
 
 			if (
-				( is_front_page() && isset($logic['general']['home']) )
-				|| ( is_page() && isset( $logic['general']['page'] ) && ! is_front_page() && ! themify_is_custom_404() )
-				|| ( is_single() && isset($logic['general']['single']) )
-				|| ( is_search() && isset($logic['general']['search']) )
-				|| ( is_author() && isset($logic['general']['author']) )
-				|| ( is_category() && isset($logic['general']['category']) )
-				|| ( is_tag() && isset($logic['general']['tag']) )
-				|| ( is_date() && isset($logic['general']['date']) )
-				|| ( is_year() && isset($logic['general']['year']) )
-				|| ( is_month() && isset($logic['general']['month']) )
-				|| ( is_day() && isset($logic['general']['day']) )
-				|| ( is_singular() && isset($logic['general'][$query_object->post_type]) && $query_object->post_type != 'page' && $query_object->post_type != 'post' )
-				|| ( is_post_type_archive() && isset( $logic['post_type_archive'][$query_object->name] ) && $query_object->name != 'page' && $query_object->name != 'post' )
-				|| ( is_tax() && isset($logic['general'][$query_object->taxonomy]) )
+				( isset($logic['general']['home']) && is_front_page())
+				|| ( isset( $logic['general']['page'] ) &&  is_page() && ! is_front_page() && ! themify_is_custom_404() )
+				|| ( isset($logic['general']['single']) && is_single() )
+				|| ( isset($logic['general']['search']) && is_search() )
+				|| ( isset($logic['general']['author']) && is_author())
+				|| ( isset($logic['general']['category']) && is_category() )
+				|| ( isset($logic['general']['tag'])  && is_tag())
+				|| ( isset($logic['general']['date']) && is_date() )
+				|| ( isset($logic['general']['year']) && is_year())
+				|| ( isset($logic['general']['month']) && is_month())
+				|| ( isset($logic['general']['day']) && is_day())
+				|| (isset($query_object) && (( isset($logic['general'][$post_type]) && $post_type !== 'page' && $post_type !== 'post' &&  is_singular()  )
+				|| ( isset( $logic['post_type_archive'][$query_object->name] ) &&  $query_object->name !== 'page' && $query_object->name !== 'post' && is_post_type_archive()  )
+				|| ( is_tax() && isset($logic['general'][$query_object->taxonomy]))))
 			) {
 				$visible = true;
 			} else { // let's dig deeper into more specific visibility rules
 				if ( ! empty( $logic['tax'] ) ) {
 					if ( is_singular() ) {
-						if ( isset( $logic['tax']['category_single'] ) && ! empty( $logic['tax']['category_single'] ) ) {
+						if (! empty( $logic['tax']['category_single'] ) ) {
 							$cat = get_the_category();
 							if ( ! empty( $cat ) ) {
 								foreach ( $cat as $c ) {
-									if ( $c->taxonomy == 'category' && isset( $logic['tax']['category_single'][$c->slug] ) ) {
+									if ( $c->taxonomy === 'category' && isset( $logic['tax']['category_single'][$c->slug] ) ) {
 										$visible = true;
 										break;
 									}
@@ -117,7 +118,7 @@ class Themify_Hooks {
 					} else {
 						foreach ( $logic['tax'] as $tax => $terms ) {
 							$terms = array_keys( $terms );
-							if ( ( $tax == 'category' && is_category($terms) ) || ( $tax == 'post_tag' && is_tag( $terms ) ) || ( is_tax( $tax, $terms ) )
+							if ( ( $tax === 'category' && is_category($terms) ) || ( $tax === 'post_tag' && is_tag( $terms ) ) || ( is_tax( $tax, $terms ) )
 							) {
 								$visible = true;
 								break;
@@ -125,19 +126,19 @@ class Themify_Hooks {
 						}
 					}
 				}
-				if ( ! $visible && ! empty( $logic['post_type'] ) ) {
+				if ($visible===false && ! empty( $logic['post_type'] ) ) {
 					foreach ( $logic['post_type'] as $post_type => $posts ) {
 						$posts = array_keys( $posts );
-						if ( ( $post_type == 'post' && is_single() && is_single($posts) ) || ( $post_type == 'page' && (
-								( is_page() && is_page( $posts ) ) || ( ! is_front_page() && is_home() && in_array( get_post_field( 'post_name', get_option('page_for_posts' ) ), $posts ) ) // check for Posts page
-								) ) || ( is_singular( $post_type ) && in_array( $query_object->post_name, $posts ) )
+						if ( ( $post_type === 'post' &&  is_single($posts) ) || ( $post_type === 'page' && (
+								( is_page( $posts ) ) || ( ! is_front_page() && is_home() && in_array( get_post_field( 'post_name', get_option('page_for_posts' ) ), $posts,true ) ) // check for Posts page
+								) ) || ( is_singular( $post_type ) && in_array( $query_object->post_name, $posts,true ) )
 						) {
 							$visible = true;
 							break;
 						}
 					}
 				}
-				if( themify_is_shop() && ( $shop_page_slug = get_post_field( 'post_name', get_option( 'woocommerce_shop_page_id' ) ) ) && isset( $logic['post_type']['page'][ $shop_page_slug ] ) ) {
+				if($visible===false &&  themify_is_shop() && ( $shop_page_slug = get_post_field( 'post_name', get_option( 'woocommerce_shop_page_id' ) ) ) && isset( $logic['post_type']['page'][ $shop_page_slug ] ) ) {
 					$visible = true;
 				}
 			}
@@ -235,38 +236,14 @@ class Themify_Hooks {
 		/* register ecommerce hooks group only if current theme supports WooCommerce */
 		if ( themify_is_woocommerce_active() ) {
 			foreach ( array(
-				array( 'themify_product_slider_add_to_cart_before', 'product_slider_add_to_cart_before', 'ecommerce' ),
-				array( 'themify_product_slider_add_to_cart_after', 'product_slider_add_to_cart_after', 'ecommerce' ),
-				array( 'themify_product_slider_image_start', 'product_slider_image_start', 'ecommerce' ),
-				array( 'themify_product_slider_image_end', 'product_slider_image_end', 'ecommerce' ),
-				array( 'themify_product_slider_title_start', 'product_slider_title_start', 'ecommerce' ),
-				array( 'themify_product_slider_title_end', 'product_slider_title_end', 'ecommerce' ),
-				array( 'themify_product_slider_price_start', 'product_slider_price_start', 'ecommerce' ),
-				array( 'themify_product_slider_price_end', 'product_slider_price_end', 'ecommerce' ),
 				array( 'themify_product_image_start', 'product_image_start', 'ecommerce' ),
 				array( 'themify_product_image_end', 'product_image_end', 'ecommerce' ),
 				array( 'themify_product_title_start', 'product_title_start', 'ecommerce' ),
 				array( 'themify_product_title_end', 'product_title_end', 'ecommerce' ),
 				array( 'themify_product_price_start', 'product_price_start', 'ecommerce' ),
 				array( 'themify_product_price_end', 'product_price_end', 'ecommerce' ),
-				array( 'themify_product_cart_image_start', 'product_cart_image_start', 'ecommerce' ),
-				array( 'themify_product_cart_image_end', 'product_cart_image_end', 'ecommerce' ),
-				array( 'themify_product_single_image_before', 'product_single_image_before', 'ecommerce' ),
-				array( 'themify_product_single_image_end', 'product_single_image_end', 'ecommerce' ),
-				array( 'themify_product_single_title_before', 'product_single_title_before', 'ecommerce' ),
-				array( 'themify_product_single_title_end', 'product_single_title_end', 'ecommerce' ),
-				array( 'themify_product_single_price_end', 'product_single_price_end', 'ecommerce' ),
-				array( 'themify_shopdock_before', 'shopdock_before', 'ecommerce' ),
 				array( 'themify_checkout_start', 'checkout_start', 'ecommerce' ),
 				array( 'themify_checkout_end', 'checkout_end', 'ecommerce' ),
-				array( 'themify_shopdock_end', 'shopdock_end', 'ecommerce' ),
-				array( 'themify_shopdock_after', 'shopdock_after', 'ecommerce' ),
-				array( 'themify_sorting_before', 'sorting_before', 'ecommerce' ),
-				array( 'themify_sorting_after', 'sorting_after', 'ecommerce' ),
-				array( 'themify_related_products_start', 'related_products_start', 'ecommerce' ),
-				array( 'themify_related_products_end', 'related_products_end', 'ecommerce' ),
-				array( 'themify_breadcrumb_before', 'breadcrumb_before', 'ecommerce' ),
-				array( 'themify_breadcrumb_after', 'breadcrumb_after', 'ecommerce' ),
 				array( 'themify_ecommerce_sidebar_before', 'ecommerce_sidebar_before', 'ecommerce' ),
 				array( 'themify_ecommerce_sidebar_after', 'ecommerce_sidebar_after', 'ecommerce' ),
 			) as $key => $value ) {
@@ -334,17 +311,17 @@ class Themify_Hooks {
 			$field_ids = array();
 		}
 
-		$out = '<div class="themify-info-link">' . sprintf( __( 'Use <a href="%s">Hook Content</a> to add content to the theme without editing any template file.', 'themify' ), 'http://themify.me/docs/hook-content' ) . '</div>';
+		$out = '<div class="themify-info-link">' . sprintf( __( 'Use <a href="%s">Hook Content</a> to add content to the theme without editing any template file.', 'themify' ), 'https://themify.me/docs/hook-content' ) . '</div>';
 
 		$out .= '<ul id="hook-content-list">';
-		if ( ! empty( $field_ids ) ) : foreach ( $field_ids as $key => $value ) :
+		if ( ! empty( $field_ids ) ) : foreach ( $field_ids as $value ) :
 				$out .= $this->item_template( $value );
 			endforeach;
 		endif;
 		$out .= '</ul>';
 		$out .= '<p class="add-link themify-add-hook alignleft"><a href="#">' . __( 'Add item', 'themify' ) . '</a></p>';
 		$out .= '<a class="button button-secondary see-hook-locations alignright" href="' . add_query_arg(array( 'tp' => 1), home_url()) . '">' . __( 'See Hook Locations', 'themify' ) . '</a>';
-		$out .= '<input type="hidden" id="themify-hooks-field-ids" name="' . esc_attr( $this->pre . '_field_ids' ) . '" value=\'' . json_encode( $field_ids ) . '\' />';
+		$out .= '<input type="hidden" id="themify-hooks-field-ids" name="' .  $this->pre . '_field_ids" value=\'' . json_encode( $field_ids ) . '\' />';
 		return $out;
 	}
 
@@ -362,22 +339,22 @@ class Themify_Hooks {
 	}
 
 	function item_template( $id ) {
-		$output = '<li class="social-link-item" data-id="' . esc_attr( $id ) . '">';
+		$output = '<li class="social-link-item" data-id="' . $id . '">';
 		$output .= '<div class="social-drag">' . esc_html__( 'Drag to Sort', 'themify' ) . '<i class="ti-arrows-vertical"></i></div>';
-		$output .= '<div class="row"><select name="' . esc_attr( $this->pre . '-' . $id . '-location' ) . '" class="width6">';
+		$output .= '<div class="row"><select name="' .  $this->pre . '-' . $id . '-location" class="width6">';
 		$locations = $this->get_locations();
 		foreach ( $this->get_location_groups() as $group => $label ) {
 			if ( ! empty( $locations[$group] ) ) {
 				$output .= '<optgroup label="' . esc_attr( $label ) . '">';
 				foreach ( $locations[$group] as $key => $value ) {
-					$output .= '<option value="' . esc_attr( $key ) . '" ' . selected( themify_get( "{$this->pre}-{$id}-location" ), $key, false ) . '>' . esc_html( $value ) . '</option>';
+					$output .= '<option value="' . $key . '" ' . selected( themify_get( "{$this->pre}-{$id}-location" ), $key, false ) . '>' . esc_html( $value ) . '</option>';
 				}
 				$output .= '</optgroup>';
 			}
 		}
 		$output .= '</select>';
-		$output .= '&nbsp; <a class="button button-secondary themify-visibility-toggle" href="#" data-target="#' . $this->pre . '-' . $id . '-visibility"> ' . __( '+ Conditions', 'themify' ) . ' </a> <input type="hidden" id="' . $this->pre . '-' . $id . '-visibility" name="' . esc_attr( $this->pre . '-' . $id . '-visibility' ) . '" value="' . esc_attr( themify_get( $this->pre . '-' . $id . '-visibility' ) ) . '" /></div>';
-		$output .= '<div class="row"><textarea class="widthfull" name="' . esc_attr( $this->pre . '-' . $id . '-code' ) . '" rows="6" cols="73">' . esc_html( themify_get( "{$this->pre}-{$id}-code" ) ) . '</textarea>';
+		$output .= '&nbsp; <a class="button button-secondary themify-visibility-toggle" href="#" data-target="#' . $this->pre . '-' . $id . '-visibility"> ' . __( '+ Conditions', 'themify' ) . ' </a> <input type="hidden" id="' . $this->pre . '-' . $id . '-visibility" name="' . $this->pre . '-' . $id . '-visibility" value="' . esc_attr( themify_get( $this->pre . '-' . $id . '-visibility' ) ) . '" /></div>';
+		$output .= '<div class="row"><textarea class="widthfull" name="' . $this->pre . '-' . $id . '-code" rows="6" cols="73">' . esc_html( themify_get( "{$this->pre}-{$id}-code" ) ) . '</textarea>';
 		$output .= '<a href="#" class="remove-item"><i class="ti-close"></i></a>';
 		$output .= '</li>';
 		return $output;
@@ -402,7 +379,7 @@ class Themify_Hooks {
 	public function visibility_dialog() {
 		global $hook_suffix;
 
-		if ( 'toplevel_page_themify' == $hook_suffix ) {
+		if ( 'toplevel_page_themify' === $hook_suffix ) {
 			echo $this->get_visibility_dialog();
 		}
 	}

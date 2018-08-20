@@ -210,7 +210,9 @@ function themify_enqueue_google_fonts() {
 	}
 
 	$fonts = apply_filters( 'themify_google_fonts', array() );
-	if( ! empty( $fonts ) ) {
+	if ( ! empty( $fonts ) ) {
+		$fonts = array_filter( $fonts, 'themify_validate_font_enqueue' );
+
 		$path = ( is_ssl() ? 'https' : 'http' ) . '://fonts.googleapis.com/css?family=' . join( '|', $fonts );
 		if( $subsets = themify_get_font_subsets() ) {
 			$subsets = join( ',', $subsets );
@@ -221,5 +223,23 @@ function themify_enqueue_google_fonts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'themify_enqueue_google_fonts', 30 );
+
+/**
+ * Filters the font list in themify_enqueue_google_fonts()
+ * to ensure all font names are valid.
+ *
+ * @return bool
+ */
+function themify_validate_font_enqueue( $font ) {
+	if ( $font[0] === ':' ) {
+	    return false;
+	}
+	$font = preg_replace( '/[\s:|]/', '', $font );
+	if ( empty( $font ) ) {
+		return false;
+	}
+
+	return true;
+}
 
 endif;

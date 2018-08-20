@@ -67,7 +67,7 @@ class Themify_Builder_Import_Export {
                             }
                             if (!empty($col['modules'])) {
                                 foreach ($col['modules'] as &$mod) {
-                                    if (isset($mod['mod_name']) && $mod['mod_name'] === 'gallery' && $mod['mod_settings']['shortcode_gallery']) {
+                                    if (isset($mod['mod_name']) && $mod['mod_name'] === 'gallery' && !empty($mod['mod_settings']['shortcode_gallery'])) {
                                         $mod['mod_settings']['shortcode_gallery'] = self::replace_with_image_path($mod['mod_settings']['shortcode_gallery']);
                                     }
                                     // Check for Sub-rows
@@ -78,7 +78,7 @@ class Themify_Builder_Import_Export {
                                             }
                                             if (!empty($sub_col['modules'])) {
                                                 foreach ($sub_col['modules'] as &$sub_module) {
-                                                    if (isset($sub_module['mod_name']) && $sub_module['mod_name'] === 'gallery' && $sub_module['mod_settings']['shortcode_gallery']) {
+                                                    if (isset($sub_module['mod_name']) && $sub_module['mod_name'] === 'gallery' && !empty($sub_module['mod_settings']['shortcode_gallery'])) {
                                                         $sub_module['mod_settings']['shortcode_gallery'] = self::replace_with_image_path($sub_module['mod_settings']['shortcode_gallery']);
                                                     }
                                                 }
@@ -157,7 +157,7 @@ class Themify_Builder_Import_Export {
         }
     }
     
-    public static function repplace_export($builder_data){
+    public static function replace_export($builder_data,$post_id){
         foreach ($builder_data as &$row) {
                 if(!empty($row['styling']['background_slider'])){
                         $row['styling']['background_slider'] = self::replace_ids_image_path($row['styling']['background_slider'],$post_id);

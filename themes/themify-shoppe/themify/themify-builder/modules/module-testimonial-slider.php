@@ -58,8 +58,9 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 				'label' => __('Testimonial Slider Layout', 'themify'),
                                 'mode'=>'sprite',
 				'options' => array(
-					array('img' => 'testimonials-image-top', 'value' => 'image-top', 'label' => __('Image Top', 'themify')),
-					array('img' => 'testimonials-image-bottom', 'value' => 'image-bottom', 'label' => __('Image Bottom', 'themify'))
+					array('img' => 'testimonials_image_top', 'value' => 'image-top', 'label' => __('Image Top', 'themify')),
+					array('img' => 'testimonials_image_bottom', 'value' => 'image-bottom', 'label' => __('Image Bottom', 'themify')),
+					array('img' => 'testimonials_image_bubble', 'value' => 'image-bubble', 'label' => __('Image Bubble', 'themify'))
 				)
 			),
 			array(
@@ -140,6 +141,7 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 				'id' => 'img_w_slider',
 				'type' => 'text',
 				'label' => __('Image Width', 'themify'),
+                                'default'=>100,
 				'class' => 'xsmall',
 				'help' => 'px'
 			),
@@ -147,6 +149,7 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 				'id' => 'img_h_slider',
 				'type' => 'text',
 				'label' => __('Image Height', 'themify'),
+                                'default'=>100,
 				'class' => 'xsmall',
 				'help' => 'px'
 			),
@@ -161,6 +164,12 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 						'default' => 1,
 						'options' => $visible_opt,
 						'help' => __('Visible', 'themify')
+					),
+					array(
+						'id' => 'mob_visible_opt_slider',
+						'type' => 'select',
+						'options' => array('', 1, 2, 3, 4),
+						'help' => __( 'Mobile Visible', 'themify' )
 					),
 					array(
 						'id' => 'auto_scroll_opt_slider',
@@ -281,7 +290,7 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') )
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') )
 			)
 		);
 	}
@@ -289,6 +298,8 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 	public function get_default_settings() {
 		return array(
 			'layout_testimonial' => 'image-top',
+                        'img_h_slider'=>100,
+                        'img_w_slider'=>100,
 			'tab_content_testimonial' => array(
 				array( 
 					'title_testimonial' => esc_html__( 'Optional Title', 'themify' ), 
@@ -315,6 +326,7 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(array('.module-testimonial-slider .testimonial-content','.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a')),
+                        self::get_element_font_weight(array('.module-testimonial-slider .testimonial-content','.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a')),
                         self::get_color( array('.module-testimonial-slider .testimonial-content', '.module-testimonial-slider .testimonial-content h1', '.module-testimonial-slider .testimonial-content h2', '.module-testimonial-slider .testimonial-content h3', '.module-testimonial-slider .testimonial-content h4', '.module-testimonial-slider .testimonial-content h5', '.module-testimonial-slider .testimonial-content h6', '.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a'),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-testimonial-slider .testimonial-content'),
                         self::get_line_height('.module-testimonial-slider .testimonial-content'),
@@ -322,6 +334,7 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-testimonial-slider .testimonial-content'),
                         self::get_text_transform('.module-testimonial-slider .testimonial-content'),
                         self::get_font_style('.module-testimonial-slider .testimonial-content'),
+                        self::get_text_decoration('.module-testimonial-slider .testimonial-content','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-testimonial-slider a','link_color'),
@@ -342,18 +355,89 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family( array('.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a'),'font_family_title'),
+                        self::get_element_font_weight( array('.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a'),'font_weight_title'),
                         self::get_color(array('.module-testimonial-slider .testimonial-content .testimonial-title', '.module-testimonial-slider .testimonial-content .testimonial-title a'),'font_color_title',__('Font Color', 'themify')),
-                        self::get_color(array('.module-testimonial-slider .testimonial-content .testimonial-title:hover', '.module-testimonial-slider .testimonial-content .testimonial-title a:hover'),'font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size( '.module-testimonial-slider .testimonial-content .testimonial-title','font_size_title'),
-                        self::get_line_height('.module-testimonial-slider .testimonial-content .testimonial-title','line_height_title')
+                        self::get_line_height('.module-testimonial-slider .testimonial-content .testimonial-title','line_height_title'),
+						self::get_letter_spacing('.module-testimonial-slider .testimonial-content .testimonial-title', 'letter_spacing_title'),
+						self::get_text_transform('.module-testimonial-slider .testimonial-content .testimonial-title', 'text_transform_title'),
+						self::get_font_style('.module-testimonial-slider .testimonial-content .testimonial-title', 'font_style_title','font_title_bold'),
 		);
 
 		$testimonial_content = array(
+			// Background
+                        self::get_seperator('content_background',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-testimonial-slider .testimonial-entry-content', 'background_color_content',__( 'Background Color', 'themify' ),'background-color'),
 			// Font
-                        self::get_font_family('.module-testimonial-slider .testimonial-content','font_family_content'),
-                        self::get_color('.module-testimonial-slider .testimonial-content','font_color_content',__('Font Color', 'themify')),
-                        self::get_font_size('.module-testimonial-slider .testimonial-content','font_size_content'),
-                        self::get_line_height('.module-testimonial-slider .testimonial-content','line_height_content')
+						self::get_seperator('font',__('Font', 'themify')),
+                        self::get_font_family('.module-testimonial-slider .testimonial-entry-content','font_family_content'),
+                        self::get_element_font_weight('.module-testimonial-slider .testimonial-entry-content','font_weight_content'),
+                        self::get_color('.module-testimonial-slider .testimonial-entry-content','font_color_content',__('Font Color', 'themify')),
+                        self::get_font_size('.module-testimonial-slider .testimonial-entry-content','font_size_content'),
+                        self::get_line_height('.module-testimonial-slider .testimonial-entry-content','line_height_content'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-testimonial-slider .testimonial-entry-content', 'content_padding'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-testimonial-slider .testimonial-entry-content', 'content_border')
+		);
+		
+		$testimonial_container = array(
+			// Background
+                        self::get_seperator('container_background',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-testimonial-slider .testimonial-content', 'b_c_container',__( 'Background Color', 'themify' ),'background-color'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-testimonial-slider .testimonial-content', 'p_container'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-testimonial-slider .testimonial-content', 'b_container')
+		);
+
+		$person_info = array(
+			// Font
+                        self::get_seperator('font',__('Person Name Font', 'themify'),false),
+                        self::get_font_family( array('.module-testimonial-slider .testimonial-content .person-name'),'font_family_person_name'),
+                        self::get_element_font_weight( array('.module-testimonial-slider .testimonial-content .person-name'),'font_weight_person_name'),
+                        self::get_color(array('.module-testimonial-slider .testimonial-content .person-name'),'font_color_person_name',__('Font Color', 'themify')),
+                        self::get_font_size( '.module-testimonial-slider .testimonial-content .person-name','font_size_person_name'),
+                        self::get_line_height('.module-testimonial-slider .testimonial-content .person-name','line_height_person_name'),
+                        self::get_text_transform('.module-testimonial-slider .testimonial-content .person-name','text_transform_person_name'),
+                        self::get_font_style('.module-testimonial-slider .testimonial-content .person-name','font_person_name','font_person_name_bold'),
+
+			// Font
+                        self::get_seperator('font',__('Person Position Font', 'themify'),false),
+                        self::get_font_family( array('.module-testimonial-slider .testimonial-content .person-position'),'font_family_person_position'),
+                        self::get_element_font_weight( array('.module-testimonial-slider .testimonial-content .person-position'),'font_weight_person_position'),
+                        self::get_color(array('.module-testimonial-slider .testimonial-content .person-position'),'font_color_person_position',__('Font Color', 'themify')),
+                        self::get_font_size( '.module-testimonial-slider .testimonial-content .person-position','font_size_person_position'),
+                        self::get_line_height('.module-testimonial-slider .testimonial-content .person-position','line_height_person_position'),
+                        self::get_text_transform('.module-testimonial-slider .testimonial-content .person-position','text_transform_person_position'),
+                        self::get_font_style('.module-testimonial-slider .testimonial-content .person-position','font_person_position','font_person_position_bold'),
+
+			// Font
+                        self::get_seperator('font',__('Person Company Font', 'themify'),false),
+                        self::get_font_family( array('.module-testimonial-slider .testimonial-content .person-company'),'font_family_company'),
+                        self::get_element_font_weight( array('.module-testimonial-slider .testimonial-content .person-company'),'font_weight_company'),
+                        self::get_color(array('.module-testimonial-slider .testimonial-content .person-company'),'font_color_company',__('Font Color', 'themify')),
+                        self::get_font_size( '.module-testimonial-slider .testimonial-content .person-company','font_size_company'),
+                        self::get_line_height('.module-testimonial-slider .testimonial-content .person-company','line_height_company'),
+                        self::get_text_transform('.module-testimonial-slider .testimonial-content .person-company','text_transform_company'),
+                        self::get_font_style('.module-testimonial-slider .testimonial-content .person-company','font_company','font_company_bold')
+		);
+
+		$controls = array(
+			// Arrows
+                        self::get_seperator('image_background',__('Arrows', 'themify'),false),
+                        self::get_color('.themify_builder_slider_wrap .carousel-prev,.themify_builder_slider_wrap .carousel-next','background_color_arrows_controls',__('Background Color', 'themify'),'background-color'),
+                        self::get_color('.themify_builder_slider_wrap .carousel-prev:hover,.themify_builder_slider_wrap .carousel-next:hover','background_color_hover_arrows_controls',__('Hover Background Color', 'themify'),'background-color'),
+						self::get_color(array( '.themify_builder_slider_wrap .carousel-prev::before,.themify_builder_slider_wrap .carousel-next::before' ),'font_color_arrows_controls',__('Color', 'themify')),
+						self::get_color(array( '.themify_builder_slider_wrap .carousel-prev:hover::before,.themify_builder_slider_wrap .carousel-next:hover::before' ),'font_color_arrows_controls_hover',__('Hover Color', 'themify')),
+			// Pager
+                        self::get_seperator('image_background',__('Pager', 'themify'),false),
+						self::get_color(array( '.themify_builder_slider_wrap .carousel-pager a' ),'font_color_pager_controls',__('Color', 'themify')),
+						self::get_color(array( '.themify_builder_slider_wrap .carousel-pager a:hover','.themify_builder_slider_wrap .carousel-pager a.selected' ),'font_color_hover_pager_controls',__('Hover Color', 'themify'))
 		);
 
 		return array(
@@ -362,12 +446,16 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 				'id' => 'module-styling',
 				'tabs' => array(
 					'general' => array(
-                                            'label' => __('General', 'themify'),
-                                            'fields' => $general
+						'label' => __('General', 'themify'),
+						'fields' => $general
 					),
-                                        'module-title' => array(
+                    'module-title' => array(
 						'label' => __( 'Module Title', 'themify' ),
 						'fields' => $this->module_title_custom_style()
+					),
+					'container' => array(
+						'label' => __( 'Testimonial Container', 'themify' ),
+						'fields' => $testimonial_container
 					),
 					'title' => array(
 						'label' => __('Testimonial Title', 'themify'),
@@ -376,6 +464,14 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 					'content' => array(
 						'label' => __('Testimonial Content', 'themify'),
 						'fields' => $testimonial_content
+					),
+					'person_info' => array(
+						'label' => __('Person Info', 'themify'),
+						'fields' => $person_info
+					),
+					'controls' => array(
+						'label' => __('Slider Controls', 'themify'),
+						'fields' => $controls
 					)
 				)
 			)
@@ -383,41 +479,6 @@ class TB_Testimonial_Slider_Module extends Themify_Builder_Component_Module {
 
 	}
 }
-
-if( ! function_exists( 'themify_builder_testimonial_author_name' ) ) :
-	function themify_builder_testimonial_author_name( $post, $show_author ) {
-		$out = '';
-		if( 'yes' === $show_author){
-			if( $author = get_post_meta( $post->ID, '_testimonial_name', true ) )
-				$out .= '<span class="dash"></span><cite class="testimonial-name">' . $author . '</cite> <br/>';
-
-			if( $position = get_post_meta( $post->ID, '_testimonial_position', true ) )
-				$out .= '<em class="testimonial-title">' . $position;
-
-				if( $link = get_post_meta( $post->ID, '_testimonial_link', true ) ){
-					if( $position ){
-						$out .= ', ';
-					}
-					else {
-						$out .= '<em class="testimonial-title">';
-					}
-					$out .= '<a href="'.esc_url($link).'">';
-				}
-
-					if( $company = get_post_meta( $post->ID, '_testimonial_company', true ) )
-						$out .= $company;
-					else
-						$out .= $link;
-
-				if( $link ) $out .= '</a>';
-
-			$out .= '</em>';
-
-			return $out;
-		}
-		return '';
-	}
-endif;
 
 ///////////////////////////////////////
 // Module Options

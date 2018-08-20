@@ -15,7 +15,7 @@
 			<div class="theme-info">
 				<div class="theme-title">
 					<h3><a href="{{{e.url}}}" target="_blank">{{{e.title}}}</a></h3>
-					<a class="tag-button lightbox" target="_blank" href="<?php echo home_url(); ?>/demo/themes/{{{e.slug}}}"><?php _e( 'demo', 'themify' ); ?></a>
+					<a class="tag-button lightbox" target="_blank" href="https://themify.me/demo/themes/{{{e.slug}}}"><?php _e( 'demo', 'themify' ); ?></a>
 				</div>
 				<!-- /theme-title -->
 				<div class="theme-excerpt">

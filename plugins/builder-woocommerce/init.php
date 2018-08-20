@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name:     Builder WooCommerce
-Plugin URI:      http://themify.me/addons/woocommerce
-Version:         1.2.3
+Plugin URI:      https://themify.me/addons/woocommerce
+Version:         1.2.4
 Author:          Themify
 Description:     Show WooCommerce products anywhere with the Builder. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
 Text Domain:     builder-wc

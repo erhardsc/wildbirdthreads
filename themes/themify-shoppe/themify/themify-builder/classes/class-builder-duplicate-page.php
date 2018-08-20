@@ -96,10 +96,9 @@ class ThemifyBuilderDuplicatePage {
 		$prefix = $suffix = '';
                 
 		if ( $post->post_type !== 'attachment' ) {
-			$prefix = '';
 			$suffix = ' Copy';
 		}
-		$new_post_author = $this->duplicate_get_current_user();
+		$new_post_author = wp_get_current_user();
 
 		$new_post = array(
 			'menu_order' => $post->menu_order,
@@ -191,7 +190,7 @@ class ThemifyBuilderDuplicatePage {
 				$post_terms = wp_get_object_terms( $post->ID, $taxonomy, array( 'orderby' => 'term_order' ) );
 				$terms = array();
                                 $terms_count = count( $post_terms );
-				for ( $i=0; $i < $terms_count; $i++ ) {
+				for ( $i=0; $i < $terms_count; ++$i ) {
 					$terms[] = $post_terms[ $i ]->slug;
 				}
 				wp_set_object_terms( $new_id, $terms, $taxonomy );
@@ -212,30 +211,10 @@ class ThemifyBuilderDuplicatePage {
 		$children = get_posts( array( 'post_type' => 'any', 'numberposts' => -1, 'post_status' => 'any', 'post_parent' => $post->ID ) );
 		// clone old attachments
 		foreach ( $children as $child ) {
-			if ( $child->post_type === 'attachment' || $child->post_type==$post->post_type){
+			if ( $child->post_type === 'attachment' || $child->post_type===$post->post_type){
                             continue;
                         }
 			$this->duplicate( $child, '', $new_id );
-		}
-	}
-
-	/**
-	 * Return current user
-	 * 
-	 * @access public
-	 * @return bool|object|WP_User
-	 */
-	public function duplicate_get_current_user() {
-		if ( function_exists( 'wp_get_current_user' ) ) {
-                    return wp_get_current_user();
-		} else if ( function_exists( 'get_currentuserinfo' ) ) {
-                    global $userdata;
-                    get_currentuserinfo();
-                    return $userdata;
-		} else {
-                    global $wpdb;
-                    $user_login = $_COOKIE[USER_COOKIE];
-                    return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_login = '%s' LIMIT 1", $user_login ) );
 		}
 	}
         

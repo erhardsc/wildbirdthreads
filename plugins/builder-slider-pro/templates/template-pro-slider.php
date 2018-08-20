@@ -113,14 +113,14 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- Slider Pro module -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php do_action('themify_builder_before_template_content_render'); ?>
 
         <?php if ($fields_args['mod_title_slider'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_slider'], $fields_args) . $fields_args['after_title']; ?>
         <?php endif; ?>
         <?php if (!empty($fields_args['builder_slider_pro_slides'])): ?>
-            <div class="themify_builder_slider_loader"></div>
+            <div class="tb_slider_loader"></div>
             <div class="slider-pro" style="visibility: hidden;">
                 <div class="sp-slides">
                     <?php foreach ($fields_args['builder_slider_pro_slides'] as $i => $slide) : ?>

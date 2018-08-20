@@ -16,7 +16,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 				var $self = $( this );
-				self.target =  $self.prop('data-target')?$( $self.prop('data-target') ):$self.prev();
+				self.target =  $self.attr('data-target') ? $( $self.attr('data-target'),self.top ) : $self.prev();
 				self.showLightbox( self.target.val() );
 			}).on('click', '#themify_lightbox_fa .lightbox_container a', function(e){
 				e.preventDefault();

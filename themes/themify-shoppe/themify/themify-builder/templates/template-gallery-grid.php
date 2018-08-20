@@ -68,7 +68,7 @@ foreach ($settings['gallery_images'] as $image) :
 <?php endforeach; // end loop  ?>
 <br style="clear: both" />
 <?php if ($pagination) : ?>
-    <div class="builder_gallery_nav" data->
+    <div class="builder_gallery_nav">
         <?php
         /**
          * fix paginate_links url in modules loaded by Ajax request: the url does not match the actual page url.

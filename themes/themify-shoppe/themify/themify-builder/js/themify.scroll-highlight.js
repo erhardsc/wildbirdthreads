@@ -82,7 +82,7 @@
 			},
 			setHeaderHeight: function() {
 				if ( _opt.$body.hasClass( 'fixed-header' ) && _opt.$headerWrap.length ) {
-					var $fixedheader, vTransition;
+					var $fixedheader;
 
 					$fixedheader = $( '#headerwrap' ).clone();
 					$fixedheader
@@ -90,16 +90,27 @@
 						.css( { visibility: 'hidden', left: '-10000px', marginTop: _opt.$body.offset().top } )
 						.appendTo( 'body' );
 
-					vTransition = $.browser.webkit ? '-webkit-transition'
-						: $.browser.mozilla ? '-moz-transition'
-						: $.browser.msie ? '-ms-transition'
-						: $.browser.opera ? '-o-transition' : 'transition'
-
 					this.options.fixedHeaderHeight = $fixedheader.outerHeight( true );
-					$fixedheader.addClass( 'fixed-header' )
-						.find( '*' ).add( $fixedheader ).css( vTransition, 'none' );
 
-					_opt.hederDiff = this.options.fixedHeaderHeight - $fixedheader.outerHeight( true );
+					$fixedheader.addClass( 'fixed-header' ).find( '*' ).add( $fixedheader ).css( 'transition', 'none' );
+
+					// Check if header is transparent
+					var bgImage = $fixedheader.css( 'background-image' ),
+						bgColor = $fixedheader.css( 'background-color' ),
+						isTransparent = false;
+
+					if( bgColor && bgColor.indexOf( 'rgba' ) > -1 ) {
+						bgColor = bgColor.replace(/^.*,(.+)\)/,'$1').trim();
+						bgColor = parseFloat( bgColor ) === 0 ? 'transparent' : 1;
+					}
+
+					isTransparent = ( ! bgImage || bgImage === 'none' ) && bgColor === 'transparent';
+
+					if( isTransparent ) {
+						this.options.fixedHeaderHeight = 0;
+					}
+
+					_opt.hederDiff = ! isTransparent ? this.options.fixedHeaderHeight - $fixedheader.outerHeight( true ) : 0;
 					$fixedheader.remove();
 				}
 			},
@@ -146,8 +157,8 @@
 				return hash && '#' !== hash;
 			},
 			removeHash: function () {
-				if ( this.isCorrectHash() && this.isHash( window.location.hash ) ) {
-					_opt.isReplaceState && history.replaceState( '', document.title, window.location.pathname + window.location.search );
+				if ( this.isCorrectHash() && this.isHash( window.top.location.hash ) ) {
+					_opt.isReplaceState && window.top.history.replaceState( '', document.title, window.top.location.pathname + window.top.location.search );
 					this.dehighlightLinks();
 				}
 			},
@@ -155,10 +166,9 @@
 				if( _opt.activeSection && ( '#' === href || href === cleanHash( window.location.hash ) ) ) return;
 				
 				this.highlightLink( href );
-
 				if( this.options.updateHash ) {
 					if ( _opt.isReplaceState ) {
-						history.replaceState( null, null, href );
+						window.top.history.replaceState( null, null, href );
 					} else {
 						var section = href.replace( /^.*#/, '' );
 	
@@ -166,11 +176,11 @@
 							var $elem = $( this.options.prefix + section );
 	
 							if ( $elem.length ) {
-								var realID = $elem.attr('id');
+								var realID = $elem.prop('id');
 	
-								$elem.attr( 'id', realID + 'tmpobjxyz5783a' );
-								window.location.hash = section;
-								$elem.attr( 'id', realID );
+								$elem.prop( 'id', realID + 'tmpobjxyz5783a' );
+								window.top.location.hash = section;
+								$elem.prop( 'id', realID );
 							}
 						}
 					}
@@ -224,7 +234,7 @@
 					$( 'html, body' ).stop().animate({
 						scrollTop: to
 					}, {
-						duration: this.options.speed,
+						duration: + self.options.speed,
 						complete: completeCallback
 					});
 				} else {
@@ -239,14 +249,14 @@
 				if ( _opt.$window.scrollTop() < self.options.fixedHeaderHeight ) {
 					self.removeHash();
 				} else {
-					$.each( elementsToCheck, function ( i, el ) {
-						if ( self.isInViewport( el ) && el.data( 'anchor' ) ) {
+					for(var i =0,len=elementsToCheck.length;i<len;++i){
+						var el = elementsToCheck[i];
+						if ( el.data( 'anchor' ) && self.isInViewport( el )) {
 							self.changeHash( '#' + el.data( 'anchor' ) );
-							_opt.activeSection = el
-							return;
+							_opt.activeSection = el;
+							break;
 						}
-					} );
-
+					}
 					if( _opt.activeSection && ! self.isInViewport( _opt.activeSection ) ) {
 						self.removeHash();
 						_opt.activeSection = null;
@@ -256,81 +266,90 @@
 			init: function () {
 				var self = this,
 					elementsToCheck = [];
+				if(!Themify.is_builder_active){
+					// Build list of elements to check visibility
+					$( 'div[class*=' + self.options.prefix.replace( '.', '' ) + ']:visible' ).not( self.options.exclude ).each( function () {
+						elementsToCheck.push( $( this ) );
+					});
 
-				// Build list of elements to check visibility
-				$( 'div[class*=' + self.options.prefix.replace( '.', '' ) + ']' )
-					.filter( ':visible' ).not( self.options.exclude ).each( function () {
-					elementsToCheck.push( $( this ) );
-				});
-
-				if( ! elementsToCheck.length ) return;
-
+					if(! elementsToCheck.length ) return;
+					
+				}
 				self.setHeaderHeight();
-
+				// Smooth Scroll and Link Highlight
+				$( this.options.context ).on('click','a[href*="#"]',function ( e ) {
+                                    if(!this.classList.contains('ab-item')){
+                                            // Build class to scroll to
+                                            var href = cleanHash( $( this ) );
+                                                    if(href!=='#'){
+														href = href.indexOf('/') != -1 ? href.substring(0, href.indexOf('/')) : href ;
+                                                        var classToScroll = href.replace( /#/, self.options.prefix );
+                                                    // If the section exists in this page
+                                                    if ( cleanupURL( window.location.href ) === cleanupURL( $( this ).prop( 'href' ) ) && $( classToScroll ).length>0 ) {
+                                                                    e.preventDefault();
+                                                                    self.linkScroll( classToScroll, href );
+                                                                    if(Themify.is_builder_active){
+                                                                        _opt.activeSection = true;
+                                                                        self.changeHash( '#' + $(classToScroll).data( 'anchor' ) );
+                                                                    }
+                                                    }
+                                            }
+                                    }
+				})
 				//Remove multiple higlighted menu items
-				$( this.options.context ).find( 'a[href*="#"]' ).not( 'a[href="#"], a.ab-item' ).each( function() {
-					if( $( this ).parent().is( '.current_page_item, .current-menu-item' ) && $( this ).parent().siblings( '.current_page_item, .current-menu-item' ).length ) {
-						$( this ).parent()
-							.siblings( '.current_page_item, .current-menu-item' )
-							.add( $( this ).parent() )
-							.removeClass( 'current_page_item current-menu-item' );
+				.find( 'a[href*="#"]' ).each( function() {
+					if(!this.classList.contains('ab-item') && $(this).prop('href')!=='#'){
+						var p = $( this ).parent();
+						if(p[0].classList.contains('current_page_item') && p[0].classList.contains('current-menu-item') ) {
+                                                    var sub = p.siblings( '.current_page_item, .current-menu-item' );
+                                                    if(sub.length>0){
+                                                            sub.add( p ).removeClass( 'current_page_item current-menu-item' );
+                                                    }
+						}
 					}
 				} );
+				if(!Themify.is_builder_active){
+					// Setup scroll event
+					_opt.$window.scroll( function ( e ) {
+						self.scrolling = true;
+					});
 
-				// Smooth Scroll and Link Highlight
-				$( this.options.context ).find( 'a[href*="#"]' )
-					.not( 'a[href="#"], a.ab-item' ).on( 'click', function ( e ) {
-					// Build class to scroll to
-					var href = cleanHash( $( this ) ),
-						classToScroll = href.replace( /#/, self.options.prefix );
+					requestInterval( function() {
+						! _opt.isScrollTo && self.scrolling && self.manualScroll( elementsToCheck );
+					}, self.options.scrollRate );
 
-					// If the section exists in this page
-					if ( cleanupURL( window.location.href ) == cleanupURL( $( this ).prop( 'href' ) ) && $( classToScroll ).length ) {
-						self.linkScroll( classToScroll, href );
-						e.preventDefault();
-					}
-				});
-
-				// Setup scroll event
-				_opt.$window.scroll( function ( e ) {
-					self.scrolling = true;
-				});
-
-				requestInterval( function() {
-					! _opt.isScrollTo && self.scrolling && self.manualScroll( elementsToCheck );
-				}, self.options.scrollRate );
-
-				// Initial section visibility check and link highlight
-				_opt.$window.load(function () {
-					if ( self.isHash( window.location.hash ) ) {
-						// If there's a hash, scroll to it
-						var hash = cleanHash( window.location.hash ),
-							current_url = cleanupURL( window.location.href ),
-							$linkHash = $( self.options.context ).find('a[href="' + hash + '"], a[href="' + current_url + hash + '"], a[href="' + current_url + '/' + hash + '"]');
-						
-						if( $linkHash.length ) {
-							$linkHash.each( function () {
-								var $link = $(this);
-								
-								if ( cleanHash( $link ) === hash ) {
-									setTimeout( function() { $link.trigger( 'click' ); }, 600 );
-									return;
+					// Initial section visibility check and link highlight
+					_opt.$window.load(function () {
+						if ( self.isHash( window.location.hash ) ) {
+							// If there's a hash, scroll to it
+							var hash = cleanHash( window.location.hash ),
+								current_url = cleanupURL( window.location.href ),
+								$linkHash = $( self.options.context ).find('a[href="' + hash + '"], a[href="' + current_url + hash + '"], a[href="' + current_url + '/' + hash + '"]');
+							
+							if( $linkHash.length ) {
+								$linkHash.each( function () {
+									var $link = $(this);
+									
+									if ( cleanHash( $link ) === hash ) {
+										setTimeout( function() { $link.trigger( 'click' ); }, 600 );
+										return;
+									}
+								});
+							} else {
+								// Build class to scroll to
+								var classToScroll = hash.replace( /#/, self.options.prefix );
+								// If the section exists in this page
+								if ( -1 === classToScroll.search('/') && $( classToScroll ).length ) {
+									setTimeout( function () { self.linkScroll( classToScroll, hash ); }, 600 );
 								}
-							});
-						} else {
-							// Build class to scroll to
-							var classToScroll = hash.replace( /#/, self.options.prefix );
-							// If the section exists in this page
-							if ( -1 === classToScroll.search('/') && $( classToScroll ).length ) {
-								setTimeout( function () { self.linkScroll( classToScroll, hash ); }, 600 );
 							}
+						} else {
+							self.manualScroll( elementsToCheck );
 						}
-					} else {
-						self.manualScroll( elementsToCheck );
-					}
-				});
+					});
+				}
 			}
-	}
+	};
 	} )();
 
 	$.fn[pluginName] = function( options ) {

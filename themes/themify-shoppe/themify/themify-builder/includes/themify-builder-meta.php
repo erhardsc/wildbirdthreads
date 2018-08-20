@@ -11,15 +11,15 @@ global $post;
 	<?php include_once THEMIFY_BUILDER_INCLUDES_DIR . '/themify-builder-module-panel.php'; ?>
 	
 	<div id="tb_scroll_anchor"></div>
-	<div id="themify_builder_module_tmp"></div>
+	<div id="tb_module_tmp"></div>
 	<!-- /themify_builder_module_panel -->
 
-	<div class="themify_builder_row_panel clearfix">
+	<div class="tb_row_panel clearfix">
 
-		<div id="themify_builder_row_wrapper" class="themify_builder_row_js_wrapper themify_builder_editor_wrapper" data-postid="<?php echo $post->ID; ?>"></div> <!-- /#themify_builder_row_wrapper - Load by js later -->
+		<div id="tb_row_wrapper" class="tb_row_js_wrapper tb_editor_wrapper" data-postid="<?php echo $post->ID; ?>"></div> <!-- /#tb_row_wrapper - Load by js later -->
 
 	</div>
-	<!-- /themify_builder_row_panel -->
+	<!-- /tb_row_panel -->
 
 	<div style="display: none;">
 		<?php

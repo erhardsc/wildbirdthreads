@@ -91,26 +91,42 @@ function fb_flush(){
   return ajax('ajax_reset_all_fb_products');
 }
 
-function sync_confirm(verbose = true) {
-  const msg = (verbose) ?
-  'Facebook for WooCommerce automatically syncs your products on ' +
-    'create/update. Are you sure you want to force product resync? ' +
-    'This will query all published products and may take some time. ' +
-    'You only need to do this if your products are out of sync ' +
-    'or some of your products did not sync.' :
-  'Your products will now be resynced with Facebook, this may take some time.'
+function sync_confirm(verbose = null) {
+  var msg = '';
+  switch (verbose) {
+    case 'fb_force_resync':
+      msg = 'Your products will now be resynced with Facebook, ' +
+        'this may take some time.';
+      break;
+    case 'fb_test_product_sync':
+      msg = 'Launch Test?';
+      break;
+    default:
+      msg = 'Facebook for WooCommerce automatically syncs your products on ' +
+      'create/update. Are you sure you want to force product resync? ' +
+      'This will query all published products and may take some time. ' +
+      'You only need to do this if your products are out of sync ' +
+      'or some of your products did not sync.';
+  }
   if(confirm(msg)) {
-    sync_all_products(window.facebookAdsToolboxConfig.feed.hasClientSideFeedUpload);
+    sync_all_products(
+      window.facebookAdsToolboxConfig.feed.hasClientSideFeedUpload,
+      verbose == 'fb_test_product_sync'
+    );
     window.fb_sync_start_time = new Date().getTime();
   }
 }
 
 // Launch the confirm dialog immediately if the param is in the URL.
 if (window.location.href.includes("fb_force_resync")) {
-    window.onload = function() { sync_confirm(false); };
+    window.onload = function() { sync_confirm("fb_force_resync"); };
+} else if (window.location.href.includes("fb_test_product_sync")) {
+  // Test products sync by feed.
+  window.is_test = true;
+  window.onload = function() { sync_confirm("fb_test_product_sync"); };
 }
 
-function sync_all_products($using_feed = false) {
+function sync_all_products($using_feed = false, $is_test = false) {
   if (get_product_catalog_id_box() && !get_product_catalog_id_box().value){
     return;
   }
@@ -120,13 +136,12 @@ function sync_all_products($using_feed = false) {
   console.log('Syncing all products!');
   window.fb_connected = true;
   sync_in_progress();
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // Upload via feed is coming, but not ready yet.
   if ($using_feed) {
     window.facebookAdsToolboxConfig.feed.hasClientSideFeedUpload = true;
     window.feed_upload = true;
     ping_feed_status_queue();
-    return ajax('ajax_sync_all_fb_products_using_feed');
+    return $is_test ? ajax('ajax_test_sync_products_using_feed')
+      : ajax('ajax_sync_all_fb_products_using_feed');
   } else {
     return ajax('ajax_sync_all_fb_products');
   }
@@ -169,7 +184,7 @@ function delete_all_settings(callback = null, failcallback = null) {
 // ---
 // It's also called again if the pixel id is ever changed or pixel pii is
 // enabled or disabled.
-function save_settings(message, callback = null, failcallback = null, localsettings = null){
+function save_settings(callback = null, failcallback = null, localsettings = null){
   if (!localsettings) {
     localsettings = settings;
   }
@@ -187,10 +202,32 @@ function save_settings(message, callback = null, failcallback = null, localsetti
   );
 }
 
+// save_settings wrapper for plugins as we do not need to:
+//   1.  sync products again after plugin is configured
+//   2.  check api_key, which is from facebook and is only necessary
+//       for following sync products
+function save_settings_for_plugin(plugin_settings, callback, failcallback) {
+  settings = Object.assign({}, settings, plugin_settings);
+  save_settings(
+    function(response){
+      if (response && response.includes('settings_saved')){
+        console.log(response);
+        callback(response);
+      } else {
+        console.log('Fail response on save_settings_and_sync');
+        failcallback(response);
+      }
+    },
+    function(errorResponse){
+      console.log('Ajax error while saving settings:' + JSON.stringify(errorResponse));
+      failcallback(errorResponse);
+    });
+}
+
 // see comments in save_settings function above
 function save_settings_and_sync(message) {
   if ('api_key' in settings){
-    save_settings(message,
+    save_settings(
       function(response){
         if (response && response.includes('settings_saved')){
           console.log(response);
@@ -214,63 +251,109 @@ function save_settings_and_sync(message) {
 
 //Reset buttons to brand new setup state
 function reset_buttons(){
-  if(document.querySelector('#connection_status')){
-    document.querySelector('#connection_status').style.display = 'none';
+  if(document.querySelector('#settings')){
+    document.querySelector('#settings').style.display = 'none';
   }
-  if(document.querySelector('#set_dia')){
-    document.querySelector('#set_dia').style.display = '';
-    document.querySelector('#set_dia').text = 'Get Started';
+  if(document.querySelector('#cta_button')){
+    var cta_element = document.querySelector('#cta_button');
+    cta_element.innerHTML = 'Get Started';
+    cta_element.style['font-size'] = '13px';
+    cta_element.style.width = '80px';
+    cta_element.href = '#';
+    cta_element.onclick= function() { facebookConfig(); };
   }
-  if(document.querySelector('#resync_products')) {
-    document.querySelector('#resync_products').style.display = 'none';
+  if(document.querySelector('#setup_h1')) {
+    document.querySelector('#setup_h1').innerHTML =
+    'Grow your business on Facebook';
   }
-  if(document.querySelector('#sync_status')){
-    document.querySelector('#sync_status').innerHTML = '';
+  if(document.querySelector('#setup_l1')){
+    document.querySelector('#setup_l1').innerHTML =
+      'Easily install a tracking pixel';
   }
-  if(document.querySelector('#sync_progress')){
-    document.querySelector('#sync_progress').innerHTML = '';
+  if(document.querySelector('#setup_l2')){
+    document.querySelector('#setup_l2').innerHTML =
+      'Upload your products and create a shop';
+  }
+  if(document.querySelector('#setup_l3')){
+    document.querySelector('#setup_l3').innerHTML =
+      'Create dynamic ads with your products and pixel';
   }
 }
 
 //Remove reset/settings buttons during product sync
 function sync_in_progress(){
+  if(document.querySelector('#settings')){
+    document.querySelector('#settings').style.display = '';
+  }
   if(document.querySelector('#connection_status')){
     document.querySelector('#connection_status').style.display = '';
+  }
+  if(document.querySelector('#sync_complete')){
+    document.querySelector('#sync_complete').style.display = 'none';
   }
   //Get rid of all the buttons
-  if(document.querySelector('#set_dia')){
-    document.querySelector('#set_dia').style.display = 'none';
+  if(document.querySelector('#setting_button')){
+    document.querySelector('#setting_button').style['pointer-events'] = 'none';
   }
   if(document.querySelector('#resync_products')) {
-    document.querySelector('#resync_products').style.display = 'none';
+    document.querySelector('#resync_products').style['pointer-events'] = 'none';
   }
-
-  if(document.querySelector('#connection_status')){
-    document.querySelector('#connection_status').style.display = '';
+  if(document.querySelector('#test_product_sync')) {
+    document.querySelector('#test_product_sync').style.display = 'none';
   }
   //Set a product sync status
-  if(document.querySelector('#sync_status')){
-    document.querySelector('#sync_status').innerHTML =
-      '<strong>Facebook product upload in progress. <br/> ' +
-      'Leave this page open to continue upload.</strong><br/>' +
-      '<div class="loader"></div>';
-  }
   if(document.querySelector('#sync_progress')){
-    document.querySelector('#sync_progress').innerHTML = '';
+    document.querySelector('#sync_progress').innerHTML =
+      'Syncing... Keep this browser open <br/>' +
+      'Until sync is complete<br/>' +
+      '<div class="loader"></div>';
   }
 }
 
 function sync_not_in_progress(){
-  if(document.querySelector('#connection_status')){
-    document.querySelector('#connection_status').style.display = '';
+  // Reset to pre-setup state.
+  if(document.querySelector('#cta_button')){
+    var cta_element = document.querySelector('#cta_button');
+    cta_element.innerHTML = 'Create Ad';
+    cta_element.style['font-size'] = '12px';
+    cta_element.style.width = '60px';
+    if (window.facebookAdsToolboxConfig.diaSettingId) {
+    cta_element.onclick= function() {
+      window.open('https://www.facebook.com/ads/dia/redirect/?settings_id=' +
+        window.facebookAdsToolboxConfig.diaSettingId + '&version=2' +
+        '&entry_point=admin_panel');
+      };
+    } else {
+      cta_element.style['pointer-events'] = 'none';
+    }
   }
-  if(document.querySelector('#set_dia')){
-    document.querySelector('#set_dia').style.display = '';
-    document.querySelector('#set_dia').text = 'Re-configure Facebook Settings';
+  if(document.querySelector('#setup_h1')) {
+    document.querySelector('#setup_h1').innerHTML =
+    'Reach the right people and sell more products';
+  }
+  if(document.querySelector('#setup_l1')){
+    document.querySelector('#setup_l1').innerHTML =
+      'Create an ad in a few steps';
+  }
+  if(document.querySelector('#setup_l2')){
+    document.querySelector('#setup_l2').innerHTML =
+      'Use built-in best practice for online sales';
+  }
+  if(document.querySelector('#setup_l3')){
+    document.querySelector('#setup_l3').innerHTML =
+      'Get reporting on sales and revenue';
+  }
+  if(document.querySelector('#settings')){
+    document.querySelector('#settings').style.display = '';
+  }
+  // Enable buttons.
+  if(document.querySelector('#setting_button')){
+    document.querySelector('#setting_button').style['pointer-events'] = 'auto';
   }
   if(document.querySelector('#resync_products')) {
-    document.querySelector('#resync_products').style.display = '';
+    document.querySelector('#resync_products').style ['pointer-events'] = 'auto';
   }
+  // Remove sync progress.
   if(document.querySelector('#sync_progress')){
     document.querySelector('#sync_progress').innerHTML = '';
   }
@@ -280,14 +363,15 @@ function not_connected(){
   if(document.querySelector('#connection_status')){
     document.querySelector('#connection_status').style.display = 'none';
   }
-  if(document.querySelector('#set_dia')){
-    document.querySelector('#set_dia').style.display = '';
+
+  if(document.querySelector('#setting_button')){
+    document.querySelector('#setting_button').style['pointer-events'] = 'auto';
   }
   if(document.querySelector('#resync_products')) {
-    document.querySelector('#resync_products').style.display = 'none';
+    document.querySelector('#resync_products').style['pointer-events'] = 'none';
   }
-  if(document.querySelector('#sync_status')){
-    document.querySelector('#sync_status').innerHTML = '';
+  if(document.querySelector('#sync_complete')) {
+    document.querySelector('#sync_complete').style.display = 'none';
   }
   if(document.querySelector('#sync_progress')){
     document.querySelector('#sync_progress').innerHTML = '';
@@ -357,7 +441,7 @@ function setPixel(message) {
   }
 
   // We need this to support changing the pixel id after setup.
-  save_settings(message,
+  save_settings(
     function(response){
       if (response && response.includes('settings_saved')){
         window.sendToFacebook('ack set pixel', message.params);
@@ -406,6 +490,20 @@ function setAccessTokenAndPageId(message) {
   }
 }
 
+function setMsgerChatSetup(data) {
+  if (data.hasOwnProperty('is_facebook_messenger_chat_plugin_enabled')) {
+    settings.messenger_chat_plugin_enabled =
+      data.is_facebook_messenger_chat_plugin_enabled;
+  }
+  if (data.hasOwnProperty('facebook_jssdk_version')) {
+    settings.messenger_chat_jssdk_version =
+      data.facebook_jssdk_version;
+  }
+  if (data.hasOwnProperty('page_id')) {
+    settings.fb_page_id = data.page_id;
+  }
+}
+
 function iFrameListener(event) {
   // Fix for web.facebook.com
   const origin = event.origin || event.originalEvent.origin;
@@ -451,6 +549,16 @@ function iFrameListener(event) {
       setAccessTokenAndPageId(event.data);
       save_settings_and_sync(event.data);
       break;
+    case 'set msger chat':
+      setMsgerChatSetup(event.data);
+      save_settings_for_plugin(event.data.params,
+        function(response) {
+          window.sendToFacebook('ack msger chat', event.data);
+        },
+        function(response) {
+          window.sendToFacebook('fail ack msger chat', event.data);
+        });
+      break;
   }
 }
 
@@ -489,11 +597,10 @@ function ping_feed_status_queue(count = 0) {
   }, 30000*(1 << count));
 }
 
-function product_sync_complete(sync_progress_element, sync_status_element){
+function product_sync_complete(sync_progress_element){
   sync_not_in_progress();
-  if(sync_status_element) {
-    sync_status_element.innerHTML =
-      '<strong>Status: </strong>Products are synced to Facebook.';
+  if(document.querySelector('#sync_complete')){
+    document.querySelector('#sync_complete').style.display = '';
   }
   if(sync_progress_element) {
     sync_progress_element.innerHTML = '';
@@ -509,7 +616,6 @@ function check_queues(){
       return;
     }
     var sync_progress_element = document.querySelector('#sync_progress');
-    var sync_status_element = document.querySelector('#sync_status');
     var res = parse_response_check_connection(response);
     if (!res) {
       if (fb_sync_no_response_count++ > 5) {
@@ -534,7 +640,7 @@ function check_queues(){
               (remaining > 1 ? 's' : '') + ' remaining.';
          }
          if(remaining === 0){
-            product_sync_complete(sync_progress_element, sync_status_element);
+            product_sync_complete(sync_progress_element);
          }
        } else {
           //Not processing, none remaining.  Either long complete, or just completed
@@ -548,7 +654,7 @@ function check_queues(){
           }
 
           if(remaining === 0){
-            product_sync_complete(sync_progress_element, sync_status_element);
+            product_sync_complete(sync_progress_element);
           }
        }
     }
@@ -559,7 +665,7 @@ function parse_response_check_connection(res) {
   if (res) {
     console.log(res);
     var response = res.substring(res.indexOf("{")); //Trim leading extra chars (rnrnr)
-    var response = JSON.parse(response);
+    response = JSON.parse(response);
     if(!response.connected && !window.fb_connected){
        not_connected();
        return null;
@@ -572,20 +678,24 @@ function parse_response_check_connection(res) {
 function check_feed_upload_queue(check_num) {
   ajax('ajax_check_feed_upload_status', null, function(response) {
     var sync_progress_element = document.querySelector('#sync_progress');
-    var sync_status_element = document.querySelector('#sync_status');
     var res = parse_response_check_connection(response);
     clearInterval(window.fb_feed_pings);
     if (res) {
       var status = res.status;
       switch (status) {
         case 'complete':
-          product_sync_complete(sync_progress_element, sync_status_element);
           window.feed_upload = false;
+          if (window.is_test) {
+            display_test_result();
+          } else {
+            product_sync_complete(sync_progress_element);
+          }
           break;
         case 'in progress':
           if (sync_progress_element) {
             sync_progress_element.innerHTML =
-              '<strong>Product uploading in progress...</strong>';
+            'Syncing... Keep this browser open <br/>' +
+            'Until sync is complete<br/>';
           }
           ping_feed_status_queue(check_num+1);
           break;
@@ -593,7 +703,67 @@ function check_feed_upload_queue(check_num) {
           sync_progress_element.innerHTML =
             '<strong>Something wrong when uploading, please try again.</strong>';
           window.feed_upload = false;
+          if (window.is_test) {
+            display_test_result();
+          }
       }
     }
   });
+}
+
+function display_test_result() {
+  ajax('ajax_display_test_result', null, function(response) {
+    var sync_complete_element = document.querySelector('#sync_complete');
+    var sync_progress_element = document.querySelector('#sync_progress');
+    var res = parse_response_check_connection(response);
+    if (res) {
+      var status = res.pass;
+      switch (status) {
+        case 'true':
+          sync_not_in_progress();
+          if(sync_complete_element) {
+            sync_complete_element.style.display = '';
+            sync_complete_element.innerHTML =
+              '<strong>Status: </strong>Test Pass.';
+          }
+          if(sync_progress_element) {
+            sync_progress_element.innerHTML = '';
+          }
+          window.is_test = false;
+          break;
+        case 'in progress':
+          if (sync_progress_element) {
+            sync_progress_element.innerHTML =
+              '<strong>Integration test in progress...</strong>';
+          }
+          ping_feed_status_queue();
+          break;
+        default:
+          window.debug_info = res.debug_info + '<br/>' + res.stack_trace;
+          if(sync_complete_element) {
+            sync_complete_element.style.display = '';
+            sync_complete_element.innerHTML =
+              '<strong>Status: </strong>Test Fail.';
+          }
+          if (sync_progress_element) {
+            sync_progress_element.innerHTML = '';
+          }
+          if(document.querySelector('#debug_info')) {
+            document.querySelector('#debug_info').style.display = '';
+          }
+          window.is_test = false;
+      }
+    }
+  });
+}
+
+function show_debug_info() {
+  var stack_trace_element = document.querySelector('#stack_trace');
+  if(stack_trace_element) {
+    stack_trace_element.innerHTML = window.debug_info;
+  }
+  if(document.querySelector('#debug_info')) {
+    document.querySelector('#debug_info').style.display = 'none';
+  }
+  window.debug_info = '';
 }

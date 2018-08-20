@@ -1,4 +1,4 @@
-( function( blocks, i18n, element ) {
+( function( blocks, i18n, element, $ ) {
 	var el = element.createElement;
 	var __ = i18n.__;
 
@@ -12,18 +12,18 @@
 		},
 		saveHTML: function( props ) {
 			if ( this.isRendered() ) {
-				this.tempHTML = document.getElementById('themify-builder-canvas-block').innerHTML;
+				this.tempHTML = document.getElementById('tb_canvas_block').innerHTML;
 			}
 		},
 		restoreHTML: function( props ){
 			if ( 'undefined' === typeof themifybuilderapp ) return;
 			
 			var api = themifybuilderapp;
-			if ( ! _.isNull( this.tempHTML ) && ! this.isRendered() && document.getElementById('themify-builder-canvas-block') ) {
-				document.getElementById('themify-builder-canvas-block').innerHTML = this.tempHTML;
+			if ( ! _.isNull( this.tempHTML ) && ! this.isRendered() && document.getElementById('tb_canvas_block') ) {
+				document.getElementById('tb_canvas_block').innerHTML = this.tempHTML;
 				if ( ! _.isUndefined(api.Instances.Builder[0]) ) {
 					
-					var batch = document.getElementById('themify_builder_row_wrapper').querySelectorAll('[data-cid]');
+					var batch = document.getElementById('tb_row_wrapper').querySelectorAll('[data-cid]');
 					batch = Array.prototype.slice.call(batch);
 					for (var i = 0, len = batch.length; i < len; ++i) {
 					var model = api.Models.Registry.lookup(batch[i].getAttribute('data-cid'));
@@ -32,7 +32,9 @@
 						}
 					}
 					api.toolbar.setElement( $('#tb_toolbar') ).render();
-					api.Instances.Builder[0].setElement($('#themify_builder_row_wrapper'));
+					api.toolbarCallback();
+					
+					api.Instances.Builder[0].setElement($('#tb_row_wrapper'));
 					api.Instances.Builder[0].init(true);
 				}
 			}
@@ -48,11 +50,12 @@
 				}
 			});
 			api.vent.on('backend:switchfrontend', function(url){
-				window.parent.location.href = url;
+				window.top.location.href = url;
 			});
 		},
 		saveBlock: function(){
 			if ( 'undefined' === typeof themifybuilderapp ) return;
+			if ( this.onClicking ) this.onClicking = false; return;
 			console.log('save_callback');
 
 			if ( themifybuilderapp.hasChanged ) {
@@ -82,7 +85,7 @@
 			console.log('edit');
 			blocks.builderUtils.vent.trigger('edit', props);
 			
-			return el('div',{ id: 'themify-builder-canvas-block'}, 'placeholder builder' );
+			return el('div',{ id: 'tb_canvas_block'}, 'placeholder builder' );
 		},
 		save: function() {
 			console.log('save');
@@ -103,9 +106,20 @@
 	blocks.builderUtils.vent.on('edit', render_block);
 	blocks.builderUtils.vent.on('save', save_block);
 
-	jQuery( document ).ajaxComplete(function( event, xhr, settings ) {
+	$(function(){
+		$('body').on('click', '.editor-post-publish-button, .editor-post-save-draft', function(){
+			if ( themifybuilderapp.hasChanged ) {
+				themifybuilderapp.Utils.saveBuilder(function(){
+					blocks.builderUtils.onClicking = true;
+				});
+			}
+		});
+	});
+
+	$( document ).ajaxComplete(function( event, xhr, settings ) {
 		var url  = settings.url,
 			callbackUrl = 'post.php?post=' + themifyBuilder.post_ID + '&action=edit&classic-editor=1&meta_box=1';
+		
 		if ( 'POST' === settings.type && url.indexOf(callbackUrl) !== -1 ) {
 			blocks.builderUtils.vent.trigger('save');
 		}
@@ -114,5 +128,6 @@
 } )(
 	window.wp.blocks,
 	window.wp.i18n,
-	window.wp.element
+	window.wp.element,
+	jQuery
 );

@@ -31,16 +31,20 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'icon_color_feature' => '#000',
         'icon_bg_feature' => '',
         'circle_size_feature' => 'medium',
+        'custom_circle_size_feature' => '',
         'link_feature' => '',
+        'feature_download_link'=>'',
         'link_options' => false,
         'lightbox_width' => '',
         'lightbox_height' => '',
-        'lightbox_size_unit_width' => 'pixels',
-        'lightbox_size_unit_height' => 'pixels',
+        'lightbox_width_unit' => 'px',
+        'lightbox_height_unit' => 'px',
         'css_feature' => '',
         'animation_effect' => ''
     );
     $fields_args = wp_parse_args($mod_settings, $fields_default);
+	$fields_args['lightbox_width_unit'] = $fields_args['lightbox_width_unit'] ? $fields_args['lightbox_width_unit'] : 'px';
+	$fields_args['lightbox_height_unit'] = $fields_args['lightbox_height_unit'] ? $fields_args['lightbox_height_unit'] : 'px';
     unset($mod_settings);
     $animation_effect = self::parse_animation_effect($fields_args['animation_effect'], $fields_args);
 
@@ -51,6 +55,8 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         $chart_vars['size'] = 150;
     } elseif ($fields_args['circle_size_feature'] === 'small') {
         $chart_vars['size'] = 100;
+    }else{
+		$chart_vars['size'] = isset($fields_args['custom_circle_size_feature']) ? $fields_args['custom_circle_size_feature'] : 150;
     }
 
     $fields_args['circle_percentage_feature'] = str_replace('%', '', $fields_args['circle_percentage_feature']); // remove % if added by user
@@ -73,15 +79,11 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         $link_type = 'regular';
         if ($fields_args['link_options'] === 'lightbox') {
             $link_type = 'lightbox';
-            $units = array(
-                'pixels' => 'px',
-                'percents' => '%'
-            );
 
             if ($fields_args['lightbox_width'] !== '' || $fields_args['lightbox_height'] !== '') {
                 $lightbox_settings = array();
-                $lightbox_settings[] = $fields_args['lightbox_width'] !== '' ? $fields_args['lightbox_width'] . $units[$fields_args['lightbox_size_unit_width']] : '';
-                $lightbox_settings[] = $fields_args['lightbox_height'] !== '' ? $fields_args['lightbox_height'] . $units[$fields_args['lightbox_size_unit_height']] : '';
+                $lightbox_settings[] = $fields_args['lightbox_width'] !== '' ? $fields_args['lightbox_width'] . $fields_args['lightbox_width_unit'] : '';
+                $lightbox_settings[] = $fields_args['lightbox_height'] !== '' ? $fields_args['lightbox_height'] . $fields_args['lightbox_height_unit'] : '';
 
                 $link_attr = sprintf('data-zoom-config="%s"', implode('|', $lightbox_settings));
             }
@@ -101,7 +103,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module feature -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php
         // DYNAMIC STYLE
         $insetColor = $fields_args['icon_bg_feature'] !== '' ? esc_attr(Themify_Builder_Stylesheet::get_rgba_color($fields_args['icon_bg_feature'])) : '';
@@ -111,13 +113,9 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
             $circleBackground = $chart_vars['trackColor'];
             $circleColor = esc_attr(Themify_Builder_Stylesheet::get_rgba_color($fields_args['circle_color_feature']));
             $style.="#{$module_ID} .module-feature-chart-html5 {
-					-webkit-box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleBackground};
-					-moz-box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleBackground};
 					box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleBackground};
 				}
 				#{$module_ID} .chart-loaded.chart-html5-fill {
-					-webkit-box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleColor};
-					-moz-box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleColor};
 					box-shadow: inset 0 0 0 " . $fields_args['circle_stroke_feature'] . "px {$circleColor};
 				}";
         }
@@ -137,6 +135,11 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
             if ('' !== $fields_args['overlap_image_feature']) {
                 echo themify_get_image('src=' . $fields_args['overlap_image_feature'] . '&w=' . $fields_args['overlap_image_width'] . '&h=' . $fields_args['overlap_image_height'] . '&ignore=true');
             };
+
+
+			if ( !empty($fields_args['feature_download_link']) && $fields_args['feature_download_link'] == 'yes'  ){
+				$link_attr .= ' download';
+			}
             ?>
 
             <?php if ('' !== $fields_args['link_feature']) : ?>
@@ -195,12 +198,12 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
 							, $link_attr
 							, $fields_args['title_feature'] )
 						: $fields_args['title_feature'];
-					
+
 					printf( '<h3 class="module-feature-title">%s</h3>', $title_feature );
 				}
 			?>
             <?php echo apply_filters('themify_builder_module_content', $fields_args['content_feature'] !== '' ? do_shortcode($fields_args['content_feature']) : '' ); ?>
-        </div>
+            </div>
 
     </div>
     <!-- /module feature -->

@@ -89,7 +89,7 @@ if (!class_exists('Themify_Customizer')) :
 			add_action('customize_save_after', array($this, 'write_stylesheet'));
 
 			// Output custom styling
-			add_action('wp_enqueue_scripts', array($this, 'enqueue_stylesheet'), 14);
+			add_action('wp_enqueue_scripts', array($this, 'enqueue_stylesheet'), 15);
 
 			// Remove stylesheet on theme switch
 			add_action('switch_theme', array($this, 'delete_stylesheet'));
@@ -153,12 +153,13 @@ if (!class_exists('Themify_Customizer')) :
 		 * @param string $section
 		 * @return array
 		 */
-		function accordion_start($label = '', $section = 'themify_options') {
+		function accordion_start( $label = '', $section = 'themify_options', $active_callback = null ) {
 			return array(
 				'control' => array(
 					'type' => 'Themify_Sub_Accordion_Start',
 					'label' => $label,
 					'section' => $section,
+					'active_callback' => $active_callback,
 				),
 			);
 		}
@@ -944,8 +945,13 @@ if (!class_exists('Themify_Customizer')) :
 				if (isset($style[0])) {
 					if (is_array($style[0])) {
 						foreach (array_map('unserialize', array_unique(array_map('serialize', $style))) as $mstyle) {
-							if ('logo' === $mstyle['prop'] || 'tagline' === $mstyle['prop'] || 'sticky-logo' === $mstyle['prop']) {
+							if ('tagline' === $mstyle['prop'] || 'sticky-logo' === $mstyle['prop']) {
 								if ($logo_props = $this->build_image_size_rule($mstyle['key'])) {
+									$css[$selector . ' img'] = $logo_props;
+								}
+							}
+							if ('logo' === $mstyle['prop']) {
+								if ($logo_props = $this->build_image_size_rule($mstyle['key'],$device)) {
 									$css[$selector . ' img'] = $logo_props;
 								}
 							}
@@ -967,7 +973,18 @@ if (!class_exists('Themify_Customizer')) :
 						}
 					} else {
 						if ('logo' === $style['prop'] || 'tagline' === $style['prop'] || 'sticky-logo' === $style['prop']) {
-							if ($logo_props = $this->build_image_size_rule($style['key'])) {
+							
+							if ('logo' === $style['prop']) {
+								$logo_props = $this->build_image_size_rule($style['key'], $device);
+							} else {
+								$logo_props = $this->build_image_size_rule($style['key']);
+							}
+
+							if ($logo_props) {
+								$css[$selector . ' img'] = $logo_props;
+							}
+
+							if ($logo_props = $this->build_image_size_rule($style['key'], $device)) {
 								$css[$selector . ' img'] = $logo_props;
 							}
 							if ('logo' === $style['prop']) {
@@ -1072,15 +1089,18 @@ if (!class_exists('Themify_Customizer')) :
 		 * @param string $mod_name
 		 * @return string
 		 */
-		function build_image_size_rule($mod_name) {
-			$element = json_decode($this->get_cached_mod($mod_name));
+		function build_image_size_rule($mod_name, $device=null) {
+			$element = json_decode($this->get_cached_mod($mod_name),true);
 			$element_props = '';
+			if ($device && isset($element[$device])) {
+				$element = $element[$device];
+			}
 			// if (isset($element->mode) && $element->mode == 'image') {
-				if (!empty($element->imgwidth)) {
-					$element_props .= "\twidth: {$element->imgwidth}px;";
+				if (!empty($element['imgwidth'])) {
+					$element_props = "\twidth: {$element['imgwidth']}px;";
 				}
-				if (!empty($element->imgheight)) {
-					$element_props .= "\n\theight: {$element->imgheight}px;";
+				if (!empty($element['imgheight'])) {
+					$element_props .= "\n\theight: {$element['imgheight']}px;";
 				}
 			// }
 			return $element_props;

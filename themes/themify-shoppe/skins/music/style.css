@@ -155,8 +155,8 @@ HEADER
 	padding: 1.2em 0.8em;
 	text-transform: none;
 }
-#headerwrap #main-nav .current_page_item > a, 
-#headerwrap #main-nav .current-menu-item > a, 
+#main-nav .current_page_item > a, 
+#main-nav .current-menu-item > a, 
 #main-nav ul a:hover, 
 #main-nav .current_page_item ul a:hover, 
 #main-nav ul .current_page_item a:hover, 
@@ -227,8 +227,8 @@ HEADER
 .transparent-header #headerwrap.fixed-header,
 .transparent-header #headerwrap a:hover,
 .transparent-header #main-nav a:hover,
-.transparent-header #headerwrap #main-nav > .current_page_item > a, 
-.transparent-header #headerwrap #main-nav > .current-menu-item > a{
+.transparent-header #main-nav > .current_page_item > a, 
+.transparent-header #main-nav > .current-menu-item > a{
 	color: #434789;
 }
 
@@ -1130,7 +1130,7 @@ MEDIA QUERIES
 	.module-feature.layout-icon-left .module-feature-content {
 		min-width: 138px;
 	}
-	.transparent-header #headerwrap #mobile-menu a {
+	.transparent-header #headerwrap .sidemenu-on a {
 		color: #434789;
 	}	
 	.transparent-header.mobile_menu_active #headerwrap #main-nav .current_page_item > a, 

@@ -2,8 +2,8 @@
 
 /*
   Plugin Name:  Builder Maps Pro
-  Plugin URI:   http://themify.me/addons/maps-pro
-  Version:      1.2.7 
+  Plugin URI:   https://themify.me/addons/maps-pro
+  Version:      1.2.8 
   Author:       Themify
   Description:  Maps Pro module allows you to insert Google Maps with multiple location markers with custom icons, tooltip text, and various map styles. It requires to use with the latest version of any Themify theme or the Themify Builder plugin.
   Text Domain:  builder-maps-pro
@@ -53,7 +53,7 @@ class Builder_Maps_Pro {
     }
 
 	public function themify_plugin_meta( $links, $file ) {
-		if ( plugin_basename( __FILE__ ) == $file ) {
+		if ( plugin_basename( __FILE__ ) === $file ) {
 			$row_meta = array(
 			  'changelogs'    => '<a href="' . esc_url( 'https://themify.me/changelogs/' ) . basename( dirname( $file ) ) .'.txt" target="_blank" aria-label="' . esc_attr__( 'Plugin Changelogs', 'builder-maps-pro' ) . '">' . esc_html__( 'View Changelogs', 'builder-maps-pro' ) . '</a>'
 			);
@@ -82,7 +82,7 @@ class Builder_Maps_Pro {
 
     public function admin_enqueue() {
         //temp code for compatibility  builder new version with old version of addon to avoid the fatal error, can be removed after updating(2017.07.20)
-        if(!class_exists('Themify_Builder_Component_Module')){
+        if(!class_exists('Themify_Builder_Component_Module') || ! function_exists( 'themify_enque' ) ){
             return;
         }
         wp_enqueue_script('themify-builder-maps-pro-admin', themify_enque($this->url . 'assets/admin.js'), array(), $this->version, false);
@@ -121,7 +121,8 @@ class Builder_Maps_Pro {
     }
 
     public function get_map_styles() {
-        $theme_styles = is_dir(get_stylesheet_directory() . '/builder-maps-pro/styles/') ? self::list_dir(get_stylesheet_directory() . '/builder-maps-pro/styles/') : array();
+        $dir = get_stylesheet_directory() . '/builder-maps-pro/styles/';
+        $theme_styles = is_dir($dir) ? self::list_dir($dir) : array();
 
         return array_merge(self::list_dir($this->dir . 'styles/'), $theme_styles);
     }

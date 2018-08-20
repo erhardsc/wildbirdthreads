@@ -21,7 +21,7 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 				'class' => 'large',
 				'render_callback' => array(
 					'binding' => 'live',
-                                        'live-selector'=>'.module-title'
+                    'live-selector'=>'.module-title'
 				)
 			),
 			array(
@@ -41,13 +41,18 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 			),
 			array(
 				'id' => 'stroke_w_divider',
-				'type' => 'text',
+				'type' => 'range',
 				'label' => __('Stroke Thickness', 'themify'),
 				'class' => 'xsmall',
-				'help' => 'px',
 				'value'=> 1,
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => 0,
+						'max' => 500,
+					)
 				)
 			),
 			array(
@@ -62,22 +67,32 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 			),
 			array(
 				'id' => 'top_margin_divider',
-				'type' => 'text',
+				'type' => 'range',
 				'label' => __('Top Margin', 'themify'),
 				'class' => 'xsmall',
-				'help' => 'px',
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => -500,
+						'max' => 500,
+					)
 				)
 			),
 			array(
 				'id' => 'bottom_margin_divider',
-				'type' => 'text',
+				'type' => 'range',
 				'label' => __('Bottom Margin', 'themify'),
 				'class' => 'xsmall',
-				'help' => 'px',
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => -500,
+						'max' => 500
+					)
 				)
 			),
 			array(
@@ -96,13 +111,18 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 			),
 			array(
 				'id' => 'divider_width',
-				'type' => 'text',
+				'type' => 'range',
 				'label' => __('Width', 'themify'),
 				'class' => 'xsmall',
-				'help' => 'px',
-				'wrap_with_class' => 'tb-group-element tb-group-element-custom',
+				'wrap_with_class' => 'tb_group_element tb_group_element_custom',
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => 0,
+						'max' => 500,
+					)
 				)
 			),
 			array(
@@ -115,7 +135,7 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 					'right' => __('Right', 'themify'),
 				),
 				'default' => 'left',
-				'wrap_with_class' => 'tb-group-element tb-group-element-custom',
+				'wrap_with_class' => 'tb_group_element tb_group_element_custom',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -130,7 +150,7 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') ),
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -153,7 +173,7 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 
 	protected function _visual_template() { 
 		$module_args = self::get_module_args(); ?>
-		<#
+		<# 
 		var style = '',
 			align = 'custom' === data.divider_type && ! _.isUndefined( data.divider_align ) ? 'divider-' + data.divider_align : '';
 		if ( data.stroke_w_divider ) style += 'border-width:'+ data.stroke_w_divider +'px; ';
@@ -161,10 +181,12 @@ class TB_Divider_Module extends Themify_Builder_Component_Module {
 		if ( data.top_margin_divider ) style += 'margin-top:' + data.top_margin_divider + 'px; ';
 		if ( data.bottom_margin_divider ) style += 'margin-bottom:'+ data.bottom_margin_divider +'px; ';
 		if ( 'custom' === data.divider_type && data.divider_width > 0 ) style += 'width:'+ data.divider_width +'px; ';
-		if ( _.isUndefined( data.style_divider ) ) data.style_divider = 'solid';
+		if (!data.style_divider ) data.style_divider = 'solid';
+                if (!data.divider_type ) data.divider_type = 'fullwidth';
 		#>
 		<div class="module module-<?php echo $this->slug ; ?> divider-{{ data.divider_type }} {{ data.style_divider }} {{ align }} {{ data.css_divider }}" style="{{ style }}">
-			<# if ( data.mod_title_divider ) { #>
+			<!--insert-->
+            <# if ( data.mod_title_divider ) { #>
 			<?php echo $module_args['before_title']; ?>{{{ data.mod_title_divider }}}<?php echo $module_args['after_title']; ?>
 			<# } #>
 		</div>

@@ -1975,6 +1975,7 @@ LOGIN
 }
 #wishlist-wrapper .products .product .product-share-wrap {
 	position: relative;
+	display: block;
 }
 #wishlist-wrapper .products .product .quick-look,
 #wishlist-wrapper .products .product .share-wrap {
@@ -1988,7 +1989,7 @@ LOGIN
 }
 #wishlist-wrapper .products .product .wishlist-remove {
 	position: absolute !important;
-	top: 2.5em;
+	top: 0;
 	left: 0;
 	display: block;
 	width: 20px;
@@ -2634,6 +2635,9 @@ LOGIN
 @media screen and (max-width: 1280px) {
 	#wishlist-wrapper .products .product .add_to_cart_button {
 		position: static;
+	}
+	#wishlist-wrapper .products .product .wishlist-remove {
+		top: 1em;
 	}
 }
 @media screen and (max-width: 768px) {

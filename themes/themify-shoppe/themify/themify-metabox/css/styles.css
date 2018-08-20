@@ -100,7 +100,7 @@ a.preview-icon {
 	z-index: 11;
 	background: rgba(0,0,0, .8);
 	color: #fff;
-	font-size: 11px;
+	font-size: 12px;
 	line-height: 1.1em;
 	padding: 4px 6px;
 	border-radius: 3px;
@@ -177,7 +177,6 @@ a.preview-icon {
 .hide-if {
 	opacity: 1;
 	visibility: visible;
-	max-height: 140px;
 	-webkit-transition: all .2s ease-in-out;
 	transition: all .2s ease-in-out;
 }
@@ -205,7 +204,7 @@ a.preview-icon {
 	pointer-events: none;
 }
 
-.themify_field_row .themify_field {
+.themify_field {
 	float: left;
 	width: 75%;
 	position: relative;
@@ -315,7 +314,7 @@ a.preview-icon {
 .themify_upload_preview img {
 	vertical-align: bottom;
 }
-.themify_field_row .themify_field_title {
+.themify_field_title {
 	width: 25%;
 	padding: 0 15px 10px 0;
 	float: left;
@@ -323,16 +322,11 @@ a.preview-icon {
 	max-width: 220px;
 }
 @media screen and (max-width: 600px) {
-	.themify_field_row .themify_field_title {
+	.themify_field_title {
 		width: auto;
 		max-width: 100%;
 		float: none;
 	}
-}
-
-.themify_field_row .themify_field input,
-.themify_field_row .themify_field select {
-	box-sizing: border-box;
 }
 	
 .themify_field_description {
@@ -776,4 +770,9 @@ input.themifyDatePicker {
 }
 .themify_field-image_radio .tm-radio-option:hover .tm-option-title {
 	display: block;
+}
+
+#order_line_items figure.product-image {
+	margin: 0;
+	display: initial;
 }

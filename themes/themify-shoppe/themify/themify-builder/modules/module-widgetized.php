@@ -40,7 +40,7 @@ class TB_Widgetized_Module extends Themify_Builder_Component_Module {
 				'id' => 'custom_css_widgetized',
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') ),
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') ),
 				'class' => 'large exclude-from-reset-field'
 			)
 		);
@@ -54,12 +54,14 @@ class TB_Widgetized_Module extends Themify_Builder_Component_Module {
 		$general = array(
 			// Background
                         self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
-                        self::get_image('.module-widgetized .widget'),
-                        self::get_color('.module-widgetized .widget', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
-						self::get_repeat('.module-widgetized .widget'),
+                        self::get_image('.module-widgetized'),
+                        self::get_color('.module-widgetized', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
+						self::get_repeat('.module-widgetized'),
+						self::get_position('.module-widgetized'),
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family('.module-widgetized'),
+                        self::get_element_font_weight('.module-widgetized'),
                         self::get_color('.module-widgetized','font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-widgetized'),
                         self::get_line_height('.module-widgetized'),
@@ -67,20 +69,51 @@ class TB_Widgetized_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-widgetized'),
                         self::get_text_transform('.module-widgetized'),
                         self::get_font_style('.module-widgetized'),
+                        self::get_text_decoration('.module-widgetized','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-widgetized a','link_color'),
                         self::get_color('.module-widgetized a:hover','link_color_hover',__('Color Hover', 'themify')),
                         self::get_text_decoration('.module-widgetized a'),
-                        // Padding
+			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding('.module-widgetized'),
 			// Margin
                         self::get_seperator('margin',__('Margin', 'themify')),
                         self::get_margin('.module-widgetized'),
-                        // Border
+			// Border
                         self::get_seperator('border',__('Border', 'themify')),
                         self::get_border('.module-widgetized')
+		);
+
+		$widgetized_container = array(
+			// Background
+                        self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-widgetized .widget', 'b_c_c',__( 'Background Color', 'themify' ),'background-color'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-widgetized .widget','p_c'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin('.module-widgetized .widget','m_c'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-widgetized .widget','b_c')
+		);
+
+		$widgetized_title = array(
+			// Font
+                        self::get_seperator('font',__('Font', 'themify')),
+                        self::get_font_family( array(' .widgettitle'),'f_f_w_t'),
+                        self::get_element_font_weight( array(' .widgettitle'),'f_w_w_t'),
+                        self::get_color(array(' .widgettitle'),'f_c_w_t',__('Font Color', 'themify')),
+                        self::get_font_size(array(' .widgettitle'),'f_s_w_t'),
+                        self::get_line_height(array(' .widgettitle'),'l_h_w_t'),
+                        self::get_letter_spacing(' .widgettitle','l_s_w_t'),
+                        self::get_text_align(' .widgettitle','t_a_w_t'),
+                        self::get_text_transform(' .widgettitle','t_t_w_t'),
+                        self::get_font_style(' .widgettitle','f_sy_w_t','f_b_w_t'),
+                        self::get_text_decoration(' .widgettitle','t_d_w_t')
 		);
 		return array(
 			array(
@@ -88,12 +121,20 @@ class TB_Widgetized_Module extends Themify_Builder_Component_Module {
 				'id' => 'module-styling',
 				'tabs' => array(
 					'general' => array(
-					'label' => __( 'General', 'themify' ),
-					'fields' => $general
+						'label' => __( 'General', 'themify' ),
+						'fields' => $general
 					),
 					'module-title' => array(
 						'label' => __( 'Module Title', 'themify' ),
 						'fields' =>  $this->module_title_custom_style()
+					),
+					'widgetized_title' => array(
+						'label' => __('Widgetized Title', 'themify'),
+						'fields' => $widgetized_title
+					),
+					'widgetized_container' => array(
+						'label' => __('Widgetized Container', 'themify'),
+						'fields' => $widgetized_container
 					)
 				)
 			)
@@ -109,7 +150,7 @@ class TB_Widgetized_Module extends Themify_Builder_Component_Module {
                 if($field['type']==='widgetized_select'){
                     $output= '<div class="selectwrapper"><select name="'. esc_attr( $field['id'] ) .'" id="'. esc_attr( $field['id'] ) .'" class="tb_lb_option"'. themify_builder_get_control_binding_data( $field ) .'>';
                     $output .= '<option></option>';
-                    foreach ( $wp_registered_sidebars as $k => $v ) {
+                    foreach ( $wp_registered_sidebars as $v ) {
                             $output .= '<option value="'.esc_attr( $v['id'] ).'">'.esc_html( $v['name'] ).'</option>';
                     }
                     $output .= '</select></div>';

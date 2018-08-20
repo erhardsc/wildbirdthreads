@@ -17,12 +17,14 @@
             bottomFixed,
             placeHolderBody,
             placeHolder,
-            doc = $(window.parent.document),
+            doc = $(window.top.document),
             currentBody,
             defaults = {
                 append: true,
                 dropitems: null,
                 elements:null,
+                type:'',
+                cancel:null,
                 onDragStart: null,
                 onDrag: null,
                 onDragEnter: null,
@@ -40,35 +42,30 @@
             if (placeHolderIframe === false) {
                 //Init PlaceHolder
                 placeHolderBody = $('<div/>', {
-                    id: 'themify_builder_placeholder_body',
-                    class: 'themify_builder_placeholder_helper'
+                    id: 'tb_placeholder_body',
+                    class: 'tb_placeholder_helper'
                 });
 
                 placeHolderIframe = $('<div/>', {
-                    id: 'themify_builder_placeholder_iframe',
-                    class: 'themify_builder_placeholder_helper'
+                    id: 'tb_placeholder_iframe',
+                    class: 'tb_placeholder_helper'
                 });
                 currentBody = $('body');
                 currentBody.prepend(placeHolderIframe).on('themify_builder_change_mode', this.changeMode);
 
                 //Init Scroll items
                 topFixed = $('#tb_toolbar', doc);
-                bottomFixed = $('#themify_builder_fixed_bottom_scroll', doc);
+                bottomFixed = $('#tb_fixed_bottom_scroll', doc);
                 $('body', doc).append(placeHolderBody);
             }
-            this.element.on('mousedown touchstart', this.mouseDown.bind(this));
+            this.element.off('mousedown.tb_visual touchstart.tb_visual').on('mousedown.tb_visual touchstart.tb_visual', this.mouseDown.bind(this));
         },
         elpos: {},
+        is_enter:false,
         size: {w: '', h: ''},
-        SetSide: function (e) {
-            var side = e.pageY > (droppedEl.offset().top + (droppedEl.outerHeight() / 2)) ? 'bottom' : 'top';
-            if (droppedEl[0].dataset.pos !== side) {
-                droppedEl.attr('data-pos', side);
-            }
-        },
         mouseDown: function (e) {
-            if (e.which === 1 && ! e.target.classList.contains( 'themify_module_favorite' ) && ! e.target.classList.contains( 'add_module_btn' ) && ! e.target.classList.contains( 'remove_item_btn' ) ) {
-
+            if (e.which === 1 && !e.target.classList.contains( 'tb_favorite' ) && !e.target.classList.contains( 'add_module_btn' ) && !e.target.classList.contains( 'remove_item_btn' ) ) {
+                
                 e.preventDefault();
                 doScroll = false;
                 draggedEl = this.element;
@@ -105,7 +102,10 @@
                 this.mouseMove(e);
                 var $body = $('body', doc);
                 $body = $body.add($('body'));
-                $body.addClass('themify_builder_drag_start');
+                $body.addClass('tb_drag_start tb_drag_'+this.options.type);
+                if(this.options.type==='row'){
+                    themifybuilderapp.toolbar.$el.find('.tb_zoom[data-zoom="50"]').trigger('click');
+                }
                 if ($.isFunction(this.options.onDragStart)) {
                     this.options.onDragStart.call(this, e, draggedEl);
                 }
@@ -149,8 +149,31 @@
 
                 }
                 else {
+                    if(this.is_enter && this.options.elements && droppedEl){
+                        var self = this,
+                        items = this.is_enter.find(this.options.dropitems+','+this.options.elements).get().reverse();
+                        for(var i=0,len=items.length;i<len;++i){
+                            var el = $(items[i]);
+                            if (self.CheckIntersect(e, el) && (!self.options.cancel || el.closest(self.options.cancel).length===0)) {  
+                                self.removeAttr();
+                                droppedEl = el;
+                                break;
+                            }
+                        }
+                        
+                    }
                     this.setPlaceHolder(e);
                 }
+            }
+        },
+        SetSide: function (e) {
+            var rect = droppedEl[0].getBoundingClientRect(),
+                side = ((e.clientY - rect.top)/(rect.bottom - rect.top-20)) > .5 ? 'bottom' : 'top';
+                if(side==='top' && droppedEl[0].parentNode===this.is_enter[0] && droppedEl.index()===0){
+                    droppedEl = this.is_enter;
+                }
+            if (droppedEl[0].dataset.pos !== side) {
+                droppedEl.attr('data-pos', side);
             }
         },
         setCurrentPlaceHolder: function () {
@@ -179,10 +202,6 @@
                     .off('mouseup.tb_visual')
                     .off('mouseenter.tb_visual')
                     .off('mouseleave.tb_visual')
-
-                    // Init Droppable zones
-                    .off('mouseenter.tb_visual')
-                    .off('mouseleave.tb_visual');
             doc
                     .off('mousemove.tb_visual')
                     .off('mouseup.tb_visual');
@@ -212,11 +231,17 @@
                     pos.left = this.elpos.left;
                 }
                 doScroll = draggedEl = null;
+                this.is_enter =null;
                 var self = this;
                 placeHolder.addClass('drop_animate').css(pos).one(themifybuilderapp.Utils.transitionPrefix(), function (e) {
                     var $body = $('body', doc);
                     $body = $body.add('body');
-                    $body.removeClass('themify_builder_drag_start');
+                    if(self.options.type==='row'){
+                        setTimeout(function(){
+                            themifybuilderapp.toolbar.$el.find('.tb_zoom[data-zoom="100"]').trigger('click');
+                        },1000);
+                    }
+                    $body.removeClass('tb_drag_start tb_drag_'+self.options.type);
                     if (droppedEl && droppedEl[0].dataset.pos) {
                         drag.hide();
                         if (droppedEl[0].dataset.pos === 'bottom') {
@@ -252,26 +277,11 @@
         },
         mouseEnter: function (e) {
             if (draggedEl && placeHolder) {
-                droppedEl = $(e.currentTarget);
-                var self = this,
-                    child = droppedEl.find(this.options.dropitems);
-                if (child.length > 0) {
-                    child.each(function () {
-                        if (self.CheckIntersect(e, $(this))) {
-                            droppedEl = $(this);
-                            return false;
-                        }
-                    });
-                }
-                if(this.options.elements){
-                    droppedEl.find(this.options.elements).each(function(){
-                        if (self.CheckIntersect(e, $(this))) {
-                            droppedEl = $(this);
-                            return false;
-                        }
-                    });
-                }
-                self.removeAttr();
+                e.stopPropagation();
+                $(document).trigger('mouseenter');
+                this.is_enter = $(e.currentTarget);
+                droppedEl = this.is_enter;
+                this.removeAttr();
                 this.SetSide(e);
                 if ($.isFunction(this.options.onDragEnter)) {
                     this.options.onDragEnter.call(this, e, draggedEl, droppedEl);
@@ -281,6 +291,12 @@
         mouseLeave: function (e) {
             var el = $(e.currentTarget);
             if (draggedEl && droppedEl && !this.CheckIntersect(e, el)) {
+                var parent = el.parent().closest(this.options.dropitems);
+                if(parent.length>0 && this.CheckIntersect(e, parent)){
+                    parent.trigger('mouseenter.tb_visual');
+                   return;
+                }
+                this.is_enter = null;
                 this.removeAttr();
                 droppedEl = false;
                 if ($.isFunction(this.options.onDragLeave)) {
@@ -290,9 +306,9 @@
         },
         scroll: function (e) {
             if (draggedEl && placeHolder) {
-                var step = parseInt((currentBody.height() - $(window.parent).height()) / 5),
+                var step = parseInt((currentBody.height() - $(window.top).height()) / 5),
                         el = $(e.currentTarget);
-                if (el.prop('id') === 'themify_builder_fixed_bottom_scroll') {
+                if (el.prop('id') === 'tb_fixed_bottom_scroll') {
                     doScroll = '+=' + step + 'px';
                     scrollDir = 'down';
                 }
@@ -310,7 +326,7 @@
         },
         checkScrollEnd: function () {
             var top = currentBody.scrollTop();
-            return (scrollDir === 'up' && top !== 0) || (scrollDir === 'down' && ($(window.parent).height() + top) !== currentBody.height());
+            return (scrollDir === 'up' && top !== 0) || (scrollDir === 'down' && ($(window.top).height() + top) !== currentBody.height());
         },
         CheckIntersect: function (e, item) {
             var offset = item.offset();

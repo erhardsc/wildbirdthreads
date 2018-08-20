@@ -33,15 +33,15 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
 
     <!-- module widget -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php
         if ($fields_args['mod_title_widget'] !== '') {
             echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_widget'], $fields_args). $fields_args['after_title'];
         }
 
         do_action('themify_builder_before_template_content_render');
-        $new_instance = TB_Widget_Module::sanitize_widget_instance( $fields_args['instance_widget'] );
         if ($fields_args['class_widget'] !== '' && class_exists($fields_args['class_widget'])){
-            the_widget($fields_args['class_widget'], $new_instance);
+            the_widget($fields_args['class_widget'], $fields_args['instance_widget']);
         }
 
         do_action('themify_builder_after_template_content_render');

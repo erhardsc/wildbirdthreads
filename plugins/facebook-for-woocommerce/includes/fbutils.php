@@ -16,7 +16,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
   class WC_Facebookcommerce_Utils {
 
     const FB_RETAILER_ID_PREFIX = 'wc_post_id_';
-    const PLUGIN_VERSION = '1.8.7';  // Change it in `facebook-for-*.php` also
+    const PLUGIN_VERSION = '1.9.5';  // Change it in `facebook-for-*.php` also
 
     const FB_VARIANT_IMAGE = 'fb_image';
     const FB_VARIANT_SIZE = 'size';
@@ -405,6 +405,20 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         return true;
       }
       return strtoupper($latin_string) === $latin_string;
+    }
+
+    public static function decode_json($json_string, $assoc = false) {
+      $data = json_decode($json_string, $assoc, 512, JSON_BIGINT_AS_STRING);
+      return $data;
+    }
+
+    public static function set_test_fail_reason($msg, $trace) {
+      $reason_msg = get_transient('facebook_plugin_test_fail');
+      if ($reason_msg) {
+        $msg = $reason_msg . PHP_EOL . $msg;
+      }
+      set_transient('facebook_plugin_test_fail', $msg);
+      set_transient('facebook_plugin_test_stack_trace', $trace);
     }
   }
 

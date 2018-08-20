@@ -20,6 +20,9 @@ if ( ! function_exists( 'themify_do_img' ) ) {
 		$attachment_id = null;
 		$img_url = null;
 
+		$width = is_numeric( $width ) ? $width : '';
+		$height = is_numeric( $height ) ? $height : '';
+
 		// if an attachment ID has been sent
 		if( is_int( $image ) ) {
 			$post = get_post( $image );

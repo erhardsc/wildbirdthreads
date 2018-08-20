@@ -1,17 +1,17 @@
-<form id="themify_builder_import_form" method="POST">
+<form id="tb_import_form" method="POST">
 
-	<div id="themify_builder_lightbox_options_tab_items">
+	<div id="tb_lightbox_options_tab_items">
 		<li class="title"><?php _e( 'Import From', 'themify' ); ?></li>
 	</div>
 
-	<div id="themify_builder_lightbox_actions_items"></div>
+	<div id="tb_lightbox_actions_items"></div>
 
-	<div class="themify_builder_options_tab_wrapper">
-		<div class="themify_builder_options_tab_content">
+	<div class="tb_options_tab_wrapper">
+		<div class="tb_options_tab_content">
 			<?php foreach( $data as $field ): ?>
-			<div class="themify_builder_field">
-				<div class="themify_builder_label"><?php echo esc_html( $field['label'] ); ?></div>
-				<div class="themify_builder_input">
+			<div class="tb_field">
+				<div class="tb_label"><?php echo esc_html( $field['label'] ); ?></div>
+				<div class="tb_input">
                                     <div class="selectwrapper">
 					<select name="<?php  echo esc_attr( $field['post_type'] ); ?>">
 						<?php foreach( $field['items'] as $option ): ?>
@@ -23,7 +23,7 @@
 			</div>
 			<?php endforeach; ?>
 
-			<button id="builder_submit_import_form" class="builder_button"><?php _e('Import', 'themify') ?></button>
+			<button id="tb_submit_import_form" class="builder_button"><?php _e('Import', 'themify') ?></button>
 		</div>
 	</div>
 

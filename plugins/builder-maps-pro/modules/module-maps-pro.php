@@ -32,10 +32,12 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 	public function get_options() {
            
 		$map_styles = array();
-		foreach( Builder_Maps_Pro::get_instance()->get_map_styles() as $key => $style ) {
+                $styles = Builder_Maps_Pro::get_instance()->get_map_styles();
+		foreach( $styles as $key => $style ) {
 			$name = str_replace( '.json', '', $key );
 			$map_styles[$name] = $name;
 		}
+                $styles = null;
 
 		return array(
 			array(
@@ -64,46 +66,53 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 			),
 			array(
 				'id' => 'w_map',
-				'type' => 'text',
+				'type' => 'range',
 				'class' => 'xsmall',
 				'label' => __('Width', 'builder-maps-pro'),
-				'unit' => array(
-					'id' => 'unit_w',
-					'type' => 'select',
-					'options' => array(
-						array( 'id' => 'pixel_unit_w', 'value' => 'px'),
-						array( 'id' => 'percent_unit_w', 'value' => '%')
+				'units' => array(
+					'PX' => array(
+						'min' => 0,
+						'max' => 500,
 					),
-					'render_callback' => array(
-						'binding' => 'live'
+					'%' => array(
+						'min' => 0,
+						'max' => 100,
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
 			),
 			array(
 				'id' => 'w_map_static',
-				'type' => 'text',
+				'type' => 'range',
 				'class' => 'xsmall',
 				'label' => __('Width', 'builder-maps-pro'),
-				'value' => 500,
-				'after' => 'px',
-				'wrap_with_class' => 'tb-group-element tb-group-element-static',
+				'wrap_with_class' => 'tb_group_element tb_group_element_static',
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => 0,
+						'max' => 500,
+					)
 				)
 			),
 			array(
 				'id' => 'h_map',
-				'type' => 'text',
+				'type' => 'range',
 				'label' => __('Height', 'builder-maps-pro'),
 				'class' => 'xsmall',
-				'after' => 'px',
-				'value' => 300,
 				'render_callback' => array(
 					'binding' => 'live'
+				),
+				'units' => array(
+					'PX' => array(
+						'min' => 0,
+						'max' => 500,
+					)
 				)
 			),
 			array(
@@ -137,7 +146,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 					'disable' => __( 'Disable', 'builder-maps-pro' ),
 					'enable' => __( 'Enable', 'builder-maps-pro' ),
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -151,7 +160,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 					'desktop_only' => __( 'Enable only on desktop', 'builder-maps-pro' ),
 					'disable' => __( 'Disable', 'builder-maps-pro' )
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -164,7 +173,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 					'no' => __( 'No', 'builder-maps-pro' ),
 					'yes' => __( 'Yes', 'builder-maps-pro' ),
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -176,7 +185,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 				'options' => array(
 					array( 'name' => 'gmaps', 'value' => __('Open Google Maps', 'builder-maps-pro'))
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-static',
+				'wrap_with_class' => 'tb_group_element tb_group_element_static',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -185,8 +194,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 				'id' => 'zoom_map',
 				'type' => 'selectbasic',
 				'label' => __('Zoom', 'builder-maps-pro'),
-				'default' => 4,
-				'options' => range( 1, 18 ),
+				'options' => range( 1, 20 ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -206,7 +214,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 					'yes' => array( 'show' => array( 'map_polyline_options' ) ),
 					'no' => array( 'hide' => array( 'map_polyline_options' ) )
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
 			),
 			array(
 				'id' => 'map_polyline_options',
@@ -245,7 +253,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 						)
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-dynamic tb-group-element-map_polyline'
+				'wrap_with_class' => 'tb_group_element tb_group_element_dynamic tb_group_element_map_polyline'
 			),
 			array(
 				'id' => 'map_center',
@@ -270,7 +278,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'builder-maps-pro'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling', 'builder-maps-pro' ) ),
+				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'builder-maps-pro' ) ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -284,8 +292,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 			'scrollwheel_map' => 'enable',
 			'draggable_map' => 'enable',
 			'disable_map_ui' => 'no',
-			'unit_w' => '%',
-			'unit_h' => 'px',
+			'w_map_unit' => '%',
 			'w_map' => 100,
 			'h_map' => 350,
 			'zoom_map' => 4,
@@ -325,7 +332,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 	protected function _visual_template() {
 		$module_args = self::get_module_args();?>
 
-		<#
+		<# 
 			var moduleSettings = {
 				'zoom': data.zoom_map,
 				'type': data.type_map,
@@ -341,13 +348,13 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 				'draggable': ( 'enable' === data.draggable_map || ( 'desktop_only' === data.draggable_map ) ) ? 'enable' : 'disable',
 				'disable_map_ui': data.disable_map_ui
 			};
-			if(!data.unit_w){
-				data.unit_w = 'px';
-			}
+			if(!data.w_map_unit){
+                            data.w_map_unit = data.unit_w?data.unit_w:'px';
+			}                     
 		#>
 
 		<div class="module module-<?php echo $this->slug; ?> {{ data.css_class }}" data-config="{{window.btoa(JSON.stringify( moduleSettings )) }}">
-
+                        <!--insert-->
 			<# if( data.mod_title ) { #>
 				<?php echo $module_args['before_title']; ?>
 				{{{ data.mod_title }}}
@@ -359,7 +366,7 @@ class TB_Maps_Pro_Module extends Themify_Builder_Component_Module {
 			<# if( data.map_display_type === 'dynamic' ) { #>
 
 				<div class="maps-pro-canvas-container">
-					<div class="maps-pro-canvas map-container" style="width: {{ data.w_map }}{{ data.unit_w }}; height: {{ data.h_map }}px;">
+					<div class="maps-pro-canvas map-container" style="width: {{ data.w_map }}{{ data.w_map_unit }}; height: {{ data.h_map }}px;">
 					</div>
 				</div>
 
@@ -458,9 +465,9 @@ function themify_builder_field_map_pro( $field, $module_name ) {
 		),
 	), $module_name );
 
-	echo '<div class="themify_builder_field tb-group-element tb-group-element-static">';
-		esc_html_e( 'In static mode, Google allows up to 5 custom icons, though each unique icons may be used multiple times. Icons are limited to sizes of 4096 pixels (64x64 for square images), and also the API does not support custom icon URLs that use HTTPS.', 'builder-maps-pro' );
-	echo '</div></div>';
+	echo '<div class="tb_field tb_group_element tb_group_element_static">',
+		esc_html( 'In static mode, Google allows up to 5 custom icons, though each unique icons may be used multiple times. Icons are limited to sizes of 4096 pixels (64x64 for square images), and also the API does not support custom icon URLs that use HTTPS.', 'builder-maps-pro' )
+	,'</div></div>';
 
 }
 

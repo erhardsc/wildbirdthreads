@@ -2,9 +2,9 @@
     'use strict';
 
     var api = themifybuilderapp,
-            tb_shorcodes = [],
-            module_cache = [],
-            ThemifyLiveStyling;
+        tb_shorcodes = [],
+        module_cache = [],
+        ThemifyLiveStyling;
 
     api.mode = 'visual';
     api.iframe = '';
@@ -36,14 +36,17 @@
             api.liveStylingInstance.setNewRules(style_data);
             return api.render_element(constructData);
         },
+        addClass:function(){
+            this.el.className += ' ' + api.VisualCache[this.model.cid];
+        },
         change_callback: function () {
             var el = this.$el;
-            el[0].insertAdjacentHTML('afterbegin', '<span class="sp-preloader tb-preview-component"></span>');
+            el[0].insertAdjacentHTML('afterbegin', '<span class="sp-preloader tb_preview_component"></span>');
             this.render_visual().done(function () {
-                el.find('.tb-preview-component').remove();
+                el.find('.tb_preview_component').remove();
                 api.Utils.setCompactMode(el[0].getElementsByClassName('module_column'));
                 var cid = api.eventName === 'row' ? el.data('cid') : api.beforeEvent.data('cid');
-                api.vent.trigger('dom:change', cid, api.beforeEvent, el, api.eventName);
+                api.undoManager.push(cid, api.beforeEvent, el, api.eventName);
                 api.Mixins.Builder.update(el);
                 if (api.eventName === 'row') {
                     api.vent.trigger('dom:builder:change');
@@ -52,35 +55,62 @@
         },
         createEl: function (markup) {
             var type = this.model.get('elType'),
-                    $html = $(markup);
-            if (type !== 'column') {
-                $html = $html.filter('.module_' + type);
+                temp  = document.createElement('div');
+                temp.innerHTML = markup;
+                markup = null;
+            var item = temp.getElementsByClassName('module_' + type)[0];
+            temp = null;
+            var cl = item.classList,
+                attr = item.attributes;
+            if(api.VisualCache[this.model.cid]){
+                this.el.className += ' ' + api.VisualCache[this.model.cid];
             }
-            var cover = $html.children('.builder_row_cover'),
-                    slider = $html.children('.' + type + '-slider'),
-                    dataAttr = $html.data(),
-                    style = $html[0].getAttribute('style');
-            this.$el.addClass($html[0].getAttribute('class'));
-            for (var i in dataAttr) {
-                this.el.dataset[i] = typeof dataAttr[i] === 'object' ? JSON.stringify(dataAttr[i]) : dataAttr[i];
+            for(var i=0,len=cl.length;i<len;++i){
+                this.el.classList.add(cl[i]);
             }
-            if (style) {
-                this.el.setAttribute('style', style);
-            }
-            if (cover.length > 0) {
-                var _cover = this.$el.children('.builder_row_cover');
-                if (_cover.length > 0) {
-                    _cover.replaceWith(cover);
-                } else {
-                    this.$el.prepend(cover);
+            cl = null;
+            for(var i=0,len=attr.length;i<len;++i){
+                if(attr[i].name!=='id' && attr[i].name!=='class'){
+                    var n = attr[i].name;
+                    this.el.setAttribute(n,attr[i].value);
+                    if(n.indexOf('data-')===0){
+                        this.$el.data(n.replace('data-',''),attr[i].value);
+                    }
                 }
             }
-            if (slider.length > 0) {
-                var _slider = this.$el.children('.' + type + '-slider');
-                if (_slider.length > 0) {
-                    _slider.replaceWith(slider);
+            attr = null;
+            var cover = item.getElementsByClassName('builder_row_cover')[0],
+                slider = item.getElementsByClassName(type + '-slider')[0],
+                frame= item.getElementsByClassName('tb_row_frame');
+            if(frame.length>0){
+                var fragment = document.createDocumentFragment(),
+                    _frame = this.el.getElementsByClassName('tb_row_frame');
+                for(var i=0,len=_frame.length;i<len;++i){
+                    _frame[i].parentNode.removeChild(_frame[i]);
+                }
+                _frame = null;
+                 
+                for(var i=0,len=frame.length;i<len;++i){
+                    fragment.appendChild(frame[i].cloneNode()); 
+                }
+                this.el.insertBefore(fragment, this.el.firstChild);
+                frame =fragment =  null;
+            }
+            if (cover) {
+                var _cover = this.el.getElementsByClassName('builder_row_cover')[0];
+                if (_cover) {
+                    this.el.replaceChild(cover,_cover);
                 } else {
-                    this.$el.prepend(slider);
+                    this.el.insertAdjacentElement('afterbegin',cover);
+                }
+                _cover  = cover = null;
+            }
+            if (slider) {
+                var _slider = this.el.getElementsByClassName(type + '-slider')[0];
+                if (_slider) {
+                    this.el.replaceChild(slider,_slider);
+                } else {
+                    this.el.insertAdjacentElement('afterbegin',slider);
                 }
             }
         },
@@ -101,10 +131,11 @@
             }
         }
     };
-
+    
+    
     api.previewVisibility = function () {
         var $el = 'row' === this.model.get('elType') ? this.$el : this.$el.find('.module'),
-                visible = 'row' === this.model.get('elType') ? this.model.get('styling') : this.model.get('mod_settings');
+            visible = 'row' === this.model.get('elType') ? this.model.get('styling') : this.model.get('mod_settings');
 
         if (api.isPreview) {
             if ('hide_all' === visible['visibility_all']) {
@@ -157,8 +188,9 @@
 
     _.extend(api.Views.BaseElement.prototype, api.Mixins.Frontend);
 
-    api.Views.register_row('visual', {
+    api.Views.register_row({
         initialize: function () {
+            this.listenTo(this.model, 'addClass', this.addClass);
             this.listenTo(this.model, 'create:element', this.createEl);
             this.listenTo(this.model, 'visual:change', this.change_callback);
             this.listenTo(this.model, 'custom:restorehtml', this.restoreHtml);
@@ -167,24 +199,25 @@
         }
     });
 
-    api.Views.register_subrow('visual', {
+    api.Views.register_subrow({
         initialize: function () {
+            this.listenTo(this.model, 'addClass', this.addClass);
             this.listenTo(this.model, 'create:element', this.createEl);
             this.listenTo(this.model, 'visual:change', this.change_callback);
             this.listenTo(this.model, 'custom:restorehtml', this.restoreHtml);
         }
     });
 
-    api.Views.register_column('visual', {
+    api.Views.register_column({
         initialize: function () {
+            this.listenTo(this.model, 'addClass', this.addClass);
             this.listenTo(this.model, 'create:element', this.createEl);
             this.listenTo(this.model, 'visual:change', this.change_callback);
             this.listenTo(this.model, 'custom:restorehtml', this.restoreHtml);
         }
     });
 
-    api.Views.register_module('visual', {
-        template: wp.template('builder_visual_module_item'),
+    api.Views.register_module( {
         is_ajax_call: false,
         _jqueryXhr: false,
         templateVisual: function (settings) {
@@ -196,7 +229,7 @@
                     cl = visible['visibility_all'] === 'hide_all' || visible['visibility_desktop'] === 'hide' || visible['visibility_tablet'] === 'hide' || visible['visibility_mobile'] === 'hide' ? ' tb_visibility_hidden' : '';
 
             return {
-                'class': 'themify_builder_module_front module-' + this.model.get('mod_name') + ' active_module clearfix tb_element_cid_' + this.model.cid + cl,
+                'class': 'tb_module_front active_module tb_element_cid_' + this.model.cid + cl,
                 'data-cid': this.model.cid
             };
         },
@@ -210,11 +243,35 @@
             api.vent.on('dom:preview', api.previewVisibility.bind(this));
         },
         createEl: function (markup) {
-            var module = this.$('.module'),
-                    cl = module[0].getAttribute('class');
-            module.remove();
-            this.el.insertAdjacentHTML('beforeend', markup);
-            this.$el.find('.module').first().addClass(cl);
+            var  n = this.model.get( 'mod_name' ),
+                temp  = document.createElement('div');
+            temp.innerHTML = api.Utils.insertModuleToolbar(markup,n);
+            markup = null;;
+            var module = temp.getElementsByClassName('module')[0];
+            temp = null;
+            this.el.innerHTML  = module.innerHTML;
+            var attr = module.attributes;
+            module = null;
+            this.el.className = this.attributes().class;
+            for(var i=0,len=attr.length;i<len;++i){
+                if(attr[i].name==='class'){
+                    this.el.className+=' '+attr[i].value;
+                }
+                else{
+                    var k = attr[i].name;
+                    this.el.setAttribute(k,attr[i].value);
+                    if(k.indexOf('data-')===0){
+                        this.$el.data(k.replace('data-',''),attr[i].value);
+                    }
+                }
+            }
+            attr = null;
+            if(api.VisualCache[this.model.cid]){
+                this.el.classList.add(api.VisualCache[this.model.cid]);
+            }
+            if(n==='layout-part'){
+               api.Forms.LayoutPart.insertSwap(this.el);
+            }
         },
         shortcodeToHTML: function (content) {
             var self = this;
@@ -232,22 +289,23 @@
                         tb_load_nonce: themifyBuilder.tb_load_nonce
                     },
                     success: function (data) {
-						if ( data.success ) {
-							var shortcodes = data.data.shortcodes,
-								styles = data.data.styles;
-							if( styles ) {
-                                                            for (var i = 0, len = styles.length; i < len; ++i) {
-                                                                    Themify.LoadCss(styles[i].s,styles[i].v,null,styles[i].m);
-                                                            }
-							}	
-							for (var i = 0, len = shortcodes.length; i < len; ++i) {
-                                                            var k = Themify.hash( shortcodes[i].key );
-                                                            self.$el.find( '.tmp' + k ).replaceWith( shortcodes[i].html );
-                                                            tb_shorcodes[k] = shortcodes[i].html;
-                                                            api.Utils.loadContentJs( self.$el, 'module' );
-							}
-
-						}
+                        if ( data.success ) {
+                                var shortcodes = data.data.shortcodes,
+                                        styles = data.data.styles;
+                                if( styles ) {
+                                    for (var i = 0, len = styles.length; i < len; ++i) {
+                                            Themify.LoadCss(styles[i].s,styles[i].v,null,styles[i].m);
+                                    }
+                                }	
+                                for (var i = 0, len = shortcodes.length; i < len; ++i) {
+                                    var k = Themify.hash( shortcodes[i].key );
+                                    self.$el.find( '.tmp' + k ).replaceWith( shortcodes[i].html );
+                                    tb_shorcodes[k] = shortcodes[i].html;
+                                    if(Themify.is_builder_loaded){
+                                        api.Utils.loadContentJs( self.$el, 'module' );
+                                    }
+                                }
+                        }
                     }
                 });
             }
@@ -311,20 +369,15 @@
                 selector.html(value);
             }
             else {
-                var module = this.$('.module');
-                module.replaceWith(tmpl);
-                this.$el.children('style').remove(); // temporary fix unwanted inline style
-                module = this.$('.module');
-                if (api.VisualCache[data['cid']]) {
-                    module.addClass(api.VisualCache[data['cid']]);
-                }
+                this.createEl(tmpl);
                 if (!cid) {
-                    api.liveStylingInstance.$liveStyledElmt = module;
+                    api.liveStylingInstance.$liveStyledElmt = this.$el;
+                    var self = this;
                     if (this.timeout) {
                         clearTimeout(this.timeout);
                     }
                     this.timeout = setTimeout(function () {
-                        api.Utils.loadContentJs(module, 'module');
+                        api.Utils.loadContentJs(self.$el, 'module');
                     }, timer);
                 }
             }
@@ -346,28 +399,24 @@
             }
             this.is_ajax_call = true;
             function callback(data) {
-                var module = that.$el.find('.module').first();
-                module.replaceWith(data);
-                module = that.$el.find('.module').first();
-                if (api.VisualCache[that.model.cid]) {
-                    module.addClass(api.VisualCache[that.model.cid]);
-                }
-                api.liveStylingInstance.$liveStyledElmt = module;
-                api.Utils.loadContentJs(module, 'module');
-                that.$el.find('.tb-preview-component').remove();
+                that.createEl(data);
+                api.liveStylingInstance.$liveStyledElmt = that.$el;
+                api.Utils.loadContentJs(that.$el, 'module');
+                that.$el.find('.tb_preview_component').remove();
             }
-            that.el.insertAdjacentHTML('afterbegin', '<span class="tb-preview-component sp-preloader"></span>');
+            
             var name = this.model.get('mod_name'),
-				unsetKey = settings['unsetKey'];
-            delete settings['cid'];
-            delete settings['unsetKey'];
+                unsetKey = settings['unsetKey'];
+        
+            that.el.insertAdjacentHTML('afterbegin', '<span class="tb_preview_component sp-preloader"></span>');
+            delete settings['cid'],settings['unsetKey'];
             settings = api.Utils.clear(settings);
             settings['module_' + name + '_slug'] = name; //unique settings
             settings = JSON.stringify(settings);
             var key = Themify.hash(settings);
 
             if(unsetKey)
-				delete module_cache[key];
+                delete module_cache[key];
 
             if (module_cache[key] !== undefined && module_cache[key]['data'] !== undefined) {
                 var old_cid = module_cache[key]['cid'];
@@ -401,10 +450,9 @@
                     callback(data);
                 },
                 error: function () {
-                    that.$el.removeClass('tb-preview-loading');
+                    that.$el.removeClass('tb_preview_loading');
                 }
             });
-
             return this;
         }
     });
@@ -429,11 +477,13 @@
                 }
             }
             else if ('module' !== type) {
+                if(api.VisualCache[cid]){
+                    model.trigger('addClass');
+                }
                 continue;
             }
             if ('module' === type && 'tile' !== data['mod_name'] && themifyBuilder.modules[data['mod_name']].type !== 'ajax') {
-                var model = api.Models.Registry.lookup(cid),
-                        is_shortcode = 'accordion' === data['mod_name'] || 'box' === data['mod_name'] || 'feature' === data['mod_name'] || 'tab' === data['mod_name'] || 'text' === data['mod_name'] || 'plain-text' === data['mod_name'] || 'pointers' === data['mod_name'] || 'pro-image' === data['mod_name'] || 'countdown' === data['mod_name'] || 'button' === data['mod_name'] || 'pro-slider' === data['mod_name'] || 'timeline' === data['mod_name'];
+                var is_shortcode = 'accordion' === data['mod_name'] || 'box' === data['mod_name'] || 'feature' === data['mod_name'] || 'tab' === data['mod_name'] || 'text' === data['mod_name'] || 'plain-text' === data['mod_name'] || 'pointers' === data['mod_name'] || 'pro-image' === data['mod_name'] || 'countdown' === data['mod_name'] || 'button' === data['mod_name'] || 'pro-slider' === data['mod_name'] || 'timeline' === data['mod_name'];
 
                 model.trigger('custom:preview:live', data['mod_settings'], is_shortcode, cid);
                 continue;
@@ -469,15 +519,15 @@
     };
 
     api.render_element = function (constructData) {
-        // send json data
         return $.ajax({
-            type: "POST",
+            type: 'POST',
             url: themifyBuilder.ajaxurl,
             dataType: 'json',
             data: {
                 action: 'tb_render_element',
                 batch: JSON.stringify(constructData),
-                tb_load_nonce: themifyBuilder.tb_load_nonce
+                tb_load_nonce: themifyBuilder.tb_load_nonce,
+				tb_post_id: themifyBuilder.post_ID
             },
             success: function (data) {
                 for (var cid in data) {
@@ -488,7 +538,13 @@
         });
     };
 
-    api.get_visual_templates = function (callback) {
+    function get_visual_templates (callback) {
+        if(api.Forms.LayoutPart.init){
+            if (callback) {
+                callback();
+            }
+            return;
+        }
         var key = 'tb_visual_templates';
         function getData() {
             if (themifyBuilder.debug) {
@@ -534,7 +590,7 @@
             for (var i in data) {
                 insert += data[i];
             }
-            document.getElementsByTagName('body')[0].insertAdjacentHTML('beforeend', insert);
+            document.body.insertAdjacentHTML('beforeend', insert);
             if (callback) {
                 callback();
             }
@@ -562,45 +618,41 @@
     };
 
     api.render = function () {
-        api.get_visual_templates(function () {
+        get_visual_templates(function () {
             var builder = [document.getElementById('themify_builder_content-' + themifyBuilder.post_ID)];
             for (var i = 0, len = 1; i < len; ++i) {
                 var id = builder[i].dataset.postid,
-                        input = builder[i].getElementsByTagName('script')[0];
-                var data = window['builderdata' + '_' + id] ? window['builderdata' + '_' + id].data : [];
+                    data = window['builderdata_' + id] ? window['builderdata_' + id].data : [];
                 if (data.length === 0) {
                     data = {};
                 }
-                window['builderdata' + '_' + id] = null;
-                if (input) {
-                    input.parentNode.removeChild(input);
+                else{
+                    data = data.filter(function(e) { return Object.keys(e).length > 0; });
                 }
+                window['builderdata_' + id] = null;
                 api.id = id;
-                api.Instances.Builder[i] = new api.Views.Builder({el: '#themify_builder_content-' + id, collection: new api.Collections.Rows(data), type: 'visual'});
+                api.Instances.Builder[i] = new api.Views.Builder({el: '#themify_builder_content-' + id, collection: new api.Collections.Rows(data), type: api.mode});
                 api.Instances.Builder[i].render();
                 api.bootstrap(null, function () {
                     api.toolbar.el.style.display = 'block';
-                    window.parent.jQuery('body').trigger('themify_builder_ready');
+                    window.top.jQuery('body').trigger('themify_builder_ready');
                     api.Utils.loadContentJs();
                     top_iframe.body.insertAdjacentHTML('beforeend', themifyBuilder.data);
                     themifyBuilder.data = null;
                     Themify.is_builder_loaded = true;
                     api.vent.trigger('dom:builder:init', true);
-					if(ThemifyBuilderCommon.inLightboxIframe())
-						$('.tb_toolbar_backend_edit', top_iframe).hide();
+              //      TB_Inline.init();			
                 });
             }
             api.id = false;
         });
     };
     // Initialize Builder
-    $('body').one('builderiframeloaded.themify', function (e, iframe) {
-        api.iframe = iframe;
-        if (tbLocalScript.isAnimationActive) {
-            setTimeout(function () {
-                Themify.LoadCss(tbLocalScript.builder_url + '/css/animate.min.css'); // load it anyway for animation live preview
-            }, 1);
-        }
+    Themify.body.one('builderiframeloaded.themify', function (e, iframe) {
+        api.iframe = $(iframe);
+        setTimeout(function () {
+            Themify.LoadCss(tbLocalScript.builder_url + '/css/animate.min.css'); 
+        }, 1);
         api.toolbar = new api.Views.Toolbar({el: '#tb_toolbar'});
         api.toolbar.render();
         setTimeout(function () {
@@ -613,27 +665,26 @@
         setTimeout(function () {
             api.Views.bindEvents();
         }, 1);
-
         api.Forms.bindEvents();
-
     });
 
     ThemifyLiveStyling = (function ($) {
 
         function ThemifyLiveStyling() {
-            this.$context = $('#themify_builder_lightbox_parent', top_iframe);
+            this.$context = $('#tb_lightbox_parent', top_iframe);
             this.isInit = false;
             this.prefix = false;
             this.type = false;
             this.group = false;
-            this.styleName = 'themify-builder-component-customize';
-            this.style_tab = '#themify_builder_options_styling';
+            this.styleName = 'tb_component_customize';
+            this.style_tab = '#tb_options_styling';
             this.generatedPrefix = [];
             this.generatedCache = [];
             this.module_rules = [];
             this.rulesCache = [];
             this.tempData = [];
             this.prevData = [];
+            this.undoData = [];
             this.currentSheet = null;
             var self = this;
             setTimeout(function () {
@@ -642,6 +693,7 @@
                 self.before_close();
                 self.bindLightboxForm();
             }, 1);
+            this.bp_reverse = Object.keys(themifyBuilder.breakpoints).reverse();
         }
 
         ThemifyLiveStyling.prototype.InitInlineStyles = function () {
@@ -657,8 +709,6 @@
             this.$liveStyledElmt = $('.tb_element_cid_' + api.activeModel.cid);
             this.prefix = '.themify_builder .tb_element_cid_' + api.activeModel.cid;
             if (this.type === 'module') {
-                this.$liveStyledElmt = this.$liveStyledElmt.children('.module');
-                this.prefix += ' ';
                 this.group = api.activeModel.get('mod_name');
             }
             else {
@@ -669,6 +719,8 @@
             }
             this.currentStyleObj = typeof currentStyleObj === 'object' ? currentStyleObj : {};
             this.tempData = [];
+            this.undoData = [];
+            this.undoData[api.activeBreakPoint] = [];
             this.tempData[api.activeBreakPoint] = [];
             if (!this.rulesCache[api.activeBreakPoint]) {
                 this.rulesCache[api.activeBreakPoint] = [];
@@ -680,6 +732,9 @@
         ThemifyLiveStyling.prototype.getRules = function () {
             var key = 'tb_rules';
             function getData() {
+                if (themifyBuilder.debug) {
+                    return false;
+                }
                 try {
                     var record = localStorage.getItem(key),
                             m = '';
@@ -738,9 +793,12 @@
         };
 
         ThemifyLiveStyling.prototype.setNewRules = function (data) {
+            if(api.Forms.LayoutPart.init){
+                return;
+            }
             var self = this;
             return $.ajax({
-                type: "POST",
+                type: 'POST',
                 url: themifyBuilder.ajaxurl,
                 dataType: 'json',
                 data: {
@@ -750,6 +808,10 @@
                 },
                 success: function (resp) {
                     if (resp) {
+                        if(resp.fonts){
+                            ThemifyBuilderCommon.loadGoogleFonts(resp.fonts);
+                            delete resp.fonts;
+                        }
                         for (var bp in resp) {
 
                             var sheet = self.getSheet(bp),
@@ -782,12 +844,21 @@
                 }
                 return false;
             }
+            function renameProp(p){
+               if (p.indexOf('-') !== -1) {
+                    var temp = p.toLowerCase().split('-'),
+                    p = temp[0] + temp[1].charAt(0).toUpperCase() + temp[1].slice(1);
+                    if (temp[2]) {
+                        p += temp[2].charAt(0).toUpperCase() + temp[2].slice(1);
+                    }
+                } 
+                return p;
+            }
             if (!selectors) {
                 selectors = [''];
             }
             var fullSelector = '',
-                    tmpProp = prop,
-                    rules = this.currentSheet.cssRules ? this.currentSheet.cssRules : this.currentSheet.rules;
+                rules = this.currentSheet.cssRules ? this.currentSheet.cssRules : this.currentSheet.rules;
 
             for (var i = 0, len = selectors.length; i < len; ++i) {
                 fullSelector += this.prefix + selectors[i];
@@ -795,41 +866,93 @@
                     fullSelector += ',';
                 }
             }
-            if (prop.indexOf('-') !== -1) {
-                var temp = prop.toLowerCase().split('-');
-                tmpProp = temp[0] + temp[1].charAt(0).toUpperCase() + temp[1].slice(1);
-                if (temp[2]) {
-                    tmpProp += temp[2].charAt(0).toUpperCase() + temp[2].slice(1);
-                }
-            }
             fullSelector = fullSelector.replace(/\s{2,}/g, ' ').replace(/\s*>\s*/g, '>');
             var hkey = Themify.hash(fullSelector),
-                    orig_v = val,
-                    index = this.rulesCache[api.activeBreakPoint][hkey] !== undefined ? this.rulesCache[api.activeBreakPoint][hkey] : findIndex(rules, fullSelector);
+                orig_v = val,
+                index = this.rulesCache[api.activeBreakPoint][hkey] !== undefined ? this.rulesCache[api.activeBreakPoint][hkey] : findIndex(rules, fullSelector);
             if (val === false) {
                 val = '';
             }
+			var old_prop = prop;
+			prop = renameProp(prop);
             if (index === false || !rules[index]) {
                 index = rules.length;
-                this.currentSheet.insertRule(fullSelector + '{' + prop + ':' + val + ';}', index);
+                this.currentSheet.insertRule(fullSelector + '{' + old_prop + ':' + val + ';}', index);
+                this.undoData[api.activeBreakPoint][index] = [];
+                this.undoData[api.activeBreakPoint][index][prop] = this.removeGenerated(fullSelector, prop, index,api.activeBreakPoint,false);
+				
             }
             else {
-                rules[index].style[tmpProp] = val;
+                if(this.undoData[api.activeBreakPoint][index]===undefined){
+                    this.undoData[api.activeBreakPoint][index] = [];
+                }
+                if(this.undoData[api.activeBreakPoint][index][prop]===undefined){
+                    this.undoData[api.activeBreakPoint][index][prop] = rules[index].style[prop];
+                }
+                rules[index].style[prop] = val;
             }
             this.rulesCache[api.activeBreakPoint][hkey] = index;
             if (this.tempData[api.activeBreakPoint][index] === undefined) {
                 this.tempData[api.activeBreakPoint][index] = [];
             }
-            this.tempData[api.activeBreakPoint][index][tmpProp] = val;
+           
+            this.tempData[api.activeBreakPoint][index][prop] = val;
             if (orig_v === '') {
-                this.removeGenerated(fullSelector, tmpProp, index);
+                this.removeGenerated(fullSelector, prop, index,api.activeBreakPoint,true);
             }
+			else{
+				var old_index = index;
+				for (var k in this.bp_reverse) {
+					if(this.bp_reverse[k]===api.activeBreakPoint){
+						break;
+					}
+					var bp = this.bp_reverse[k];
+					if(this.undoData[bp]===undefined){
+						this.undoData[bp] = [];
+					}
+					if(this.undoData[bp][old_index]===undefined){
+						this.undoData[bp][old_index] = [];
+					}
+					var media_v = this.removeGenerated(fullSelector, prop, index,bp,true);
+					if(media_v){
+						var msheet = this.getSheet(bp),
+						rules = msheet.cssRules ? msheet.cssRules : msheet.rules,
+						index = this.rulesCache[bp]!==undefined && this.rulesCache[bp][hkey] !== undefined ? this.rulesCache[bp][hkey] : findIndex(rules, fullSelector);
+						if (index === false || !rules[index]) {
+							index = rules.length;
+							msheet.insertRule(fullSelector + '{' + old_prop + ':' + media_v + ';}', index);
+						}
+						else{
+							rules[index].style[prop] = val;
+						}
+						delete this.undoData[bp][old_index],this.prevData[api.activeModel.cid][bp][old_index];
+						if(this.undoData[bp][index]===undefined){
+							this.undoData[bp][index] = [];
+						}
+						this.undoData[bp][index][prop] = media_v;
+						if(this.rulesCache[bp]===undefined){
+							this.rulesCache[bp] = [];
+						}
+						if(this.tempData[bp]===undefined){
+							this.tempData[bp] = [];
+						}
+						this.prevData[api.activeModel.cid][bp][index] = []
+						this.prevData[api.activeModel.cid][bp][index][prop] = media_v;
+						this.rulesCache[bp][hkey] = index;
+						if (this.tempData[bp][index] === undefined) {
+							this.tempData[bp][index] = [];
+						}
+						this.tempData[bp][index][prop] = val;
+					}
+				}
+			}
+            Themify.body.trigger('tb_' + this.type + '_styling', [this.group, prop, val,orig_v,this.$liveStyledElmt]);
         };
 
 
         ThemifyLiveStyling.prototype.initModChange = function () {
             var self = this;
-            $('body').on('themify_builder_change_mode', function (e, prevbreakpoint, breakpoint) {
+            Themify.body.on('themify_builder_change_mode', function (e, prevbreakpoint, breakpoint) {
                 if (self.isInit) {
                     if (self.tempData[breakpoint] === undefined) {
                         self.tempData[breakpoint] = [];
@@ -837,13 +960,17 @@
                     if (self.rulesCache[breakpoint] === undefined) {
                         self.rulesCache[breakpoint] = [];
                     }
+					if (self.undoData[breakpoint] === undefined) {
+                        self.undoData[breakpoint] = [];
+                    }
                     self.currentSheet = self.getSheet(breakpoint);
                 }
             });
         };
 
-        ThemifyLiveStyling.prototype.revertRules = function () {
-            var remembered = this.prevData[api.activeModel.cid] !== undefined ? this.prevData[api.activeModel.cid] : false;
+        ThemifyLiveStyling.prototype.revertRules = function (cid,force) {
+            cid = cid || api.activeModel.cid;
+            var remembered = this.prevData[cid] !== undefined ? this.prevData[cid] : false;
             for (var points in this.tempData) {
                 var stylesheet = this.getSheet(points),
                         rules = stylesheet.cssRules ? stylesheet.cssRules : stylesheet.rules;
@@ -851,7 +978,7 @@
                     if (rules[i]) {
                         for (var j in this.tempData[points][i]) {
                             var v = '';
-                            if (remembered && remembered[points] !== undefined && remembered[points][i] !== undefined && remembered[points][i][j] !== undefined) {
+                            if (force===undefined && remembered && remembered[points] !== undefined && remembered[points][i] !== undefined && remembered[points][i][j] !== undefined) {
                                 v = remembered[points][i][j];
                             }
                             rules[i].style[j] = v;
@@ -859,18 +986,22 @@
                     }
                 }
             }
+            this.undoData = [];
             this.tempData = [];
         };
 
-        ThemifyLiveStyling.prototype.removeGenerated = function (fullSelector, prop, key) {
-            var cid = api.activeModel.cid;
+        ThemifyLiveStyling.prototype.removeGenerated = function (fullSelector, prop, key,breakpoint,remove) {
+            var cid = api.activeModel.cid;   
+            remove = remove || true;
             if (api.VisualCache[cid] !== undefined) {
                 var post_id = this.$liveStyledElmt.closest('.themify_builder_content').data('postid'),
-                        rules = document.getElementById('themify-builder-' + post_id + '-generated-css');
-                if (rules !== null) {
+                    is_layout_part = api.Forms.LayoutPart.el!==null,
+                    rules = is_layout_part?api.Forms.LayoutPart.el.children('.themify-builder-generated-css')[0]:document.getElementById('themify-builder-' + post_id + '-generated-css');
+                if (rules) {
                     rules = rules.sheet;
                     rules = rules.cssRules ? rules.cssRules : rules.rules;
-                    if (this.generatedPrefix[cid] === undefined) {
+                    var selector = Themify.hash(fullSelector);
+                    if (this.generatedPrefix[cid] === undefined || this.generatedPrefix[cid][selector]===undefined) {
                         var prefix = '';
                         if (this.type === 'column' && api.activeModel.get('component_name') !== 'sub-column') {
                             var rowCid = this.$liveStyledElmt.closest('.module_row').data('cid');
@@ -899,8 +1030,10 @@
                         }
                         prefix = prefix + '.' + api.VisualCache[cid].replace(' ', '.');
                         var re = new RegExp(this.prefix, 'ig');
-                        this.generatedPrefix[cid] = fullSelector.replace(re, prefix).replace(/\s{2,}/g, ' ').replace(/\s*\,\s*/g, ',').replace(/\s*>\s*/g, '>');
-
+                        if(this.generatedPrefix[cid]===undefined){
+                            this.generatedPrefix[cid] =[];
+                        }
+                        this.generatedPrefix[cid][selector] = fullSelector.replace(re, prefix).replace(/\s{2,}/g, ' ').replace(/\s*\,\s*/g, ',').replace(/\s*>\s*/g, '>');
                     }
 
                 }
@@ -920,56 +1053,65 @@
                                 return [i, j];
                             }
                         }
-                        else if (w === false && self.generatedPrefix[cid] === rules[i].selectorText.replace(/\s{2,}/g, ' ').replace(/\s*\,\s*/g, ',').replace(/\s*>\s*/g, '>')) {
+                        else if (w === false && self.generatedPrefix[cid][selector] === rules[i].selectorText.replace(/\s{2,}/g, ' ').replace(/\s*\,\s*/g, ',').replace(/\s*>\s*/g, '>')) {
                             return i;
                         }
                     }
                 }
             }
-            if (this.generatedPrefix[cid] !== undefined) {
-                if (this.generatedCache[api.activeBreakPoint] === undefined) {
-                    this.generatedCache[api.activeBreakPoint] = [];
+            var v = '';
+            if (this.generatedPrefix[cid]!==undefined && this.generatedPrefix[cid][selector] !== undefined) {
+                if (this.generatedCache[breakpoint] === undefined) {
+                    this.generatedCache[breakpoint] = [];
                 }
                 var type = CSSRule.STYLE_RULE,
-                        hkey = Themify.hash(this.generatedPrefix[cid]),
-                        index = this.generatedCache[api.activeBreakPoint][hkey],
+                        hkey = Themify.hash(this.generatedPrefix[cid][selector]),
+                        index = this.generatedCache[breakpoint][hkey],
                         w = false;
                 if (index === undefined) {
-                    if (api.activeBreakPoint !== 'desktop') {
-                        w = api.Utils.getBPWidth(api.activeBreakPoint) + 'px';
+                    if (breakpoint !== 'desktop') {
+                        w = api.Utils.getBPWidth(breakpoint) + 'px';
                         type = CSSRule.MEDIA_RULE;
                     }
-                    this.generatedCache[api.activeBreakPoint][hkey] = parseMedia(rules, type, w);
-                    index = this.generatedCache[api.activeBreakPoint][hkey];
+                    this.generatedCache[breakpoint][hkey] = parseMedia(rules, type, w);
+                    index = this.generatedCache[breakpoint][hkey];
                 }
                 if (index !== undefined) {
-                    var v = '';
+                    
                     if (index[1] !== undefined) {
                         var msheet = rules[index[0]].cssRules ? rules[index[0]].cssRules : rules[index[0]].rules;
                         v = msheet[index[1]].style[prop];
-                        msheet[index[1]].style[prop] = '';
+                        if(remove){
+                            msheet[index[1]].style[prop] = '';
+                        }
                     }
-                    else if (api.activeBreakPoint === 'desktop') {
+                    else if (breakpoint === 'desktop') {
                         v = rules[index].style[prop];
-                        rules[index].style[prop] = '';
+                        if(remove){
+                            rules[index].style[prop] = '';
+                        }
                     }
-                    if (v !== '') {
+                    if (remove && v !== '') {
                         if (this.prevData[cid] === undefined) {
                             this.prevData[cid] = [];
                         }
-                        if (this.prevData[cid][api.activeBreakPoint] === undefined) {
-                            this.prevData[cid][api.activeBreakPoint] = [];
+                        if (this.prevData[cid][breakpoint] === undefined) {
+                            this.prevData[cid][breakpoint] = [];
                         }
-                        if (this.prevData[cid][api.activeBreakPoint][key] === undefined) {
-                            this.prevData[cid][api.activeBreakPoint][key] = [];
+                        if (this.prevData[cid][breakpoint][key] === undefined) {
+                            this.prevData[cid][breakpoint][key] = [];
                         }
-                        this.prevData[cid][api.activeBreakPoint][key][prop] = v;
+                        this.prevData[cid][breakpoint][key][prop] = v;
+                        if(this.undoData[breakpoint][key][prop]===''){
+                            this.undoData[breakpoint][key][prop] = v;
+                        }
                     }
                 }
 
             }
+            return v;
         };
-
+        
         ThemifyLiveStyling.prototype.remember = function (cid) {
             this.prevData[cid] = $.extend(true, {}, this.tempData);
         };
@@ -999,11 +1141,11 @@
         ThemifyLiveStyling.prototype.doUndo = function (styles, is_first) {
             for (var bp in styles) {
                 var stylesheet = this.getSheet(bp),
-                        rules = stylesheet.cssRules ? stylesheet.cssRules : stylesheet.rules;
+                    rules = stylesheet.cssRules ? stylesheet.cssRules : stylesheet.rules;
                 for (var i in styles[bp]) {
                     if (rules[i]) {
                         for (var j in styles[bp][i]) {
-                            rules[i].style[j] = is_first ? '' : styles[bp][i][j];
+                            rules[i].style[j] = is_first || styles[bp][i][j]==='' ? '' :(j==='backgroundImage' && styles[bp][i][j].indexOf('(',2)===-1?'url('+styles[bp][i][j]+')':styles[bp][i][j]);
                         }
                     }
 
@@ -1015,16 +1157,15 @@
         //closing lightbox
         ThemifyLiveStyling.prototype.before_close = function () {
             var self = this;
-            $('body').on('themify_builder_lightbox_before_close', function () {
+            Themify.body.on('themify_builder_lightbox_before_close', function () {
                 self.isInit = false;
-
                 if (api.activeModel !== null) {
-                    self.$liveStyledElmt.removeClass('animated');
-                    if (!api.saving) {
+                    self.$liveStyledElmt.removeClass('animated hover-wow');
+                    if (!api.saving && api.hasChanged) {
                         self.revertRules();
                         if (self.type && self.type !== 'module') {
                             var styling = api.activeModel.get('styling');
-                            if (styling && styling['background_type'] === 'slider' && styling['background_slider'] && api.hasChanged) {
+                            if (styling && styling['background_type'] === 'slider' && styling['background_slider']) {
                                 self.bindBackgroundSlider();
                             }
                         }
@@ -1035,11 +1176,16 @@
 
         ThemifyLiveStyling.prototype.bindColors = function () {
             var self = this;
-            $('body').on('themify_builder_color_picker_change', function (e, id, el, rgbaString) {
+            Themify.body.on('themify_builder_color_picker_change', function (e, id, el, rgbaString) {
                 if (self.isInit) {
                     if (id === 'cover_color' || id === 'cover_color_hover') {
                         self.addOrRemoveComponentOverlay(id, rgbaString);
-                    } else {
+                    } 
+                    else if (el.hasClass('tb_frame')) {
+                        self.addOrRemoveFrame( el );
+                        return;
+                    }
+                    else {
                         if (el.hasClass('border_color')) {
                             self.bindMultiFields(el);
                             return;
@@ -1051,6 +1197,62 @@
                     }
                 }
             });
+        };
+
+        ThemifyLiveStyling.prototype.addOrRemoveFrame = function ( $option ) {
+			var self = this,
+                        $el = api.liveStylingInstance.$liveStyledElmt,
+                        $context = api.liveStylingInstance.$context.find(self.style_tab),
+                        side = $option.closest( '.tb_tab' ).attr( 'id' ).match( /frame_tabs_(.*)$/ )[1],
+                        settings = {},
+                        selector = this.getValue(side+'-frame_type').selector,
+                        $frame = $el.children( '.tb_row_frame_' + side );
+			$( [ 'custom', 'location', 'width', 'height', 'width_unit', 'height_unit', 'repeat' ] ).each( function( i, v ) {
+				settings[ v ] = $( '#' + side + '-frame_' + v, $context ).val();
+			} );
+			settings['type'] = $( '#' + side + '-frame_type :checked', $context ).val();
+			settings['layout'] = $( '#' + side + '-frame_layout', $context ).find( 'a.selected' ).attr( 'id' );
+			settings['color'] = $( '#' + side + '-frame_color', $context ).val() ? $( '#' + side + '-frame_color', $context ).minicolors( 'rgbaString' ) : '';
+			if ( ( settings.type === side + '-presets' && settings.layout === '' ) || ( settings.type === side + '-custom' && settings.custom === '' ) ) {
+                            $frame.remove();
+                            return;
+			}
+			if ( $frame.length < 1 ) {
+                            $frame = $( '<div />', {
+                                            class : 'tb_row_frame tb_row_frame_' + side+' '+settings.location
+                            } );
+                            $el.children( '.tb_action_wrap' ).after( $frame );
+			}
+                        else{
+                            $frame.removeClass( 'behind_content in_front' ).addClass( settings.location );
+                        }
+			if ( settings.type === side + '-presets' ) {
+                            var imageName = ( side === 'left' || side === 'right' ) ? settings.layout + '-l' : settings.layout;
+                                $.ajax( {
+                                        dataType: 'text',
+                                        url : tbLocalScript.builder_url + '/img/row-frame/' + imageName + '.svg',
+                                        success:function(svg){
+                                            if ( settings.color) {
+                                                 svg = svg.replace( /\#D3D3D3/gi, settings.color );
+                                             }
+                                             self.setLiveStyle( 'background-image', 'url("data:image/svg+xml;base64,' + btoa( svg ) + '")', selector );
+                                        }
+                                } );
+                                
+			} else {
+				self.setLiveStyle( 'background-image', 'url("' + settings.custom + '")', selector );
+			}
+                        self.setLiveStyle( 'width', (settings.width?(settings.width + settings.width_unit):''), selector );
+                        self.setLiveStyle( 'height', (settings.height?(settings.height + settings.height_unit):''), selector );
+			if ( settings.repeat ) {
+				if ( side === 'left' || side === 'right' ) {
+					self.setLiveStyle( 'background-size', '100% ' + ( 100 / settings.repeat ) + '%', selector );
+				} else {
+					self.setLiveStyle( 'background-size', ( 100 / settings.repeat ) + '% 100%', selector );
+				}
+			} else {
+				self.setLiveStyle( 'background-size', '', selector );
+			}
         };
 
 
@@ -1072,7 +1274,7 @@
                     }
 
                 }
-                $('body').trigger('themify_builder_color_picker_change', [$id, el, v]);
+                Themify.body.trigger('themify_builder_color_picker_change', [$id, el, v]);
             }
             else {
                 el.trigger('change');
@@ -1092,7 +1294,7 @@
         };
         ThemifyLiveStyling.prototype.addOrRemoveComponentOverlay = function ($id, rgbaString) {
             var $overlayElmt = this.getComponentBgOverlay(),
-                    $isset = $overlayElmt.length !== 0;
+                $isset = $overlayElmt.length !== 0;
             if (!$isset) {
                 $overlayElmt = $('<div/>', {
                     class: 'builder_row_cover'
@@ -1109,43 +1311,44 @@
             if ($isset) {
                 return;
             }
-            var $elmtToInsertBefore = this.getComponentBgSlider();
-
-            if (!$elmtToInsertBefore.length > 0) {
-                var selector = this.type !== 'column' ? '.' + this.type + '_inner' : '.themify_module_holder';
-                $elmtToInsertBefore = this.$liveStyledElmt.children(selector);
-            }
-            $overlayElmt.insertBefore($elmtToInsertBefore);
+            api.liveStylingInstance.$liveStyledElmt.children( '.tb_action_wrap' ).before($overlayElmt);
         };
 
         ThemifyLiveStyling.prototype.bindMultiFields = function ($this, isTrigger) {
             var self = this;
 
             function setFullWidth(val, prop) {
-                if (!is_border && self.type === 'row' && tbLocalScript.fullwidth_support === '' && ((is_checked && (prop === 'padding' || prop === 'margin')) || prop === 'padding-left' || prop === 'padding-right' || prop === 'margin-left' || prop === 'margin-right')) {
-                    var type = prop.split('-'),
-                            k = api.activeBreakPoint + '-' + type[0];
-                    if (is_checked) {
-                        val = val + ',' + val;
+                if (!is_border) {
+                    if(self.type === 'row' && tbLocalScript.fullwidth_support === '' && ((is_checked && (prop === 'padding' || prop === 'margin')) || prop === 'padding-left' || prop === 'padding-right' || prop === 'margin-left' || prop === 'margin-right')){
+                            var type = prop.split('-'),
+                                            k = api.activeBreakPoint + '-' + type[0];
+                            if (is_checked) {
+                                    val = val + ',' + val;
+                            }
+                            else {
+                                    var old_val = self.$liveStyledElmt.data(k);
+                                    if (!old_val) {
+                                            old_val = [];
+                                    }
+                                    else {
+                                            old_val = old_val.split(',');
+                                    }
+                                    if (type[1] === 'left') {
+                                            old_val[0] = val;
+                                    }
+                                    else {
+                                            old_val[1] = val;
+                                    }
+                                    val = old_val.join(',');
+                            }
+                            self.$liveStyledElmt.attr('data-' + k, val).data(k, val);
+                            ThemifyBuilderModuleJs.setupFullwidthRows(self.$liveStyledElmt);
                     }
-                    else {
-                        var old_val = self.$liveStyledElmt.data(k);
-                        if (!old_val) {
-                            old_val = [];
-                        }
-                        else {
-                            old_val = old_val.split(',');
-                        }
-                        if (type[1] === 'left') {
-                            old_val[0] = val;
-                        }
-                        else {
-                            old_val[1] = val;
-                        }
-                        val = old_val.join(',');
+                    if((is_checked && prop === 'padding') || prop.indexOf('padding')===0){console.log(self.$liveStyledElmt)
+                        setTimeout(function(){
+                            $(window).trigger('tfsmartresize.tfVideo');
+                        },600);
                     }
-                    self.$liveStyledElmt.attr('data-' + k, val).data(k, val);
-                    ThemifyBuilderModuleJs.setupFullwidthRows(self.$liveStyledElmt);
                 }
             }
             function getCssValue(el) {
@@ -1219,8 +1422,7 @@
 
         ThemifyLiveStyling.prototype.bindRowWidthHeight = function () {
             var self = this;
-            this.$context.on('change', 'input[name="row_height"]', function () {
-                var val = $(this).val();
+            Themify.body.on('tb_row_height', function (e,val) {
                 if (val === 'fullheight') {
                     self.$liveStyledElmt.addClass(val);
                 }
@@ -1229,40 +1431,38 @@
                 }
                 $(window).trigger('tfsmartresize.tfVideo');
             })
-            .on('change', 'input[name="row_width"]', function () {
-                        var val = $(this).val(),
-                                builderJs = ThemifyBuilderModuleJs;
-                        if (val === 'fullwidth') {
-                            self.$liveStyledElmt.removeClass('fullwidth').addClass('fullwidth_row_container');
-                            builderJs.setupFullwidthRows(self.$liveStyledElmt);
-                        } else if (val === 'fullwidth-content') {
-                            self.$liveStyledElmt.removeClass('fullwidth_row_container').addClass('fullwidth');
-                            builderJs.setupFullwidthRows(self.$liveStyledElmt);
-                        } else {
-                            self.$liveStyledElmt.removeClass('fullwidth fullwidth_row_container')
-                                    .css({
-                                        'margin-left': '',
-                                        'margin-right': '',
-                                        'padding-left': '',
-                                        'padding-right': '',
-                                        'width': ''
-                                    });
-                        }
-                        $(window).trigger('tfsmartresize.tfVideo');
-                    });
+            .on('tb_row_width',  function (e,val) {
+                    if (val === 'fullwidth') {
+                        self.$liveStyledElmt.removeClass('fullwidth').addClass('fullwidth_row_container');
+                        ThemifyBuilderModuleJs.setupFullwidthRows(self.$liveStyledElmt);
+                    } else if (val === 'fullwidth-content') {
+                        self.$liveStyledElmt.removeClass('fullwidth_row_container').addClass('fullwidth');
+                        ThemifyBuilderModuleJs.setupFullwidthRows(self.$liveStyledElmt);
+                    } else {
+                        self.$liveStyledElmt.removeClass('fullwidth fullwidth_row_container')
+                                .css({
+                                    'margin-left': '',
+                                    'margin-right': '',
+                                    'padding-left': '',
+                                    'padding-right': '',
+                                    'width': ''
+                                });
+                    }
+                    $(window).trigger('tfsmartresize.tfVideo');
+            });
         };
         ThemifyLiveStyling.prototype.bindParralax = function () {
             var self = this;
             if (false && tbLocalScript.isParallaxScrollActive) {
                 this.$context.on('change', '.tb_parrallax input,.tb_parrallax select', function () {
-                    var container = self.$context.find('#themify_builder_options_animation'),
+                    var container = self.$context.find('#tb_options_animation'),
                             speed = container.find('#custom_parallax_scroll_speed').val();
                     Rellax.destroy(self.$liveStyledElmt[0].dataset.rellaxIndex);
                     if (speed) {
                         if (container.find('#custom_parallax_scroll_reverse_reverse').is(':checked')) {
                             speed = -speed;
                         }
-                        fade = container.find('#custom_parallax_scroll_fade_fade').is(':checked') ? 1 : '';
+                        var fade = container.find('#custom_parallax_scroll_fade_fade').is(':checked') ? 1 : '';
                         self.$liveStyledElmt[0].dataset.rellaxFade = fade;
                         self.$liveStyledElmt.attr({'data-rellax-fade': fade, 'data-rellax-speed': speed});
                         ThemifyBuilderModuleJs.parallaxScrollingInit(self.$liveStyledElmt, true);
@@ -1280,19 +1480,32 @@
 
         ThemifyLiveStyling.prototype.bindAnimation = function () {
             var self = this;
-            this.$context.on('change', '#animation_effect,#animation_effect_delay,#animation_effect_repeat', function () {
-                var animationEffect = self.getStylingVal('animation_effect');
+            this.$context.on('change', '#animation_effect,#animation_effect_delay,#animation_effect_repeat,#hover_animation_effect', function () {
+                var is_hover = $(this).prop('id')==='hover_animation_effect',
+                    key = is_hover?'hover_animation_effect':'animation_effect',
+                    effect = is_hover?$(this).val():self.$context.find('#animation_effect').val(),
+                    animationEffect = self.getStylingVal(key);
                 if (animationEffect) {
+                    if(is_hover){
+                        animationEffect=animationEffect+' hover-wow hover-animation-'+animationEffect;
+                    }
                     self.$liveStyledElmt.removeClass(animationEffect + ' wow animated').css({'animation-name': '', 'animation-delay': '', 'animation-iteration-count': ''});
                 }
-                var effect = self.$context.find('#animation_effect').val();
-                self.setStylingVal('animation_effect', effect);
+                self.setStylingVal(key, effect);
                 if (effect) {
-                    var delay = parseFloat(self.$context.find('#animation_effect_delay').val()),
+                    if(!is_hover){
+                        var delay = parseFloat(self.$context.find('#animation_effect_delay').val()),
                             repeat = parseInt(self.$context.find('#animation_effect_repeat').val());
-                    self.$liveStyledElmt.css({'animation-delay': delay > 0 && !isNaN(delay) ? delay + 's' : '', 'animation-iteration-count': repeat > 0 && !isNaN(repeat) ? repeat : ''});
+                        self.$liveStyledElmt.css({'animation-delay': delay > 0 && !isNaN(delay) ? delay + 's' : '', 'animation-iteration-count': repeat > 0 && !isNaN(repeat) ? repeat : ''});
+                    }
+                    else{
+                        effect='hover-wow hover-animation-'+effect;
+                    }
                     setTimeout(function () {
                         self.$liveStyledElmt.addClass(effect + ' animated');
+                        if(is_hover){
+                            self.$liveStyledElmt.trigger('mouseover');
+                        }
                     }, 1);
                 }
             });
@@ -1312,20 +1525,6 @@
                 self.$liveStyledElmt.addClass(className);
             });
         };
-
-        ThemifyLiveStyling.prototype.bindRowAnchor = function () {
-            var self = this;
-            this.$context.on('keyup', '#row_anchor', function () {
-                var rowAnchor = self.getStylingVal('row_anchor');
-                self.$liveStyledElmt.removeClass(self.getRowAnchorClass(rowAnchor));
-                rowAnchor = $.trim($(this).val());
-                self.setStylingVal('row_anchor', rowAnchor);
-                if (rowAnchor !== '') {
-                    self.$liveStyledElmt.addClass(self.getRowAnchorClass(rowAnchor));
-                }
-            });
-        };
-
         ThemifyLiveStyling.prototype.getRowAnchorClass = function (rowAnchor) {
             return rowAnchor.length > 0 ? 'tb_section-' + rowAnchor : '';
         };
@@ -1338,15 +1537,10 @@
             this.currentStyleObj[stylingKey] = val;
         };
 
-        ThemifyLiveStyling.prototype.bindBackgroundMode = function (val) {
-			var previousVal = this.getStylingVal('background_repeat');
-			if (val.length > 0) {
-				if (previousVal.length > 0) {
-					this.$liveStyledElmt.removeClass(previousVal);
-				}
+        ThemifyLiveStyling.prototype.bindBackgroundMode = function ( val, id ) {
+			var $data = this.getValue( id );;
 
-				this.setStylingVal( 'background_repeat', val );
-				this.$liveStyledElmt.addClass( val );
+			if (val.length > 0) {
 
 				var bgValues = {
 					'repeat': 'repeat',
@@ -1364,31 +1558,44 @@
 				if( bgValues[val] ) {
 					if( val.indexOf( 'repeat' ) !== -1 ) {
 						propCSS['background-repeat'] = bgValues[val];
+						propCSS['background-size'] = 'auto';
 					} else {
 						propCSS['background-size'] = bgValues[val];
-						propCSS['background-repeat'] = 'no-repeat;';
+						propCSS['background-repeat'] = 'no-repeat';
 
 						if( bgValues[val] === 'best-fit-image' || bgValues[val] === 'builder-zooming' ) {
-							propCSS['background-position'] = 'center center;';
+							propCSS['background-position'] = 'center center';
 						} else if( bgValues[val] === 'builder-zoom-scrolling' ) {
-							propCSS['background-position'] = '50%;';
+							propCSS['background-position'] = '50%';
 						}
 					}
-
-					this.$liveStyledElmt.css( propCSS );
+                                        this.$liveStyledElmt
+                                        .toggleClass('builder-parallax-scrolling',val==='builder-parallax-scrolling')
+                                        .toggleClass('builder-zooming',val==='builder-zooming')
+                                        .toggleClass('builder-zoom-scrolling',val==='builder-zoom-scrolling')
+                                        .css('background-position','');
+					for( var key in propCSS ) {
+						this.setLiveStyle( key, propCSS[key], $data.selector );
+					}
+                                        if(val==='builder-zoom-scrolling'){
+                                            ThemifyBuilderModuleJs.backgroundZoom(this.$liveStyledElmt);
+                                        }
+                                        else if(val==='builder-zooming'){
+                                            ThemifyBuilderModuleJs.backgroundZooming(this.$liveStyledElmt);
+                                        }
+                                        else if(val==='builder-parallax-scrolling'){
+                                            ThemifyBuilderModuleJs.backgroundScrolling(this.$liveStyledElmt);
+                                        }
 				}
-			} else {
-				this.$liveStyledElmt.removeClass(previousVal);
 			}
-		};
+        };
 
-        ThemifyLiveStyling.prototype.bindBackgroundPosition = function (val) {
-            var previousVal = this.getStylingVal('background_position');
+        ThemifyLiveStyling.prototype.bindBackgroundPosition = function (val, id) {
 
             if (val && val.length > 0) {
-                this.setStylingVal('background_position', val);
+                this.setStylingVal( id , val);
 
-                var $data = this.getValue('background_position');
+                var $data = this.getValue( id );
                 if ($data) {
                     this.setLiveStyle($data.prop, val.replace('-', ' '), $data.selector);
                 }
@@ -1397,23 +1604,21 @@
 
         ThemifyLiveStyling.prototype.bindBackgroundSlider = function () {
             var self = this,
-                    images = $.trim(self.$context.find('#background_slider').val());
+				images = $.trim(self.$context.find('#background_slider').val());
+
             self.removeBgSlider();
 
             function callback(slider) {
                 var $bgSlider = $(slider),
-                        bgCover = self.getComponentBgOverlay();
+                    bgCover = self.getComponentBgOverlay();
                 if (bgCover.length > 0) {
                     bgCover.after($bgSlider);
                 } else {
-                    if (self.type === 'row') {
-                        self.$liveStyledElmt.children('.themify_builder_row_top').after($bgSlider);
-                    } else {
-                        self.$liveStyledElmt.prepend($bgSlider);
-                    }
+                    self.$liveStyledElmt.prepend($bgSlider);
                 }
                 ThemifyBuilderModuleJs.backgroundSlider($($bgSlider[0]));
             }
+
             if (images) {
 
                 if (self.cahce === undefined) {
@@ -1423,9 +1628,11 @@
                 var options = {
                     shortcode: encodeURIComponent(images),
                     mode: self.$context.find('#background_slider_mode').val(),
+                    speed: self.$context.find('#background_slider_speed').val(),
                     size: self.$context.find('#background_slider_size').val()
                 },
                 hkey = '';
+
                 for (var i in options) {
                     hkey += Themify.hash(i + options[i]);
                 }
@@ -1437,12 +1644,12 @@
                 options['order'] = api.activeModel.cid;
 
                 $.post(
-                        themifyBuilder.ajaxurl,
-                        {
-                            nonce: themifyBuilder.tb_load_nonce,
-                            action: 'tb_slider_live_styling',
-                            tb_background_slider_data: options
-                        },
+					themifyBuilder.ajaxurl,
+					{
+						nonce: themifyBuilder.tb_load_nonce,
+						action: 'tb_slider_live_styling',
+						tb_background_slider_data: options
+					},
                 function (slider) {
                     if (slider.length < 10) {
                         return;
@@ -1558,39 +1765,53 @@
 
         ThemifyLiveStyling.prototype.bindChangesEvent = function () {
             var self = this;
-            self.$context.on('change', self.style_tab + ' select,' + self.style_tab + ' textarea,' + self.style_tab + ' input.themify-builder-uploader-input,' + self.style_tab + ' input[type="radio"]', function (e) {
-
-                if (!self.isInit || $(this).hasClass('minicolors-input') || $(this).hasClass('color_opacity') || $(this).hasClass('themify-gradient-type')) {
+            self.$context.on('change', self.style_tab + ' select,' + self.style_tab + ' textarea,' + self.style_tab + ' input.tb_uploader_input,' + self.style_tab + ' input[type="radio"]', function (e) {
+                var cl = this.classList;
+                if (!self.isInit || cl.contains('minicolors-input') ||cl.contains('color_opacity') || cl.contains('themify-gradient-type')) {
                     return;
                 }
                 var $val = $.trim($(this).val()),
-                        is_radio = $(this).is(':radio'),
-                        is_select = !is_radio && $(this).is('select'),
-                        $id = !is_select && is_radio ? $(this).parent('.tb_lb_option').prop('id') : $(this).prop('id');
+                    is_select = this.tagName === 'SELECT',
+                    is_radio =!is_select && $(this).is(':radio'),
+                    $id = is_radio ? $(this).parent('.tb_lb_option').prop('id') : $(this).prop('id');
                 if (is_select) {
-                    if ($(this).hasClass('font-family-select')) {
+                    if (cl.contains('font-family-select')) {
                         if ($val !== 'default' && ThemifyBuilderCommon.safe_fonts[$val] === undefined) {
-                            ThemifyBuilderCommon.loadGoogleFonts([$val.split(' ').join('+') + ':400,700:latin,latin-ext']);
+
+                        	var $fontWeight = $(this).closest('.tb_field').next('.tb_field').find('select'),
+                        		request ;
+
+                        	request = $val;
+
+							if( $fontWeight.length ) {
+								request += ':' + $fontWeight[0].options[$fontWeight[0].selectedIndex].text;
+							}
+
+                            ThemifyBuilderCommon.loadGoogleFonts(request);
                         } else if ($val === 'default') {
                             $val = '';
                         }
                     }
-                    else if ($(this).hasClass('tb_unit')) {
+                    else if (cl.contains('tb_unit')) {
                         self.$context.find('#' + $id.replace('_unit', '')).trigger('keyup');
                     }
-                    else if ($(this).hasClass('border_style')) {
+                    else if (cl.contains('border_style')) {
                         self.bindMultiFields($(this), e.isTrigger);
                         return;
                     }
-                    else if ($id === 'background_repeat') {
-                        self.bindBackgroundMode($val);
+                    else if ( /^background_repeat/.test( $id ) ) {
+                        self.bindBackgroundMode( $val, $id );
                         return;
                     }
-                    else if ($id === 'background_position') {
-                        self.bindBackgroundPosition($val);
+                    else if ( /^background_position/.test( $id ) ) {
+                        self.bindBackgroundPosition( $val, $id );
                         return;
                     }
-                    else if (self.type !== 'module' && ($id === 'background_slider_size' || $id === 'background_slider_mode')) {
+                    else if (cl.contains('tb_frame')) {
+                        self.addOrRemoveFrame( $( this ) );
+                        return;
+                    }
+                    else if (self.type !== 'module' && ($id === 'background_slider_size' || $id === 'background_slider_mode' || $id === 'background_slider_speed' )) {
                         self.bindBackgroundSlider();
                         return;
                     }
@@ -1607,11 +1828,15 @@
                         self.overlayType($id, $val);
                         return;
                     }
+                    else if ($(this).closest('.tb_frame').length>0) {
+                        self.addOrRemoveFrame( $( this ) );
+                        return;
+                    }
                 }
-                else if ($(this).hasClass('themify-builder-uploader-input')) {
+                else if (cl.contains('tb_uploader_input')) {
                     if ($id === 'background_video') {
                         if ($val.length > 0) {
-                            self.$liveStyledElmt.data('fullwidthvideo', $val);
+                            self.$liveStyledElmt.data('fullwidthvideo', $val).attr('data-fullwidthvideo', $val);
                             if (_.isEmpty(self.$liveStyledElmt.data('mutevideo')) && self.$context.find('#background_video_options_mute').is(':checked')) {
                                 self.$liveStyledElmt.data('mutevideo', 'mute');
                             }
@@ -1621,8 +1846,12 @@
                         }
                         return false;
                     }
+                    else if (cl.contains('tb_frame')) {
+                        self.addOrRemoveFrame( $( this ) );
+                        return;
+                    }
                     else {
-                        $val = $val ? 'url(' + $val + ')' : 'none';
+						$val = $val ? 'url(' + $val + ')' : 'none';
                     }
                 }
                 else if (self.type !== 'module' && $id === 'background_slider') {
@@ -1631,24 +1860,46 @@
                 }
                 self.setData($id, '', $val);
 
-            }).on('keyup', self.style_tab + ' input[type="text"]', function (e) {
-                if ($(this).hasClass('minicolors-input') || $(this).hasClass('color_opacity')) {
+            })
+            .on('keyup', self.style_tab + ' input[type="text"]', function (e) {
+                var cl = this.classList;
+                if (cl.contains('minicolors-input') || cl.contains('color_opacity')) {
                     return;
                 }
                 var $val = $.trim($(this).val()),
-                        $id = $(this).prop('id');
-                if ($(this).hasClass('border_width') || $(this).hasClass('tb_multi_field')) {
+                    $id = $(this).prop('id');
+                if (cl.contains('border_width') || cl.contains('tb_multi_field')) {
                     self.bindMultiFields($(this), e.isTrigger);
                     return;
-                } else if ($(this).is('.column_gap, .column_rule_width')) {
-                    $val += 'px';
-                } else if ($val) {
-                    var unit = self.$context.find(self.style_tab + ' #' + $id + '_unit');
-                    if (unit.length > 0) {
-                        $val += unit.val() ? unit.val() : 'px';
+                }
+                else if (cl.contains('tb_frame')) {
+                    self.addOrRemoveFrame( $( this ) );
+                    return;
+                }
+                else if ($val) {
+                     if(cl.contains('tb_multi_columns_width')){
+                       $val+='px';
+                       var bid = $id.replace('_width','_style'),
+                        border = self.$context.find(self.style_tab + ' #' + bid);
+                        if(border.length>0){
+                           self.setData(bid, '', border.val());
+                        }
+                    }
+                    else{
+                        var unit = self.$context.find(self.style_tab + ' #' + $id + '_unit');
+                        if (unit.length > 0) {
+                            $val += unit.val() ? unit.val() : 'px';
+                        }
                     }
                 }
                 self.setData($id, '', $val);
+            })
+            .on('click',self.style_tab + ' .themify-layout-icon', function (e) {
+                var cl = this.classList;
+                if (cl.contains('tb_frame')) {
+                    self.addOrRemoveFrame( $( this ) );
+                    return;
+                }
             });
         };
 
@@ -1666,9 +1917,8 @@
             this.bindColors();
             this.bindAnimation();
             this.VideoOptions();
-            this.bindRowAnchor();
             this.bindRowWidthHeight();
-            this.bindParralax();
+          //  this.bindParralax();
             this.bindAdditionalCSSClass();
         };
 

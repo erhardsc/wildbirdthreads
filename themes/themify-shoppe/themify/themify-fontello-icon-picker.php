@@ -39,11 +39,11 @@ class Themify_Icon_Picker_Fontello extends Themify_Icon_Picker_Font {
 		$icons = array();
 		$config = themify_fontello_get_config();
 		if( $config ) {
-			if( isset( $config['glyphs'] ) && ! empty( $config['glyphs'] ) ) {
+			if( ! empty( $config['glyphs'] ) ) {
 				foreach( $config['glyphs'] as $glyph ) {
 
 					/* custom icons uploaded but not selected are still included in the list; skip over those. */
-					if( isset( $glyph['src'] ) && $glyph['src'] == 'custom_icons' && $glyph['selected'] == false ) {
+					if( isset( $glyph['src'] ) && $glyph['src'] === 'custom_icons' && $glyph['selected'] == false ) {
 						continue;
 					}
 

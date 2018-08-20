@@ -1,6 +1,4 @@
 ( function( $ ) {
-	var $body = $( 'body' );
-
 	if( ! $.fn.themifyBuilderImagesLoaded ) {
 		$.fn.themifyBuilderImagesLoaded = function( callback ) {
 			var elems = this.filter( 'img' ),
@@ -25,7 +23,7 @@
 		};
 	}
 
-	$body.on( 'click', '.bsp-slide-button', function( e ) {
+	 Themify.body.on( 'click', '.bsp-slide-button', function( e ) {
 		var $this = $( this );
 
 		if( $this.is( '[href="#next-slide"], [href="#prev-slide"]' ) ) {
@@ -42,7 +40,7 @@
 	function do_pro_slider( e, el, type ) {
 		var items = $( '.module.module-pro-slider', el );
 
-		if( el && el.hasClass( 'module-pro-slider' ) && el.hasClass( 'module' ) ) {
+		if( el && el[0].classList.contains('module-pro-slider')) {
 			items = items.add( el );
 		}
 
@@ -78,7 +76,7 @@
 						fadeOutPreviousSlide: false,
 						touchSwipe : tbLocalScript.isTouch, // on touch devices, enable the touchSwipe
 						init: function() {
-							$this.find( '.themify_builder_slider_loader' ).remove();
+							$this.find( '.tb_slider_loader' ).remove();
 						}
 					};
 
@@ -110,7 +108,7 @@
 	}
 
 	if ( Themify.is_builder_active ) {
-		$body.on( 'builder_load_module_partial', do_pro_slider );
+                Themify.body.on( 'builder_load_module_partial tb_module_sort tb_grid_changed', do_pro_slider );
 		Themify.is_builder_loaded && do_pro_slider();
 	} else{
 		do_pro_slider();

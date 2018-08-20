@@ -7,8 +7,10 @@ if (!defined('ABSPATH'))
  */
 
 class TB_Feature_Module extends Themify_Builder_Component_Module {
-
+    
     function __construct() {
+        self::$texts['title_feature'] =__( 'Feature Title', 'themify' );
+        self::$texts['content_feature'] =__( 'Feature content', 'themify' );
         parent::__construct(array(
             'name' => __('Feature', 'themify'),
             'slug' => 'feature'
@@ -30,7 +32,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
             array(
                 'id' => 'title_feature',
                 'type' => 'text',
-                'label' => __('Feature Title', 'themify'),
+                'label' => self::$texts['title_feature'],
                 'class' => 'Large',
                 'render_callback' => array(
                     'binding' => 'live',
@@ -52,9 +54,9 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 'label' => __('Layout', 'themify'),
                 'mode' => 'sprite',
                 'options' => array(
-                    array('img' => 'icon-left', 'value' => 'icon-left', 'label' => __('Icon Left', 'themify')),
-                    array('img' => 'icon-right', 'value' => 'icon-right', 'label' => __('Icon Right', 'themify')),
-                    array('img' => 'icon-top', 'value' => 'icon-top', 'label' => __('Icon Top', 'themify'))
+                    array('img' => 'icon_left', 'value' => 'icon-left', 'label' => __('Icon Left', 'themify')),
+                    array('img' => 'icon_right', 'value' => 'icon-right', 'label' => __('Icon Right', 'themify')),
+                    array('img' => 'icon_top', 'value' => 'icon-top', 'label' => __('Icon Top', 'themify'))
                 ),
                 'render_callback' => array(
                     'binding' => 'live'
@@ -67,22 +69,33 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 'fields' => array(
                     array(
                         'id' => 'circle_percentage_feature',
-                        'type' => 'text',
+                        'type' => 'range',
                         'label' => __('Percentage', 'themify'),
                         'class' => 'xsmall',
                         'render_callback' => array(
                             'binding' => 'live'
-                        )
+                        ),
+	                    'units' => array(
+		                    '%' => array(
+			                    'min' => 0,
+			                    'max' => 100,
+		                    )
+	                    )
                     ),
                     array(
                         'id' => 'circle_stroke_feature',
-                        'type' => 'text',
+                        'type' => 'range',
                         'label' => __('Stroke', 'themify'),
                         'class' => 'xsmall',
-                        'after' => 'px',
                         'render_callback' => array(
                             'binding' => 'live'
-                        )
+                        ),
+	                    'units' => array(
+		                    'PX' => array(
+			                    'min' => -500,
+			                    'max' => 500,
+		                    )
+	                    )
                     ),
                     array(
                         'id' => 'circle_color_feature',
@@ -100,12 +113,26 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                         'options' => array(
                             'small' => __('Small', 'themify'),
                             'medium' => __('Medium', 'themify'),
-                            'large' => __('Large', 'themify')
+                            'large' => __('Large', 'themify'),
+                            'custom' => __('Custom', 'themify')
                         ),
+						'binding' => array(
+							'small' => array('hide' => array( 'custom_circle_size_feature' )),
+							'medium' => array('hide' => array( 'custom_circle_size_feature' )),
+							'large' => array('hide' => array( 'custom_circle_size_feature' )),
+							'custom' => array('show' => array( 'custom_circle_size_feature' )),
+						),
                         'render_callback' => array(
                             'binding' => 'live'
                         )
                     ),
+                    array(
+                        'id' => 'custom_circle_size_feature',
+						'type' => 'text',
+						'label' => __('Circle size(px)', 'themify'),
+						'render_callback' => array(
+							'binding' =>  'live'
+						)),
                 )
             ),
             array(
@@ -127,7 +154,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 'type' => 'image',
                 'label' => __('Image URL', 'themify'),
                 'class' => 'xlarge',
-                'wrap_with_class' => 'tb-group-element tb-group-element-image_icon',
+                'wrap_with_class' => 'tb_group_element tb_group_element_image_icon',
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -141,7 +168,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                         'id' => 'icon_feature',
                         'type' => 'icon',
                         'label' => __('Icon', 'themify'),
-                        'wrap_with_class' => 'tb-group-element tb-group-element-icon',
+                        'wrap_with_class' => 'tb_group_element tb_group_element_icon',
                         'render_callback' => array(
                             'binding' => 'live'
                         )
@@ -152,7 +179,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                         'colorpicker' => true,
                         'label' => __('Color', 'themify'),
                         'class' => 'medium',
-                        'wrap_with_class' => 'tb-group-element tb-group-element-icon',
+                        'wrap_with_class' => 'tb_group_element tb_group_element_icon',
                         'render_callback' => array(
                             'binding' => 'live'
                         )
@@ -163,7 +190,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                         'colorpicker' => true,
                         'label' => __('Background', 'themify'),
                         'class' => 'medium',
-                        'wrap_with_class' => 'tb-group-element tb-group-element-icon',
+                        'wrap_with_class' => 'tb_group_element tb_group_element_icon',
                         'render_callback' => array(
                             'binding' => 'live'
                         )
@@ -184,10 +211,95 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                     )
                 ),
                 'render_callback' => array(
+                    'binding' =>  'live'
+                )
+            ),
+			array(
+				'id' => 'feature_download_link',
+				'type' => 'checkbox',
+				'label' => __('Download-able Link', 'themify'),
+				'options' => array(
+					array( 'name' => 'yes', 'value' => __('Download link as file', 'themify') )
+				),
+				'render_callback' => array(
+					'binding' => 'live'
+				)
+			),
+            array(
+                'id' => 'link_options',
+                'type' => 'radio',
+                'label' => __('Open Link In', 'themify'),
+                'options' => array(
+                    'regular' => __('Same window', 'themify'),
+                    'lightbox' => __('Lightbox ', 'themify'),
+                    'newtab' => __('New tab ', 'themify')
+                ),
+                'new_line' => false,
+                'default' => 'regular',
+                'option_js' => true,
+                'wrap_with_class' => 'link_options',
+                'render_callback' => array(
                     'binding' => false
                 )
             ),
             array(
+                'id' => 'lightbox_size',
+                'type' => 'multi',
+                'label' => __('Lightbox Dimension', 'themify'),
+                'fields' => array(
+                    array(
+                        'id' => 'lightbox_width',
+	                    'label' => __('Width', 'themify'),'type' => 'range',
+	                    'value' => '',
+	                    'type' => 'range',
+	                    'render_callback' => array(
+		                    'binding' => false
+	                    ),
+	                    'units' => array(
+		                    'PX' => array(
+			                    'min' => -500,
+			                    'max' => 500,
+		                    ),
+		                    'EM' => array(
+			                    'min' => -10,
+			                    'max' => 10,
+		                    ),
+		                    '%' => array(
+			                    'min' => 0,
+			                    'max' => 100,
+		                    )
+	                    )
+                    ),
+                    array(
+                        'id' => 'lightbox_height',
+	                    'label' => __('Height', 'themify'),
+	                    'type' => 'range',
+	                    'value' => '',
+	                    'render_callback' => array(
+		                    'binding' => false
+	                    ),
+	                    'units' => array(
+		                    'PX' => array(
+			                    'min' => -500,
+			                    'max' => 500,
+		                    ),
+		                    'EM' => array(
+			                    'min' => -10,
+			                    'max' => 10,
+		                    ),
+		                    '%' => array(
+			                    'min' => 0,
+			                    'max' => 100,
+		                    )
+	                    )
+                    )
+                ),
+                'wrap_with_class' => 'tb_group_element tb_group_element_lightbox lightbox_size',
+                'render_callback' => array(
+                    'binding' => false
+                )
+            ),
+             array(
                 'id' => 'overlap_image_feature',
                 'type' => 'image',
                 'label' => __('Overlap Image', 'themify'),
@@ -224,78 +336,6 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 ),
             ),
             array(
-                'id' => 'link_options',
-                'type' => 'radio',
-                'label' => __('Open Link In', 'themify'),
-                'options' => array(
-                    'regular' => __('Same window', 'themify'),
-                    'lightbox' => __('Lightbox ', 'themify'),
-                    'newtab' => __('New tab ', 'themify')
-                ),
-                'new_line' => false,
-                'default' => 'regular',
-                'option_js' => true,
-                'wrap_with_class' => 'link_options',
-                'render_callback' => array(
-                    'binding' => false
-                )
-            ),
-            array(
-                'id' => 'lightbox_size',
-                'type' => 'multi',
-                'label' => __('Lightbox Dimension', 'themify'),
-                'fields' => array(
-                    array(
-                        'id' => 'lightbox_width',
-                        'type' => 'text',
-                        'label' => __('Width', 'themify'),
-                        'value' => '',
-                        'render_callback' => array(
-                            'binding' => false
-                        )
-                    ),
-                    array(
-                        'id' => 'lightbox_size_unit_width',
-                        'type' => 'select',
-                        'label' => __('Units', 'themify'),
-                        'options' => array(
-                            'pixels' => __('px ', 'themify'),
-                            'percents' => __('%', 'themify')
-                        ),
-                        'default' => 'pixels',
-                        'render_callback' => array(
-                            'binding' => false
-                        )
-                    ),
-                    array(
-                        'id' => 'lightbox_height',
-                        'type' => 'text',
-                        'label' => __('Height', 'themify'),
-                        'value' => '',
-                        'render_callback' => array(
-                            'binding' => false
-                        )
-                    ),
-                    array(
-                        'id' => 'lightbox_size_unit_height',
-                        'type' => 'select',
-                        'label' => __('Units', 'themify'),
-                        'options' => array(
-                            'pixels' => __('px ', 'themify'),
-                            'percents' => __('%', 'themify')
-                        ),
-                        'default' => 'pixels',
-                        'render_callback' => array(
-                            'binding' => false
-                        )
-                    )
-                ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-lightbox lightbox_size',
-                'render_callback' => array(
-                    'binding' => false
-                )
-            ),
-            array(
                 'type' => 'separator',
                 'meta' => array('html' => '<hr />')
             ),
@@ -303,7 +343,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 'id' => 'css_feature',
                 'type' => 'text',
                 'label' => __('Additional CSS Class', 'themify'),
-                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify')),
+                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify')),
                 'class' => 'large exclude-from-reset-field',
                 'render_callback' => array(
                     'binding' => 'live'
@@ -314,8 +354,8 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
 
     public function get_default_settings() {
         return array(
-            'title_feature' => esc_html__('Feature title', 'themify'),
-            'content_feature' => esc_html__('Feature content', 'themify'),
+            'title_feature' =>self::$texts['title_feature'],
+            'content_feature' => self::$texts['content_feature'],
             'circle_percentage_feature' => '100',
             'circle_stroke_feature' => '3',
             'icon_feature' => 'fa-home',
@@ -332,9 +372,11 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
             self::get_image('.module-feature'),
             self::get_color('.module-feature', 'background_color', __('Background Color', 'themify'), 'background-color'),
             self::get_repeat('.module-feature'),
+			self::get_position('.module-feature'),
             // Font
             self::get_seperator('font', __('Font', 'themify')),
             self::get_font_family(array('.module-feature', '.module-feature .module-feature-title', '.module-feature h1', '.module-feature h2', '.module-feature h3:not(.module-title)', '.module-feature h4', '.module-feature h5', '.module-feature h6')),
+            self::get_element_font_weight(array('.module-feature', '.module-feature .module-feature-title', '.module-feature h1', '.module-feature h2', '.module-feature h3:not(.module-title)', '.module-feature h4', '.module-feature h5', '.module-feature h6')),
             self::get_color(array('.module-feature', '.module-feature h1', '.module-feature h2', '.module-feature h3', '.module-feature h4', '.module-feature h5', '.module-feature h6', '.module-feature .module-feature-title'), 'font_color', __('Font Color', 'themify')),
             self::get_font_size('.module-feature'),
             self::get_line_height('.module-feature'),
@@ -342,6 +384,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
             self::get_text_align('.module-feature'),
             self::get_text_transform('.module-feature'),
             self::get_font_style('.module-feature'),
+            self::get_text_decoration('.module-feature','text_decoration_regular'),
             // Link
             self::get_seperator('link', __('Link', 'themify')),
             self::get_color('.module-feature a', 'link_color'),
@@ -362,10 +405,40 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
             // Font
             self::get_seperator('font', __('Font', 'themify'), false),
             self::get_font_family(array('.module-feature .module-feature-title:not(.module-title)', '.module-feature .module-feature-title a'), 'font_family_title'),
-            self::get_color(array('.module-feature .module-feature-title:not(.module-title)', '.module-feature .module-feature-title a'), 'font_color_title', __('Font Color', 'themify')),
+            self::get_element_font_weight(array('.module-feature .module-feature-title:not(.module-title)', '.module-feature .module-feature-title a'), 'font_weight_title'),
+            self::get_color(array('.module-feature .module-feature-title:not(.module-title)', '.module-feature .module-feature-title:not(.module-title) a'), 'font_color_title', __('Font Color', 'themify')),
             self::get_color(array('.module-feature .module-feature-title:not(.module-title):hover', '.module-feature .module-feature-title a:hover'), 'font_color_title_hover', __('Color Hover', 'themify')),
             self::get_font_size('.module-feature .module-feature-title:not(.module-title)', 'font_size_title'),
-            self::get_line_height('.module-feature .module-feature-title:not(.module-title)', 'line_height_title')
+            self::get_line_height('.module-feature .module-feature-title:not(.module-title)', 'line_height_title'),
+            self::get_letter_spacing('.module-feature .module-feature-title:not(.module-title)', 'l_s_t'),
+            self::get_text_transform('.module-feature .module-feature-title:not(.module-title)', 't_t_t'),
+            self::get_font_style('.module-feature .module-feature-title:not(.module-title)', 'f_s_t','f_t_b')
+        );
+
+        $feature_content = array(
+            // Font
+				self::get_seperator('font', __('Font', 'themify'), false),
+				self::get_font_family(array('.module-feature .module-feature-content :not(.module-feature-title)', '.module-feature .module-feature-title a'), 'f_f_c'),
+				self::get_element_font_weight(array('.module-feature .module-feature-content :not(.module-feature-title)', '.module-feature .module-feature-title a'), 'f_w_c'),
+				self::get_color(array('.module-feature .module-feature-content :not(.module-feature-title)'), 'f_c_c', __('Font Color', 'themify')),
+				self::get_font_size('.module-feature .module-feature-content :not(.module-feature-title)', 'f_s_c'),
+				self::get_line_height('.module-feature .module-feature-content :not(.module-feature-title)', 'l_h_c'),
+				self::get_letter_spacing('.module-feature .module-feature-content :not(.module-feature-title)', 'l_s_c'),
+			// Padding
+				self::get_seperator('padding',__('Padding', 'themify')),
+				self::get_padding('.module-feature .module-feature-content','c_p'),
+			// Margin
+				self::get_seperator('margin',__('Margin', 'themify')),
+				self::get_margin('.module-feature .module-feature-content','c_m'),
+			// Border
+				self::get_seperator('border',__('Border', 'themify')),
+				self::get_border('.module-feature .module-feature-content','c_b')
+        );
+
+        $featured_icon = array(
+            // Font
+				self::get_seperator('font', __('Font', 'themify'), false),
+				self::get_font_size('.module-feature .module-feature-icon', 'f_s_i')
         );
 
         return array(
@@ -384,6 +457,14 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                     'title' => array(
                         'label' => __('Feature Title', 'themify'),
                         'fields' => $feature_title
+                    ),
+                    'featured_icon' => array(
+                        'label' => __('Feature Icon', 'themify'),
+                        'fields' => $featured_icon
+                    ),
+                    'content' => array(
+                        'label' => __('Feature Content', 'themify'),
+                        'fields' => $feature_content
                     )
                 )
             )
@@ -429,6 +510,8 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
             chart_vars.size = 150;
         } else if (data.circle_size_feature === 'small') {
             chart_vars.size = 100;
+        }else if (data.circle_size_feature === 'custom'){
+            chart_vars.size = data.custom_circle_size_feature;
         }
         data.circle_percentage_feature = data.circle_percentage_feature?data.circle_percentage_feature.replace('%',''):'';
         if(!data.circle_percentage_feature){
@@ -461,6 +544,7 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
         }
         #>
         <div id="{{module_id}}" class="module module-<?php echo $this->slug; ?> {{chart_class}} layout-{{ data.layout_feature }} size-{{data.circle_size_feature}} {{ data.css_feature }}">
+            <!--insert-->
             <style type="text/css">
                 {{style}}
             </style> 
@@ -476,8 +560,8 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 style += 'height:' + ( data.overlap_image_height ? data.overlap_image_height + 'px;' : 'auto;' );
                 #>
                     <img src="{{data.overlap_image_feature}}" style="{{style}}"/>
-                <#}#>
-                <# if(data.link_feature){ #>
+                <#}
+                 if(data.link_feature){ #>
                 <a href="{{ data.link_feature }}">
                     <#}#>
                     <div class="module-feature-chart-html5"
@@ -499,10 +583,10 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                                 <# if (data.icon_type_feature.indexOf('image')!==-1 && data.image_feature !== ''){ #>
                                 <img src="{{data.image_feature}}" />
                                 <# }
-                                else{ #>
-                                <# if ('' !== insetColor){ #><div class="module-feature-background" style="background:{{insetColor}}"></div><# } #>
-                                <# if ('' !== data.icon_feature){ #><i class="module-feature-icon fa {{data.icon_feature}}"<# if(data.icon_color_feature!==''){ #> style="color:<# print(themifybuilderapp.Utils.toRGBA(data.icon_color_feature)) #>"<# } #>></i><# } #>
-                                <# } #>
+                                else{ 
+                                    if ('' !== insetColor){ #><div class="module-feature-background" style="background:{{insetColor}}"></div><# }
+                                    if ('' !== data.icon_feature){ #><i class="module-feature-icon fa {{data.icon_feature}}"<# if(data.icon_color_feature!==''){ #> style="color:<# print(themifybuilderapp.Utils.toRGBA(data.icon_color_feature)) #>"<# } #>></i><# } 
+                                } #>
                             </div>
                         </div>
                     </div>
@@ -514,11 +598,11 @@ class TB_Feature_Module extends Themify_Builder_Component_Module {
                 <# if(data.title_feature!==''){ #>
                 <h3 class="module-feature-title">
                     <# if(data.link_feature){ #>
-                    <a href="{{data.link_feature}}">
-                        <#}#>
-                        {{data.title_feature}}
-                        <# if(data.link_feature){ #>
-                    </a>
+                        <a href="{{data.link_feature}}">
+                    <#}#>
+                    {{data.title_feature}}
+                    <# if(data.link_feature){ #>
+                        </a>
                     <#}#>
                 </h3>
                 <# } #>

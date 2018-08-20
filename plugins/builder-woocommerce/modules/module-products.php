@@ -136,19 +136,19 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 					array(
 						'id' => 'layout_products',
 						'type' => 'layout',
-                                                 'mode'=>'sprite',
+                                                'mode'=>'sprite',
 						'label' => __('Layout', 'builder-wc'),
 						'options' => array(
-							array('img' => 'list-post', 'value' => 'list-post', 'label' => __('List Post', 'builder-wc')),
+							array('img' => 'list_post', 'value' => 'list-post', 'label' => __('List Post', 'builder-wc')),
 							array('img' => 'grid3', 'value' => 'grid3', 'label' => __('Grid 3', 'builder-wc')),
 							array('img' => 'grid2', 'value' => 'grid2', 'label' => __('Grid 2', 'builder-wc')),
 							array('img' => 'grid4', 'value' => 'grid4', 'label' => __('Grid 4', 'builder-wc')),
-							array('img' => 'list-thumb-image', 'value' => 'list-thumb-image', 'label' => __('List Thumb Image', 'builder-wc')),
-							array('img' => 'grid2-thumb', 'value' => 'grid2-thumb', 'label' => __('Grid 2 Thumb', 'builder-wc'))
+							array('img' => 'list_thumb_image', 'value' => 'list-thumb-image', 'label' => __('List Thumb Image', 'builder-wc')),
+							array('img' => 'grid2_thumb', 'value' => 'grid2-thumb', 'label' => __('Grid 2 Thumb', 'builder-wc'))
 						)
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-list',
+				'wrap_with_class' => 'tb_group_element tb_group_element_list',
 				'render_callback' => array(
 					'binding' => 'live',
 					'selector' => '> .woocommerce'
@@ -165,10 +165,10 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 						'label' => __('Slider Layout', 'builder-wc'),
 						'separated' => 'top',
 						'options' => array(
-							array('img' => 'slider-default', 'value' => 'slider-default', 'label' => __('Slider Default', 'builder-wc')),
-							array('img' => 'slider-image-top', 'value' => 'slider-overlay', 'label' => __('Slider Overlay', 'builder-wc')),
-							array('img' => 'slider-caption-overlay', 'value' => 'slider-caption-overlay', 'label' => __('Slider Caption Overlay', 'builder-wc')),
-							array('img' => 'slider-agency', 'value' => 'slider-agency', 'label' => __('Agency', 'builder-wc'))
+							array('img' => 'slider_default', 'value' => 'slider-default', 'label' => __('Slider Default', 'builder-wc')),
+							array('img' => 'slider_image_top', 'value' => 'slider-overlay', 'label' => __('Slider Overlay', 'builder-wc')),
+							array('img' => 'slider_caption_overlay', 'value' => 'slider-caption-overlay', 'label' => __('Slider Caption Overlay', 'builder-wc')),
+							array('img' => 'slider_agency', 'value' => 'slider-agency', 'label' => __('Agency', 'builder-wc'))
 						)
 					),
 					array(
@@ -182,6 +182,12 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 								'default' => 1,
 								'options' => apply_filters( 'builder_products_visible_opt_slider', array( 1 => 1, 2, 3, 4, 5, 6, 7 ) ),
 								'help' => __('Visible', 'builder-wc')
+							),
+							array(
+								'id' => 'mob_visible_opt_slider',
+								'type' => 'select',
+								'options' => array('', 1, 2, 3, 4),
+								'help' => __( 'Mobile Visible', 'builder-wc' )
 							),
 							array(
 								'id' => 'auto_scroll_opt_slider',
@@ -296,7 +302,7 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 						)
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-slider'
+				'wrap_with_class' => 'tb_group_element tb_group_element_slider'
 			),
 			array(
 				'id' => 'description_products',
@@ -412,7 +418,7 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 					'no' => __('No', 'builder-wc')
 				),
 				'default' => 'Yes',
-				'wrap_with_class' => 'tb-group-element tb-group-element-list'
+				'wrap_with_class' => 'tb_group_element tb_group_element_list'
 			),
 			// Additional CSS
 			array(
@@ -424,7 +430,7 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'builder-wc'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'builder-wc') )
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'builder-wc') )
 			)
 		);
 	}
@@ -441,8 +447,8 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
         }
         
 	public function get_styling() {
-		return array(
-                         // Background
+		$general = array(
+			// Background
                         self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
                         self::get_color('.module-products', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
 			// Font
@@ -451,20 +457,165 @@ class TB_Products_Module extends Themify_Builder_Component_Module {
                         self::get_color(array( '.module-products', '.module-products .product-title a' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-products'),
                         self::get_line_height('.module-products'),
-                        self::get_text_align('.module-producta'),
+                        self::get_text_align('.module-products'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
-                        self::get_color('.module-products a','link_color'),
-                        self::get_text_decoration('.module-products a'),
-                        // Padding
+                        self::get_color('.module-products a:not(.add_to_cart_button)','link_color'),
+                        self::get_color('.module-products a:not(.add_to_cart_button):hover','link_color_hover'),
+                        self::get_text_decoration('.module-products a:not(.add_to_cart_button)'),
+			// Padding
                         self::get_seperator('padding',__('Padding', 'themify')),
                         self::get_padding('.module-products'),
 			// Margin
                         self::get_seperator('margin',__('Margin', 'themify')),
                         self::get_margin('.module-products'),
-                        // Border
+			// Border
                         self::get_seperator('border',__('Border', 'themify')),
                         self::get_border('.module-products')
+		);
+		$product_container = array(
+			// Background
+                        self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-products .product', 'b_c_p_ctr',__( 'Background Color', 'themify' ),'background-color'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-products .product','p_p_ctr'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin('.module-products .product','m_p_ctr'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-products .product','b_p_ctr')
+		);
+		$product_content = array(
+			// Background
+                        self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
+                        self::get_color(array( '.module-products .post-content', '.module-products .product-content'), 'b_c_p_ct',__( 'Background Color', 'themify' ),'background-color'),
+			// Font
+                        self::get_seperator('font',__('Font', 'themify'),false),
+                        self::get_font_family(array( '.module-products .post-content', '.module-products .product-content' ), 'f_f_p_ct'),
+						self::get_element_font_weight(array( '.module-products .post-content', '.module-products .product-content'),'f_w_p_ct'),
+                        self::get_color(array( '.module-products .post-content', '.module-products .product-content' ),'f_c_p_ct', __('Font Color', 'themify')),
+                        self::get_font_size(array( '.module-products .post-content', '.module-products .product-content'),'f_s_p_ct'),
+                        self::get_line_height(array( '.module-products .post-content', '.module-products .product-content'),'l_h_p_ct'),
+                        self::get_text_align(array( '.module-products .post-content', '.module-products .product-content'),'t_a_p_ct'),
+                        self::get_text_transform(array( '.module-products .post-content', '.module-products .product-content'),'t_t_p_ct'),
+                        self::get_font_style(array( '.module-products .post-content', '.module-products .product-content'), 'f_sy_p_ct', 'f_w_p_ct'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding(array( '.module-products .post-content', '.module-products .product-content'),'p_p_ct'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin(array( '.module-products .post-content', '.module-products .product-content'),'m_p_ct'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border(array( '.module-products .post-content', '.module-products .product-content'),'b_p_ct')
+		);
+		$product_title = array(
+			// Font
+                        self::get_seperator('font',__('Font', 'themify'),false),
+                        self::get_font_family(array( '.module-products .product h3', '.module-products .product h3 a' ), 'f_f_p_t'),
+						self::get_element_font_weight(array( '.module-products .product h3', '.module-products .product h3 a'),'f_w_p_t'),
+                        self::get_color(array( '.module-products .product h3', '.module-products .product h3 a' ),'f_c_p_t', __('Font Color', 'themify')),
+                        self::get_font_size('.module-products .product h3','f_s_p_t'),
+                        self::get_line_height('.module-products .product h3','l_h_p_t'),
+                        self::get_text_align('.module-products .product h3','t_a_p_t'),
+                        self::get_text_transform('.module-products .product h3','t_t_p_t'),
+                        self::get_font_style('.module-products .product h3', 'f_sy_p_t', 'f_w_p_t'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-products .product h3','p_p_t'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin('.module-products .product h3','m_p_t'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-products .product h3','b_p_t')
+		);
+		$price = array(
+			// Font
+                        self::get_seperator('font',__('Font', 'themify'),false),
+                        self::get_font_family('.module-products .product .price', 'f_f_p_p'),
+						self::get_element_font_weight('.module-products .product .price', 'f_w_p_p'),
+                        self::get_color('.module-products .product .price','f_c_p_p', __('Font Color', 'themify')),
+                        self::get_font_size('.module-products .product .price','f_s_p_p'),
+                        self::get_line_height('.module-products .product .price','l_h_p_p'),
+                        self::get_text_align('.module-products .product .price','t_a_p_p'),
+                        self::get_font_style('.module-products .product .price', 'f_sy_p_p', 'f_w_p_p'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-products .product .price','p_p_p'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin('.module-products .product .price','m_p_p'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-products .product .price','b_p_p')
+		);
+		$button = array(
+			// Background
+                        self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-products .product .add_to_cart_button', 'b_c_p_b',__( 'Background Color', 'themify' ),'background-color'),
+                        self::get_color('.module-products .product .add_to_cart_button:hover', 'b_c_h_p_b',__( 'Background Color', 'themify' ),'background-color'),
+			// Font
+                        self::get_seperator('font',__('Font', 'themify'),false),
+                        self::get_font_family('.module-products .product .add_to_cart_button', 'f_f_p_b'),
+						self::get_element_font_weight('.module-products .product .add_to_cart_button', 'f_w_p_b'),
+                        self::get_color('.module-products .product .add_to_cart_button','f_c_p_b', __('Font Color', 'themify')),
+                        self::get_color('.module-products .product .add_to_cart_button:hover','f_c_h_p_b', __('Font Color', 'themify')),
+                        self::get_font_size('.module-products .product .add_to_cart_button','f_s_p_b'),
+                        self::get_line_height('.module-products .product .add_to_cart_button','l_h_p_b'),
+                        self::get_text_align('.module-products .product .add_to_cart_button','t_a_p_b'),
+			// Padding
+                        self::get_seperator('padding',__('Padding', 'themify')),
+                        self::get_padding('.module-products .product .add_to_cart_button','p_p_b'),
+			// Margin
+                        self::get_seperator('margin',__('Margin', 'themify')),
+                        self::get_margin('.module-products .product .add_to_cart_button','m_p_b'),
+			// Border
+                        self::get_seperator('border',__('Border', 'themify')),
+                        self::get_border('.module-products .product .add_to_cart_button','b_p_b')
+		);
+		return array(
+			array(
+				'type' => 'tabs',
+				'id' => 'module-styling',
+				'tabs' => array(
+					'general' => array(
+						'label' => __('General', 'themify'),
+						'fields' => $general
+					),
+					'module-title' => array(
+						'label' => __( 'Module Title', 'themify' ),
+						'fields' => $this->module_title_custom_style()
+					),
+					'container' => array(
+						'label' => __('Product Container', 'themify'),
+						'fields' => $product_container
+					),
+					'content' => array(
+						'label' => __('Product Content', 'themify'),
+						'fields' => $product_content
+					),
+					'title' => array(
+						'label' => __('Product Title', 'themify'),
+						'fields' => $product_title
+					),
+					'price' => array(
+						'label' => __('Price', 'themify'),
+						'fields' => $price
+					),
+					'description' => array(
+						'label' => __('Product Description', 'themify'),
+						'fields' => $product_description
+					),
+					'button' => array(
+						'label' => __('Button', 'themify'),
+						'fields' => $button
+					)
+				)
+			)
+			
 		);
 	}
 }

@@ -11,7 +11,7 @@ var TB_Ticks;
         init: function (options,contentWindow) {
             var self = TB_Ticks;
             self.options = options;
-            self.time = parseInt(options.tick / 2) * 1000;
+            self.time = parseInt(options.tick) * 1000;
             self.$el = $('#tmpl-builder-restriction');
             self.iframe = contentWindow;
             return self;
@@ -28,7 +28,7 @@ var TB_Ticks;
                     self.iframe.ThemifyBuilderCommon.showLoader('show');
                     var api =  self.iframe.themifybuilderapp;
                     api.Utils.saveBuilder(function () {
-                        api.Views.Toolbar.prototype.Revisions.ajax({action: 'tb_save_revision', rev_comment: self.$el.find('.tb-locked-revision').text()}, function () {
+                        api.Views.Toolbar.prototype.Revisions.ajax({action: 'tb_save_revision', rev_comment: self.$el.find('.tb_locked_revision').text()}, function () {
                             self.iframe.ThemifyBuilderCommon.showLoader('hide');
                             api.Models.Registry.destroy();
                         });
@@ -64,7 +64,7 @@ var TB_Ticks;
             });
         },
         isEditing: function () {
-            return document.body.classList.contains('tb-restriction');
+            return document.body.classList.contains('tb_restriction');
         },
         show: function () {
             var self = TB_Ticks;
@@ -77,16 +77,15 @@ var TB_Ticks;
         },
         takeOver: function () {
             var self = TB_Ticks;
-            $('body').one('click', '.tb-locked-btn', function (e) {
+            Themify.body.one('click', '.tb_locked_btn', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 self.ajax(function () {
-                    var $body = $('body');
-                    if($body.hasClass('themify_builder_active') || $body.hasClass('wp-admin')){
+                    if(Themify.body.hasClass('themify_builder_active') || Themify.body.hasClass('wp-admin')){
                         self.ticks();
                     }
                     else{
-                        $body.removeClass('tb-restriction');
+                        Themify.body.removeClass('tb_restriction');
                         $('.js-turn-on-builder').first().trigger('click');
                     }
                     self.$el.remove();
@@ -94,11 +93,8 @@ var TB_Ticks;
             });
         },
         close: function () {
-            $('.tb-locked-close').one('click', this.hide);
+            this.$el.one('click','.tb_locked_close',this.hide);
         }
     };
-    $(document).ready(function () {
-
-    });
 
 })(jQuery);

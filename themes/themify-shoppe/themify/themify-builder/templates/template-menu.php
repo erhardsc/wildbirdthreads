@@ -19,6 +19,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'animation_effect' => '',
         'menu_breakpoint' => '',
         'menu_slide_direction' => '',
+		'allow_menu_fallback' => '',
         'allow_menu_breakpoint' => ''
     );
 
@@ -46,18 +47,29 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
 
     <!-- module menu -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php if ($fields_args['mod_title_menu'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_menu'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
 
         <?php
         if ($fields_args['custom_menu'] !== '') {
-            $args = array(
-                'menu' => $fields_args['custom_menu'],
-                'menu_class' => 'ui nav ' . $fields_args['layout_menu'] . ' ' . $fields_args['color_menu'] . ' ' . $fields_args['according_style_menu']
-            );
-            wp_nav_menu($args);
-        }
+			$args = array(
+				'menu' => $fields_args['custom_menu'],
+				'menu_class' => 'ui nav ' . $fields_args['layout_menu'] . ' ' . $fields_args['color_menu'] . ' ' . $fields_args['according_style_menu']
+			);
+			
+			wp_nav_menu( $args );
+        } else if ( ! empty( $fields_args['allow_menu_fallback'] ) ) {
+			$args = array(
+				'title_li'	=> '',
+				'echo'		=> 0,
+			);
+
+			printf('<ul class="%1$s">%2$s</ul>'
+				, 'ui nav ' . $fields_args['layout_menu'] . ' ' . $fields_args['color_menu'] . ' ' . $fields_args['according_style_menu']
+				, wp_list_pages( $args ) );
+		}
         ?>
     </div>
     <!-- /module menu -->

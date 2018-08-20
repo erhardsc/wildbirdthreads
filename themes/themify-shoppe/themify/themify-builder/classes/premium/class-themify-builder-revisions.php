@@ -22,7 +22,7 @@
  * @author     Themify
  */
 class Themify_Builder_Revisions {
-
+        
 	/**
 	 * Builder instance.
 	 *
@@ -45,7 +45,7 @@ class Themify_Builder_Revisions {
 	 * @param object Themify_Builder $builder 
 	 */
 	public function __construct( Themify_Builder $builder ) {
-		$this->builder = $builder;
+                $this->builder = $builder;
 		$this->builder_meta_key = $GLOBALS['ThemifyBuilder_Data_Manager']->meta_key;
 
 		$ajax_events = array(

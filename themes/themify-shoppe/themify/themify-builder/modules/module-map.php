@@ -17,7 +17,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
 
     public function get_options() {
         $zoom_opt = array();
-        for ($i = 1; $i < 17; $i++) {
+        for ($i = 1; $i < 21; $i++) {
             $zoom_opt[] = $i;
         }
         return array(
@@ -78,21 +78,23 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
             ),
             array(
                 'id' => 'w_map',
-                'type' => 'text',
+                'type' => 'range',
                 'class' => 'xsmall',
                 'label' => __('Width', 'themify'),
-                'unit' => array(
-                    'id' => 'unit_w',
-                    'type' => 'select',
-                    'options' => array(
-                        array('id' => 'pixel_unit_w', 'value' => 'px'),
-                        array('id' => 'percent_unit_w', 'value' => '%')
-                    )
-                ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+                'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
                 'render_callback' => array(
                     'binding' => 'live'
-                )
+                ),
+	            'units' => array(
+		            'PX' => array(
+			            'min' => 0,
+			            'max' => 500,
+		            ),
+		            '%' => array(
+			            'min' => 0,
+			            'max' => 100,
+		            )
+	            )
             ),
             array(
                 'id' => 'w_map_static',
@@ -101,27 +103,30 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                 'label' => __('Width', 'themify'),
                 'value' => 500,
                 'after' => 'px',
-                'wrap_with_class' => 'tb-group-element tb-group-element-static',
+                'wrap_with_class' => 'tb_group_element tb_group_element_static',
                 'render_callback' => array(
                     'binding' => 'live'
                 )
             ),
             array(
                 'id' => 'h_map',
-                'type' => 'text',
+                'type' => 'range',
                 'label' => __('Height', 'themify'),
                 'class' => 'xsmall',
-                'unit' => array(
-                    'id' => 'unit_h',
-                    'type' => 'select',
-                    'options' => array(
-                        array('id' => 'pixel_unit_h', 'value' => 'px')
-                    )
-                ),
                 'value' => 300,
                 'render_callback' => array(
                     'binding' => 'live'
-                )
+                ),
+	            'units' => array(
+		            'PX' => array(
+			            'min' => 0,
+			            'max' => 500,
+		            ),
+		            '%' => array(
+			            'min' => 0,
+			            'max' => 100,
+		            )
+	            )
             ),
             array(
                 'id' => 'multi_map_border',
@@ -145,7 +150,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                     ),
                     array(
                         'id' => 'b_width_map',
-                        'type' => 'text',
+                        'type' => 'range',
                         'label' => '',
                         'class' => 'medium',
                         'after' => 'px',
@@ -187,7 +192,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                     'disable' => __('Disable', 'themify'),
                     'enable' => __('Enable', 'themify'),
                 ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+                'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -200,7 +205,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                     'enable' => __('Enable', 'themify'),
                     'disable' => __('Disable', 'themify')
                 ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+                'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -213,7 +218,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                     'yes' => __('Yes', 'themify'),
                     'no' => __('No', 'themify')
                 ),
-                'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+                'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -225,7 +230,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                 'class' => 'fullwidth',
                 'label' => __('Info window', 'themify'),
                 'help' => __('Additional info that will be shown when clicking on map marker', 'themify'),
-                'wrap_with_class' => 'tb-group-element tb-group-element-dynamic',
+                'wrap_with_class' => 'tb_group_element tb_group_element_dynamic',
                 'render_callback' => array(
                     'binding' => false
                 )
@@ -240,7 +245,7 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
                 'type' => 'text',
                 'label' => __('Additional CSS Class', 'themify'),
                 'class' => 'large exclude-from-reset-field',
-                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify')),
+                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify')),
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -253,7 +258,8 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
             'address_map' => 'Toronto',
             'b_style_map' => 'solid',
             'w_map' => '100',
-            'unit_w' => '%'
+            'w_map_unit' => '%',
+            'h_map_unit' => 'px',
         );
     }
 
@@ -303,11 +309,13 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
         'zoom_map':15,
         'w_map':'100',
         'w_map_static':500,
-        'unit_w':'%',
+        'w_map_unit':'px',
         'h_map':'300',
-        'unit_h' : 'px',
+        'h_map_unit' : 'px',
         'b_style_map': 'solid',
         'b_width_map':'',
+        'unit_w': -1,
+        'unit_h': -1,
         'b_color_map':'',
         'type_map':'ROADMAP',
         'scrollwheel_map':'disable',
@@ -317,6 +325,18 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
         'map_display_type':'dynamic',
         'css_map':''
         });
+        if(data.unit_w != -1){
+            data.w_map_unit = data.unit_w;
+            if(data.w_map_unit != '%'){
+                data.w_map_unit = 'px';
+            }
+        }
+        if(data.unit_h != -1){
+            data.h_map_unit = data.unit_h;
+            if(data.h_map_unit != '%'){
+                data.h_map_unit = 'px';
+            }
+        }
         if (data.address_map) {
         data.address_map =data.address_map.trim().replace(/\s\s+/g, ' ');
         }
@@ -326,16 +346,16 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
         var info = !data.info_window_map?'<?php echo $default_addres ?>'.replace('#s#',data.address_map):data.info_window_map, 
         style = '';
         if(data.b_width_map){
-        style+= 'border: '+data.b_style_map+' '+data.b_width_map+'px';
-        if (data.b_color_map) {
-        style+=' '+themifybuilderapp.Utils.toRGBA(data.b_color_map);
-        }
-        style+= ';';
+            style+= 'border: '+data.b_style_map+' '+data.b_width_map+'px';
+            if (data.b_color_map) {
+                style+=' '+themifybuilderapp.Utils.toRGBA(data.b_color_map);
+            }
+            style+= ';';
         }
         #>
 
         <div class="module module-<?php echo $this->slug; ?> {{ data.css_map }}">
-
+             <!--insert-->
             <# if( data.mod_title_map ) { #>
             <?php echo $module_args['before_title']; ?>
             {{{ data.mod_title_map }}}
@@ -357,8 +377,8 @@ class TB_Map_Module extends Themify_Builder_Component_Module {
             <#
             }
             else if(data.address_map || data.latlong_map) {
-            style+= 'width:'+data.w_map + data.unit_w+';';
-            style+= 'height:'+data.h_map + data.unit_h+';';
+            style+= 'width:'+data.w_map + data.w_map_unit+';';
+            style+= 'height:'+data.h_map + data.h_map_unit+';';
             var js = {},
             reverse = !data.address_map && data.latlong_map;
             js.address = data.address_map? data.address_map: data.latlong_map;

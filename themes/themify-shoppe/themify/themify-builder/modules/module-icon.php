@@ -7,8 +7,9 @@ if (!defined('ABSPATH'))
  */
 
 class TB_Icon_Module extends Themify_Builder_Component_Module {
-
+   
     function __construct() {
+        self::$texts['icon_label'] = __('Label', 'themify');
         parent::__construct(array(
             'name' => __('Icon', 'themify'),
             'slug' => 'icon'
@@ -51,6 +52,19 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
                 'default' => 'circle'
             ),
             array(
+                'id' => 'icon_position',
+                'type' => 'radio',
+                'label' => __('Icon Position ', 'themify'),
+                'options' => array(
+                    'icon_position_left' => __('Left', 'themify'),
+                    'icon_position_right' => __('Right', 'themify'),
+                ),
+                'render_callback' => array(
+                    'binding' => 'live'
+                ),
+                'default' => 'icon_position_left'
+            ),
+            array(
                 'id' => 'icon_arrangement',
                 'type' => 'radio',
                 'label' => __('Arrangement ', 'themify'),
@@ -90,7 +104,7 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
                                 'id' => 'icon_color_bg',
                                 'type' => 'layout',
                                 'mode' => 'sprite',
-                                'class' => 'tb-colors',
+                                'class' => 'tb_colors',
                                 'label' => '',
                                 'options' => $colors,
                                 'bottom' => false,
@@ -108,7 +122,7 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
                     array(
                         'id' => 'label',
                         'type' => 'text',
-                        'label' => __('Label', 'themify'),
+                        'label' =>self::$texts['icon_label'],
                         'class' => 'fullwidth',
                         'render_callback' => array(
                             'repeater' => 'content_icon',
@@ -159,57 +173,57 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
                         'options' => array(
                             array(
                                 'id' => 'lightbox_width',
-                                'type' => 'text',
-                                'label' => __('Width', 'themify'),
-                                'value' => '',
-                                'render_callback' => array(
-                                    'repeater' => 'content_icon',
-                                    'binding' => 'live'
-                                )
-                            ),
-                            array(
-                                'id' => 'lightbox_size_unit_width',
-                                'type' => 'select',
-                                'label' => __('Units', 'themify'),
-                                'options' => array(
-                                    'pixels' => __('px ', 'themify'),
-                                    'percents' => __('%', 'themify')
-                                ),
-                                'default' => 'pixels',
-                                'render_callback' => array(
-                                    'repeater' => 'content_icon',
-                                    'binding' => 'live'
-                                )
+	                            'label' => __('Width', 'themify'),
+	                            'value' => '',
+	                            'render_callback' => array(
+		                            'repeater' => 'content_icon',
+		                            'binding' => false
+	                            ),
+	                            'type' => 'range',
+	                            'units' => array(
+		                            'PX' => array(
+			                            'min' => -500,
+			                            'max' => 500,
+		                            ),
+		                            '%' => array(
+			                            'min' => 0,
+			                            'max' => 100,
+		                            ),
+		                            'EM' => array(
+			                            'min' => -10,
+			                            'max' => 10,
+		                            )
+	                            )
                             ),
                             array(
                                 'id' => 'lightbox_height',
-                                'type' => 'text',
                                 'label' => __('Height', 'themify'),
                                 'value' => '',
                                 'render_callback' => array(
                                     'repeater' => 'content_icon',
-                                    'binding' => 'live'
-                                )
-                            ),
-                            array(
-                                'id' => 'lightbox_size_unit_height',
-                                'type' => 'select',
-                                'label' => __('Units', 'themify'),
-                                'options' => array(
-                                    'pixels' => __('px ', 'themify'),
-                                    'percents' => __('%', 'themify')
+                                    'binding' => false
                                 ),
-                                'default' => 'pixels',
-                                'render_callback' => array(
-                                    'repeater' => 'content_icon',
-                                    'binding' => 'live'
-                                )
+	                            'type' => 'range',
+	                            'units' => array(
+		                            'PX' => array(
+			                            'min' => -500,
+			                            'max' => 500,
+		                            ),
+		                            '%' => array(
+			                            'min' => 0,
+			                            'max' => 100,
+		                            ),
+		                            'EM' => array(
+			                            'min' => -10,
+			                            'max' => 10,
+		                            )
+	                            )
                             )
                         ),
                         'render_callback' => array(
                             'binding' => 'live'
                         ),
-                        'wrap_with_class' => 'tb-group-element tb-group-element-lightbox'
+                        'wrap_with_class' => 'tb_group_element tb_group_element_lightbox'
                     )
                 ),
                 'render_callback' => array(
@@ -226,7 +240,7 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
                 'type' => 'text',
                 'label' => __('Additional CSS Class', 'themify'),
                 'class' => 'large exclude-from-reset-field',
-                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify')),
+                'help' => sprintf('<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify')),
                 'render_callback' => array(
                     'binding' => 'live'
                 )
@@ -254,9 +268,11 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
             self::get_image(' div.module-icon'),
             self::get_color(' div.module-icon', 'background_color', __('Background Color', 'themify'), 'background-color'),
             self::get_repeat(' div.module-icon'),
+			self::get_position(' div.module-icon'),
             // Font
             self::get_seperator('font', __('Font', 'themify')),
             self::get_font_family(' div.module-icon'),
+            self::get_element_font_weight(' div.module-icon'),
             self::get_color(' div.module-icon', 'font_color', __('Font Color', 'themify')),
             self::get_font_size(array(' div.module-icon i', ' div.module-icon a', ' div.module-icon span')),
             self::get_line_height(array(' div.module-icon i', ' div.module-icon a', ' div.module-icon span')),
@@ -264,11 +280,12 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
             self::get_text_align(' div.module-icon'),
             self::get_text_transform(' div.module-icon'),
             self::get_font_style(' div.module-icon'),
+            self::get_text_decoration(' div.module-icon span','text_decoration_regular'),
             // Link
             self::get_seperator('link', __('Link', 'themify')),
-            self::get_color(' div.module-icon span', 'link_color'),
+            self::get_color(array(' div.module-icon span', ' div.module-icon i'), 'link_color'),
             self::get_color(' div.module-icon .module-icon-item:hover span', 'link_color_hover', __('Color Hover', 'themify')),
-            self::get_text_decoration(array(' div.module-icon a span', ' div.module-icon a i')),
+            self::get_text_decoration(array(' div.module-icon span')),
             // Padding
             self::get_seperator('padding', __('Padding', 'themify')),
             self::get_padding(' div.module-icon'),
@@ -288,7 +305,8 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
             // Font
             self::get_seperator('font', __('Color', 'themify')),
             self::get_color(' div.module-icon .module-icon-item i', 'font_color_icon', __('Color', 'themify')),
-            self::get_color(' div.module-icon .module-icon-item:hover i', 'font_color_icon_hover', __('Color Hover', 'themify'))
+            self::get_color(' div.module-icon .module-icon-item:hover i', 'font_color_icon_hover', __('Color Hover', 'themify')),
+            self::get_font_size(' div.module-icon .module-icon-item i', 'f_s_i')
         );
 
         return array(
@@ -318,6 +336,7 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
         'icon_size' : '',
         'icon_style' : '',
         'icon_arrangement' : 'icon_horizontal',
+        'icon_position' : 'icon_position_left',
         'content_icon' : null,
         'css_icon' : ''
         });
@@ -330,38 +349,38 @@ class TB_Icon_Module extends Themify_Builder_Component_Module {
         'link_options':'',
         'lightbox_width':'',
         'lightbox_height':'',
-        'lightbox_size_unit_width':'',
-        'lightbox_size_unit_height':''
+        'lightbox_width_unit':'',
+        'lightbox_height_unit':''
         };
         #>
 
         <div class="module module-<?php echo $this->slug; ?> {{ data.css_icon }}">
+             <!--insert-->
             <# if( data.mod_title_icon ) { #>
             <?php echo $module_args['before_title']; ?>
             {{{ data.mod_title_icon }}}
             <?php echo $module_args['after_title']; ?>
             <# } #>
-            <div class="module-<?php echo $this->slug; ?> {{ data.icon_size }} {{ data.icon_style }} {{ data.icon_arrangement }}">
+            <div class="module-<?php echo $this->slug; ?> {{ data.icon_size }} {{ data.icon_style }} {{ data.icon_arrangement }} {{ data.icon_position }}">
                 <#  
                 if(data.content_icon){
                 _.each( data.content_icon, function( item ) {
                 _.defaults(item, def);
                 var link_target = item.link_options === 'newtab' ? 'rel="noopener" target="_blank"' : '',
                 link_lightbox_class = item.link_options === 'lightbox' ? ' class="lightbox-builder themify_lightbox"' : '',
-                lightbox_data = item.lightbox_width || item.lightbox_height ? (' data-zoom-config="'+item.lightbox_width+item.lightbox_size_unit_width+'|'+item.lightbox_height+item.lightbox_size_unit_height+'"'): false;
+                lightbox_data = item.lightbox_width || item.lightbox_height ? (' data-zoom-config="'+item.lightbox_width+item.lightbox_width_unit+'|'+item.lightbox_height+item.lightbox_height_unit+'"'): false;
                 #>
                 <div class="module-icon-item">
                     <# if(item.link){ #>
-                    <a href="{{ item.link }}"{{ link_target }}{{ link_lightbox_class }}{{ lightbox_data }}>
-                       <# } #>
-                       <# if (item.icon){ #>
+                        <a href="{{ item.link }}"{{ link_target }}{{ link_lightbox_class }}{{ lightbox_data }}>
+                    <# } 
+                    if (item.icon){ #>
                        <i class="{{ item.icon }} fa ui {{ item.icon_color_bg }}"></i>
-                        <# } #>
-                        <# if (item.label){ #>
+                    <# } 
+                    if (item.label){ #>
                         <span>{{ item.label }}</span>
-                        <# } #>
-                        <# if(item.link){ #>
-                    </a>
+                        <# }  if(item.link){ #>
+                        </a>
                     <# } #>
                 </div>
                 <# });

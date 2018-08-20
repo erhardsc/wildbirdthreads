@@ -4,7 +4,7 @@
 * Description: Grow your business on Facebook! Use this official plugin to help sell more of your products using Facebook. After completing the setup, you'll be ready to create ads that promote your products and you can also create a shop section on your Page where customers can browse your products on Facebook.
 * Author: Facebook
 * Author URI: https://www.facebook.com/
-* Version: 1.8.7
+* Version: 1.9.5
 * Woo: 2127297:0ea4fe4c2d7ca6338f8a322fb3e4e187
 * Text Domain: facebook-for-woocommerce
 * WC requires at least: 3.0.0
@@ -46,6 +46,11 @@ class WC_Facebookcommerce {
       return;
     }
 
+    if (is_admin()) {
+      add_filter('plugin_action_links_'.plugin_basename(__FILE__),
+        array($this, 'add_settings_link'));
+    }
+
     if (WC_Facebookcommerce_Utils::isWoocommerceIntegration()) {
       include_once('woo-includes/woo-functions.php');
       if (!defined('WOOCOMMERCE_FACEBOOK_PLUGIN_SETTINGS_URL')) {
@@ -63,6 +68,16 @@ class WC_Facebookcommerce {
         'add_woocommerce_integration'
       ));
     }
+  }
+
+  public function add_settings_link($links) {
+    $settings = array(
+      'settings' => sprintf(
+        '<a href="%s">%s</a>',
+        admin_url('admin.php?page=wc-settings&tab=integration&section=facebookcommerce'),
+        'Settings')
+    );
+    return array_merge($settings, $links);
   }
 
   public function wp_debug_display_error() {

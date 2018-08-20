@@ -33,45 +33,43 @@ class WC_Facebook_Product_Feed {
 
   public function sync_all_products_using_feed() {
     $start_time = microtime(true);
-    WC_Facebookcommerce_Utils::fblog('Sync all products using feed');
+    $this->log_feed_progress('Sync all products using feed');
 
     if (!is_writable(dirname(__FILE__))) {
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Failure - Sync all products using feed, folder is not writable');
       return false;
     }
 
     if (!$this->generate_productfeed_file()) {
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Failure - Sync all products using feed, feed file not generated');
       return false;
     }
-    WC_Facebookcommerce_Utils::fblog(
-      'Sync all products using feed, feed file generated');
+    $this->log_feed_progress('Sync all products using feed, feed file generated');
 
     if (!$this->feed_id) {
       $this->feed_id = $this->create_feed();
       if (!$this->feed_id) {
-        WC_Facebookcommerce_Utils::fblog(
+        $this->log_feed_progress(
           'Failure - Sync all products using feed, facebook feed not created');
         return false;
       }
-
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Sync all products using feed, facebook feed created');
     } else {
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Sync all products using feed, facebook feed already exists.');
     }
 
 
     $this->upload_id = $this->create_upload($this->feed_id);
     if (!$this->upload_id) {
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Failure - Sync all products using feed, facebook upload not created');
       return false;
     }
-    WC_Facebookcommerce_Utils::fblog(
+    $this->log_feed_progress(
       'Sync all products using feed, facebook upload created');
 
     unlink(dirname(__FILE__) .
@@ -94,17 +92,13 @@ class WC_Facebook_Product_Feed {
         'default_product_percentage' => $default_product_percentage,
       );
     }
-    WC_Facebookcommerce_Utils::fblog('Complete - Sync all products using feed. '
-    , $data);
+    $this->log_feed_progress('Complete - Sync all products using feed.', $data);
     return true;
   }
 
   public function generate_productfeed_file() {
-    WC_Facebookcommerce_Utils::fblog('Generating product feed file');
-    $post_ids = WC_Facebookcommerce_Utils::get_wp_posts(
-      null,
-      null,
-      array('product', 'product_variation'));
+    $this->log_feed_progress('Generating product feed file');
+    $post_ids = $this->get_product_wpid();
     $all_parent_product = array_map(function($post_id) {
         if (get_post_type($post_id) == 'product_variation') {
           return wp_get_post_parent_id($post_id);
@@ -116,7 +110,6 @@ class WC_Facebook_Product_Feed {
   }
 
   public function write_product_feed_file($wp_ids) {
-    $feed_items = array();
     try {
       $feed_file =
         fopen(dirname(__FILE__) . DIRECTORY_SEPARATOR .
@@ -158,6 +151,7 @@ class WC_Facebook_Product_Feed {
     $product_data = $woo_product->prepare_product(null, true);
     $item_group_id = $product_data['retailer_id'];
     // prepare variant column for variable products
+    $product_data['variant'] = '';
     if (
       WC_Facebookcommerce_Utils::is_variation_type($woo_product->get_type())
     ) {
@@ -231,8 +225,8 @@ class WC_Facebook_Product_Feed {
     // log simple product
     if (!isset($product_data['default_product'])) {
       $this->no_default_product_count++;
+      $product_data['default_product'];
     }
-
 
     return
       $product_data['retailer_id'] . ',' .
@@ -263,12 +257,13 @@ class WC_Facebook_Product_Feed {
     $result = $this->fbgraph->create_feed(
       $this->facebook_catalog_id, array('name' => self::FEED_NAME));
     if (is_wp_error($result) || !isset($result['body'])) {
-      WC_Facebookcommerce_Utils::fblog(json_encode($result));
+      $this->log_feed_progress(json_encode($result));
       return null;
     }
-    $feed_id = json_decode($result['body'])->id;
+    $decode_result = WC_Facebookcommerce_Utils::decode_json($result['body']);
+    $feed_id = $decode_result->id;
     if (!$feed_id) {
-      WC_Facebookcommerce_Utils::fblog(
+      $this->log_feed_progress(
         'Response from creating feed not return feed id!');
       return null;
     }
@@ -280,7 +275,7 @@ class WC_Facebook_Product_Feed {
       $facebook_feed_id, dirname(__FILE__) . DIRECTORY_SEPARATOR .
       (self::FACEBOOK_CATALOG_FEED_FILENAME));
     if (is_null($result) || !isset($result['id']) || !$result['id']) {
-      WC_Facebookcommerce_Utils::fblog(json_encode($result));
+      $this->log_feed_progress(json_encode($result));
       return null;
     }
     $upload_id = $result['id'];
@@ -330,16 +325,32 @@ class WC_Facebook_Product_Feed {
    public function is_upload_complete(&$settings) {
      $result = $this->fbgraph->get_upload_status($settings['fb_upload_id']);
      if (is_wp_error($result) || !isset($result['body'])) {
-       WC_Facebookcommerce_Utils::fblog(json_encode($result));
+       $this->log_feed_progress(json_encode($result));
        return 'error';
      }
-     $end_time = json_decode($result['body'])->end_time;
+     $decode_result = WC_Facebookcommerce_Utils::decode_json($result['body'], true);
+     $end_time = $decode_result['end_time'];
      if (isset($end_time)) {
        $settings['upload_end_time'] = $end_time;
        return 'complete';
      } else {
        return 'in progress';
      }
+   }
+
+   // Log progress in local log file and FB.
+   public function log_feed_progress($msg, $object = array()) {
+     WC_Facebookcommerce_Utils::fblog($msg, $object);
+     $msg = empty($object) ? $msg : $msg . json_encode($object);
+     WC_Facebookcommerce_Utils::log($msg);
+   }
+
+   public function get_product_wpid() {
+     $post_ids = WC_Facebookcommerce_Utils::get_wp_posts(
+       null,
+       null,
+       array('product', 'product_variation'));
+     return $post_ids;
    }
 }
 

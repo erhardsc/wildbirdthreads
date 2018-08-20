@@ -152,7 +152,9 @@ var do_maps;
         if (typeof google === 'object' && typeof google.maps === 'object') {
             do_maps(el);
         } else {
-            Themify.LoadAsync('//maps.google.com/maps/api/js?sensor=false&callback=do_maps&key=' + themify_vars.map_key, false, false, false, function () {
+            Themify.LoadAsync('//maps.googleapis.com/maps/api/js', function(){
+                do_maps(el);
+            }, '?v=3.exp&callback=do_maps&key=' + themify_vars.map_key, false, function () {
                 return typeof google === 'object' && typeof google.maps === 'object';
             });
         }

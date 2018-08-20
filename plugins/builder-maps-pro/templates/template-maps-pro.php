@@ -14,16 +14,16 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'map_center' => '',
         'zoom_map' => 4,
         'w_map' => '100', 
-        'unit_w' => 'px',
+        'w_map_unit' => '',
         'h_map' => '', 
         'type_map' => 'ROADMAP',
         'scrollwheel_map' => 'enable',
         'draggable_map' => 'enable',
-		'disable_map_ui' => 'no',
-		'map_polyline' => 'no',
-		'map_polyline_geodesic' => 'yes',
-		'map_polyline_stroke' => 2,
-		'map_polyline_color' => 'ff0000_1',
+        'disable_map_ui' => 'no',
+        'map_polyline' => 'no',
+        'map_polyline_geodesic' => 'yes',
+        'map_polyline_stroke' => 2,
+        'map_polyline_color' => 'ff0000_1',
         'markers' => array(),
         'map_display_type' => 'dynamic',
         'w_map_static' => 500,
@@ -35,9 +35,11 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'title' => '', 
         'address' => '',
         'image' => ''
-	);
-	
+    );
     $fields_args = wp_parse_args($mod_settings, $fields_default);
+    if($fields_args['w_map_unit']===''){
+        $fields_args['w_map_unit'] = isset($mod_settings['unit_w'])?$mod_settings['unit_w']:'px';
+    }
     unset($mod_settings);
     $animation_effect = self::parse_animation_effect($fields_args['animation_effect'], $fields_args);
     $container_class = implode(' ', apply_filters('themify_builder_module_classes', array(
@@ -46,7 +48,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     );
     if ('' !== $fields_args['style_map'] && $fields_args['map_display_type'] === 'dynamic') {
         echo '
-	<script type="text/javascript" defer>
+	<script type="text/javascript">
 		map_pro_styles = window.map_pro_styles || [];
 		map_pro_styles["' . $fields_args['style_map']  . '"] = ' . json_encode(Builder_Maps_Pro::get_instance()->get_map_style($fields_args['style_map']  )) . ';
 	</script>';
@@ -76,6 +78,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     <!-- module maps pro -->
     <div <?php echo self::get_element_attributes($container_props); ?> data-config='<?php  esc_attr_e(base64_encode(json_encode($map_options))); ?>'>
         <?php unset($map_options);?>
+        <!--insert-->
         <?php if ($fields_args['mod_title'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
@@ -85,7 +88,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         <?php if ($fields_args['map_display_type'] === 'dynamic') : ?>
 
             <div class="maps-pro-canvas-container">
-                <div class="maps-pro-canvas map-container" style="width: <?php echo $fields_args['w_map'] .$fields_args['unit_w'] ; ?>; height: <?php echo $fields_args['h_map']?>px;">
+                <div class="maps-pro-canvas map-container" style="width: <?php echo $fields_args['w_map'] .$fields_args['w_map_unit'] ; ?>; height: <?php echo $fields_args['h_map']?>px;">
                 </div>
             </div>
 
@@ -127,7 +130,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
 
             /* Map style */
             if ('' !== $fields_args['style_map']) {
-                $style = Builder_Maps_Pro::get_instance()->get_map_style($style_map);
+                $style = Builder_Maps_Pro::get_instance()->get_map_style($fields_args['style_map']);
                 foreach ($style as $rule) {
                     $args .= '&style=';
                     if (isset($rule->featureType)) {

@@ -14,6 +14,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'icon_size' => '',
         'icon_style' => '',
         'icon_arrangement' => 'icon_horizontal',
+        'icon_position' => 'icon_position_left',
         'content_icon' => array(),
         'animation_effect' => '',
         'css_icon' => ''
@@ -26,11 +27,11 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'module', $module_ID, $fields_args['css_icon'], $animation_effect
                     ), $mod_name, $module_ID, $fields_args)
     );
-    $ui_class = implode(' ', array('module-' . $mod_name, $fields_args['icon_size'], $fields_args['icon_style'], $fields_args['icon_arrangement']));
+    $ui_class = implode(' ', array('module-' . $mod_name, $fields_args['icon_size'], $fields_args['icon_style'], $fields_args['icon_arrangement'],$fields_args['icon_position']));
     ?>
     <!-- module icon -->
     <div id="<?php echo $module_ID; ?>" class="<?php echo $container_class; ?>">
-
+        <!--insert-->
         <?php if ($fields_args['mod_title_icon'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_icon'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
@@ -38,7 +39,6 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         <div class="<?php echo $ui_class; ?>">
             <?php
             $content_icon = array_filter($fields_args['content_icon']);
-            $lightbox_units = array('pixels' => 'px', 'percents' => '%');
             foreach ($content_icon as $content):
                 $content = wp_parse_args($content, array(
                     'label' => '',
@@ -49,15 +49,16 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
                     'link_options' => '',
                     'lightbox_width' => '',
                     'lightbox_height' => '',
-                    'lightbox_size_unit_width' => '',
-                    'lightbox_size_unit_height' => ''
+                    'lightbox_width_unit' => 'px',
+                    'lightbox_height_unit' => 'px'
                 ));
-
+	            $content['lightbox_width_unit'] = $content['lightbox_width_unit'] ? $content['lightbox_width_unit'] : 'px';
+	            $content['lightbox_height_unit'] = $content['lightbox_height_unit'] ? $content['lightbox_height_unit'] : 'px';
                 $link_target = $content['link_options'] === 'newtab' ? ' rel="noopener" target="_blank"' : '';
                 $link_lightbox_class = $content['link_options'] === 'lightbox' ? ' class="lightbox-builder themify_lightbox"' : '';
                 $lightbox_data = !empty($content['lightbox_width']) || !empty($content['lightbox_height']) ? sprintf(' data-zoom-config="%s|%s"'
-                                , $content['lightbox_width'] . $lightbox_units[$content['lightbox_size_unit_width']]
-                                , $content['lightbox_height'] . $lightbox_units[$content['lightbox_size_unit_height']]) : false;
+                                , $content['lightbox_width'] . $content['lightbox_width_unit']
+                                , $content['lightbox_height'] . $content['lightbox_height_unit']) : false;
                 ?>
                 <div class="module-icon-item">
                     <?php if ($content['link']): ?>

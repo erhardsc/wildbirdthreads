@@ -41,11 +41,12 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module box -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php if ($fields_args['mod_title_box'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_box'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
         <div class="<?php echo $inner_container_classes; ?>">
-            <?php echo apply_filters('themify_builder_module_content', $fields_args['content_box']); ?>
+                <?php echo apply_filters('themify_builder_module_content', $fields_args['content_box']); ?>
         </div>
     </div>
     <!-- /module box -->

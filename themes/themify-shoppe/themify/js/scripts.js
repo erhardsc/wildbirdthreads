@@ -88,6 +88,7 @@
 			$panelTop =  $panel.offset().top - 32;
 		}
 
+		var expandableOptionsInit = false;
 		//
 		// Create Tabs
 		// Update address URL when Themify sub tab is clicked
@@ -95,6 +96,33 @@
 			var el = e.type === 'tabscreate' ? window.location : ui.newTab.find('a')[0];
 			if ( 'replaceState' in history ) {
 				history.replaceState( null, null, el.hash || null );
+			}
+			if (e.type === 'tabscreate' && !expandableOptionsInit) {
+				expandableOptionsInit = true;
+				var subtabs = $('#themify div#setting div.subtab');
+				subtabs.each(function() {
+					var $this = $(this),
+					fieldset = $this.find('fieldset');
+					if (fieldset.length > 2) {
+						fieldset.children('.themify_panel_fieldset_wrap').hide();
+					} else {
+						fieldset.find('legend').addClass('themify_panel_fieldset_nocollapse');
+					}
+				});
+				subtabs.find('legend:not(.themify_panel_fieldset_nocollapse)').on('click', function() {
+					var $this = $(this),
+						$icon = $this.children('i');
+					if ($icon.hasClass('ti-plus')) {
+						$this.siblings().slideDown( "fast", function() {
+							$icon.removeClass('ti-plus').addClass('ti-minus');
+						});
+					} else {
+						$this.siblings().slideUp( "fast", function() {
+							$icon.removeClass('ti-minus').addClass('ti-plus');
+						});
+					}
+				});
+				
 			}
 		};
 
@@ -208,7 +236,7 @@
 			$.ajax( {
 				url : 'https://themify.me/public-api/update-message/index.txt',
 				success : function( message ) {
-					$( 'p.update:has(a.upgrade-framework, a.upgrade-theme)' ).append( $( message ).wrap( '<div class="updater-message"></div>' ) );
+					$( '<span class="updater-message"></span>' ).text( message ).appendTo( 'p.update:has(a.upgrade-framework, a.upgrade-theme)' );
 				}
 			} );
 		}

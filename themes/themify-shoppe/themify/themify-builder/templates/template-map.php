@@ -16,9 +16,9 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'zoom_map' => 15,
         'w_map' => '100',
         'w_map_static' => 500,
-        'unit_w' => '%',
+        'w_map_unit' => 'px',
         'h_map' => '300',
-        'unit_h' => 'px',
+        'h_map_unit' => 'px',
         'b_style_map' => 'solid',
         'b_width_map' => '',
         'b_color_map' => '',
@@ -36,6 +36,8 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         $mod_settings['address_map'] = preg_replace('/\s+/', ' ', trim($mod_settings['address_map']));
     }
     $fields_args = wp_parse_args($mod_settings, $fields_default);
+    $fields_args['w_map_unit'] = isset($fields_args['unit_w'])?$fields_args['unit_w']:$fields_args['w_map_unit'];
+    $fields_args['h_map_unit'] = isset($fields_args['unit_h'])?$fields_args['unit_h']:$fields_args['h_map_unit'];
     unset($mod_settings);
     $animation_effect = self::parse_animation_effect($fields_args['animation_effect'], $fields_args);
     $info_window_map = $fields_args['info_window_map'] === '' ? sprintf('<b>%s</b><br/><p>%s</p>', __('Address', 'themify'), $fields_args['address_map']) : $fields_args['info_window_map'];
@@ -68,7 +70,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module map -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php if ($fields_args['mod_title_map'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_map'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
@@ -88,8 +90,14 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
             <img style="<?php echo esc_attr($style); ?>" src="//maps.googleapis.com/maps/api/staticmap?<?php echo $args; ?>" />
 
         <?php elseif ($fields_args['address_map'] !== '' || $fields_args['latlong_map'] !== ''):
-                $style .= 'width:' . $fields_args['w_map'] . $fields_args['unit_w'] . ';';
-                $style .= 'height:' . $fields_args['h_map'] . $fields_args['unit_h'] . ';';
+                if($fields_args['w_map_unit']==-1){
+                    $fields_args['w_map_unit'] = 'px';
+                }
+                $style .= 'width:' . $fields_args['w_map'] . $fields_args['w_map_unit'] . ';';
+                if($fields_args['h_map_unit']==-1){
+                    $fields_args['h_map_unit'] = 'px';
+                }
+                $style .= 'height:' . $fields_args['h_map'] . $fields_args['h_map_unit'] . ';';
                 $data['address'] = $fields_args['address_map'] !== '' ? $fields_args['address_map'] : $fields_args['latlong_map'];;
                 $data['zoom'] = $fields_args['zoom_map'];
                 $data['type'] = $fields_args['type_map'];

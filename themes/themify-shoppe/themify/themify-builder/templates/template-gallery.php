@@ -31,7 +31,23 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
         'gallery_per_page' => '',
         'gallery_image_title' => false,
         'gallery_exclude_caption' => false,
-        'layout_masonry' => ''
+        'layout_masonry' => '',
+		'visible_opt_slider' => '',
+        'mob_visible_opt_slider' => '',
+        'auto_scroll_opt_slider' => 0,
+        'speed_opt_slider' => '',
+        'effect_slider' => 'scroll',
+        'pause_on_hover_slider' => 'resume',
+        'wrap_slider' => 'yes',
+        'show_nav_slider' => 'yes',
+        'show_arrow_slider' => 'yes',
+        'show_arrow_buttons_vertical' => '',
+        'unlink_feat_img_slider'=>'no',
+        'unlink_post_title_slider'=>'no',
+        'left_margin_slider' => '',
+        'right_margin_slider' => '',
+        'animation_effect' => '',
+        'height_slider' => 'variable'
     );
     $fields_args = wp_parse_args($mod_settings, $fields_default);
     unset($mod_settings);
@@ -73,9 +89,14 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module gallery -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php if ($fields_args['mod_title_gallery'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_gallery'], $fields_args). $fields_args['after_title']; ?>
         <?php endif; ?>
+
+		<?php if( ! empty( $masonry_class ) && $fields_args['layout_gallery'] === 'grid' ): ?>
+			<div class="module-gallery-gutter"></div>
+		<?php endif; ?>
 
         <?php
         if (!empty($fields_args['gallery_images'])) {

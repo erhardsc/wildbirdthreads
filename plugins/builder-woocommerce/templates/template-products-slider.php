@@ -19,17 +19,18 @@ $speed = $settings['speed_opt_slider']==='slow'?4:($settings['speed_opt_slider']
 ?>
 
 <!-- module products slider -->
-<div id="<?php echo $module_ID; ?>-loader" class="themify_builder_slider_loader" style="<?php echo !empty($settings['img_height_products']) ? 'height:'.$settings['img_height_products'].'px;' : 'height:50px;'; ?>"></div>
+<div id="<?php echo $module_ID; ?>-loader" class="tb_slider_loader" style="<?php echo !empty($settings['img_height_products']) ? 'height:'.$settings['img_height_products'].'px;' : 'height:50px;'; ?>"></div>
 <div id="<?php echo $module_ID; ?>" class="<?php echo esc_attr( $container_class ); ?>">
 	<div class="woocommerce">
 
 		<?php if ( $settings['mod_title_products'] !== '' ): ?>
-			<?php echo $settings['before_title'] . apply_filters( 'themify_builder_module_title', $settings['mod_title_products'] , $fields_args )  . $settings['after_title']; ?>
+			<?php echo $settings['before_title'] . apply_filters( 'themify_builder_module_title', $settings['mod_title_products'] , $settings )  . $settings['after_title']; ?>
 		<?php endif; ?>
 
 		<ul class="themify_builder_slider" 
 			data-id="<?php echo $module_ID; ?>" 
-			data-visible="<?php echo $settings['visible_opt_slider']; ?>" 
+			data-visible="<?php echo $settings['visible_opt_slider']; ?>"
+			data-mob-visible="<?php echo $settings['mob_visible_opt_slider'] ?>"
 			data-scroll="<?php echo $settings['scroll_opt_slider']; ?>" 
 			data-auto-scroll="<?php echo $settings['auto_scroll_opt_slider']; ?>"
 			data-speed="<?php echo $speed; ?>"

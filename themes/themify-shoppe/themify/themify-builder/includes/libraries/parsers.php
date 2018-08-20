@@ -17,30 +17,29 @@ class WXR_Parser {
 			$result = $parser->parse( $file );
 
 			// If SimpleXML succeeds or this is an invalid WXR file then return the results
-			if ( ! is_wp_error( $result ) || 'SimpleXML_parse_error' != $result->get_error_code() )
+			if ( ! is_wp_error( $result ) || 'SimpleXML_parse_error' !== $result->get_error_code() )
 				return $result;
 		} else if ( extension_loaded( 'xml' ) ) {
 			$parser = new WXR_Parser_XML;
 			$result = $parser->parse( $file );
 
 			// If XMLParser succeeds or this is an invalid WXR file then return the results
-			if ( ! is_wp_error( $result ) || 'XML_parse_error' != $result->get_error_code() )
+			if ( ! is_wp_error( $result ) || 'XML_parse_error' !== $result->get_error_code() )
 				return $result;
 		}
 
 		// We have a malformed XML file, so display the error and fallthrough to regex
 		if ( isset($result) && defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
 			echo '<pre>';
-			if ( 'SimpleXML_parse_error' == $result->get_error_code() ) {
+			if ( 'SimpleXML_parse_error' === $result->get_error_code() ) {
 				foreach  ( $result->get_error_data() as $error )
 					echo esc_html( $error->line . ':' . $error->column ) . ' ' . esc_html( $error->message ) . "\n";
-			} else if ( 'XML_parse_error' == $result->get_error_code() ) {
+			} else if ( 'XML_parse_error' === $result->get_error_code() ) {
 				$error = $result->get_error_data();
 				echo wp_kses_post( $error[0] . ':' . $error[1] ) . ' ' . esc_html( $error[2] );
 			}
-			echo '</pre>';
-			echo '<p><strong>' . __( 'There was an error when reading this WXR file', 'themify' ) . '</strong><br />';
-			echo __( 'Details are shown above. The importer will now try again with a different parser...', 'themify' ) . '</p>';
+			echo '</pre>','<p><strong>' . __( 'There was an error when reading this WXR file', 'themify' ) . '</strong><br />',
+                            __( 'Details are shown above. The importer will now try again with a different parser...', 'themify' ) . '</p>';
 		}
 
 		// use regular expressions if nothing else available or this is bad XML
@@ -487,7 +486,7 @@ class WXR_Parser_Regex {
 	function get_tag( $string, $tag ) {
 		preg_match( "|<$tag.*?>(.*?)</$tag>|is", $string, $return );
 		if ( isset( $return[1] ) ) {
-			if ( substr( $return[1], 0, 9 ) == '<![CDATA[' ) {
+			if ( substr( $return[1], 0, 9 ) === '<![CDATA[' ) {
 				if ( strpos( $return[1], ']]]]><![CDATA[>' ) !== false ) {
 					preg_match_all( '|<!\[CDATA\[(.*?)\]\]>|s', $return[1], $matches );
 					$return = '';

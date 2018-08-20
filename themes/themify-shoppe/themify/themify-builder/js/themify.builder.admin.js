@@ -37,7 +37,7 @@
 
 		$(spinner).appendTo($('body'));
 
-		$('.themify_builder_switch_btn').on('click', function(event){
+		$('.tb_switch_btn').on('click', function(event){
 			event.preventDefault();
 			TBuilderAdmin.savePost(TBuilderAdmin.switchToBuilder);
 		});

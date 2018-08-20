@@ -32,6 +32,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
 
     <!-- module widgetized -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php
         if ($fields_args['mod_title_widgetized'] !== '') {
             echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_widgetized'], $fields_args). $fields_args['after_title'];

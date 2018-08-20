@@ -550,6 +550,15 @@ ADMIN BAR
 	overflow-y: hidden;
 }
 
+@media screen and (max-width:1024px) {
+	.footer-widgets .col4-1 {
+		width: 48.4%;
+	}
+	.footer-widgets .col4-1:nth-child(2n+1) {
+		margin-left: 0;
+		clear: left;
+	}
+}
 @media screen and (max-width: 1200px) {
 	
 	body {
@@ -916,15 +925,6 @@ ADMIN BAR
 	}
 	.footer-block .footer-widgets-wrap {
 		max-width: 100%;
-	}
-	#footerwrap .footer-widgets .col4-1 {
-		width: 48.4% !important;
-		margin-left: 3.2% !important;
-		float: left !important;
-	}
-	#footerwrap .footer-widgets .col4-1:nth-child(2n+1) {
-		margin-left: 0 !important;
-		clear: left;
 	}
 	
 	/*

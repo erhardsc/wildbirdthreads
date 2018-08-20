@@ -7,6 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class TB_Callout_Module extends Themify_Builder_Component_Module {
 	function __construct() {
+                self::$texts['heading_callout'] =__('Callout Heading', 'themify');
+                self::$texts['text_callout'] =__('Callout Text', 'themify');
+                self::$texts['action_btn_text_callout'] =__('Action Button Text', 'themify');
 		parent::__construct(array(
 			'name' => __('Callout', 'themify'),
 			'slug' => 'callout'
@@ -23,7 +26,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
                 }
 		return $text;
 	}
-
+        
 	public function get_options() {
                 $appearance = Themify_Builder_Model::get_appearance();
                 $colors = Themify_Builder_Model::get_colors();
@@ -45,10 +48,10 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
                                 'mode'=>'sprite',
 				'label' => __('Callout Style', 'themify'),
 				'options' => array(
-					array('img' => 'callout-button-right', 'value' => 'button-right', 'label' => __('Button Right', 'themify')),
-					array('img' => 'callout-button-left', 'value' => 'button-left', 'label' => __('Button Left', 'themify')),
-					array('img' => 'callout-button-bottom', 'value' => 'button-bottom', 'label' => __('Button Bottom', 'themify')),
-					array('img' => 'callout-button-bottom-center', 'value' => 'button-bottom-center', 'label' => __('Button Bottom Center', 'themify'))
+					array('img' => 'callout_button_right', 'value' => 'button-right', 'label' => __('Button Right', 'themify')),
+					array('img' => 'callout_button_left', 'value' => 'button-left', 'label' => __('Button Left', 'themify')),
+					array('img' => 'callout_button_bottom', 'value' => 'button-bottom', 'label' => __('Button Bottom', 'themify')),
+					array('img' => 'callout_button_bottom_center', 'value' => 'button-bottom-center', 'label' => __('Button Bottom Center', 'themify'))
 				),
 				'render_callback' => array(
 					'binding' => 'live'
@@ -57,7 +60,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'heading_callout',
 				'type' => 'text',
-				'label' => __('Callout Heading', 'themify'),
+				'label' =>self::$texts ['heading_callout'],
 				'class' => 'xlarge',
 				'render_callback' => array(
                                     'binding' => 'live',
@@ -67,7 +70,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'text_callout',
 				'type' => 'textarea',
-				'label' => __('Callout Text', 'themify'),
+				'label' => self::$texts['text_callout'],
 				'class' => 'fullwidth',
 				'render_callback' => array(
                                     'binding' => 'live'
@@ -77,7 +80,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 				'id' => 'color_callout',
 				'type' => 'layout',
                                 'mode'=>'sprite',
-                                'class'=>'tb-colors',
+                                'class'=>'tb_colors',
 				'label' => __('Callout Color', 'themify'),
 				'options' =>$colors,
 				'render_callback' => array(
@@ -94,6 +97,10 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 				)
 			),
 			array(
+				'type' => 'separator',
+				'meta' => array( 'html' => '<hr/>')
+			),
+			array(
 				'id' => 'action_btn_link_callout',
 				'type' => 'text',
 				'label' => __('Action Button Link', 'themify'),
@@ -104,13 +111,13 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 			),
 			array(
 				'id' => 'open_link_new_tab_callout',
-				'type' => 'select',
-				'label' => __('Open link in a new tab', 'themify'),
+				'type' => 'radio',
+				'label' => __('Open Link', 'themify'),
 				'options' => array(
-                                        ''=>'',
-					'yes' => __('Yes', 'themify'),
-					'no' => __('No', 'themify')
+					'no' => __('Same Window', 'themify'),
+					'yes' => __('New Window', 'themify')
 				),
+                                'default'=>'no',
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -118,7 +125,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'action_btn_text_callout',
 				'type' => 'text',
-				'label' => __('Action Button Text', 'themify'),
+				'label' => self::$texts ['action_btn_text_callout'],
 				'class' => 'medium',
 				'render_callback' => array(
                                     'binding' => 'live',
@@ -128,7 +135,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'action_btn_color_callout',
 				'type' => 'layout',
-                                'class'=>'tb-colors',
+                                'class'=>'tb_colors',
                                 'mode'=>'sprite',
 				'label' => __('Action Button Color', 'themify'),
 				'options' => $colors,
@@ -155,7 +162,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling', 'themify') ),
+				'help' => sprintf( '<br/><small>%s</small>', __('Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify') ),
 				'render_callback' => array(
 					'binding' => 'live'
 				)
@@ -181,9 +188,11 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
                         self::get_image('.module-callout'),
                         self::get_color('.module-callout', 'background_color',__( 'Background Color', 'themify' ),'background-color'),
 						self::get_repeat('.module-callout'),
+						self::get_position('.module-callout'),
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(array( '.module-callout', '.module-callout .callout-button' )),
+                        self::get_element_font_weight(array( '.module-callout', '.module-callout .callout-button' )),
                         self::get_color(array( '.module-callout', '.module-callout h1', '.module-callout h2', '.module-callout h3', '.module-callout h4', '.module-callout h5', '.module-callout h6', '.module-callout .callout-button' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-callout'),
                         self::get_line_height('.module-callout'),
@@ -191,6 +200,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-callout'),
                         self::get_text_transform('.module-callout'),
                         self::get_font_style('.module-callout'),
+                        self::get_text_decoration('.module-callout','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-callout .callout-button a','link_color'),
@@ -208,14 +218,29 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
                         self::get_border('.module-callout')
 		);
 
+		$callout_title = array(
+			// Font
+                        self::get_seperator('font',__('Font', 'themify')),
+                        self::get_font_family('.module-callout .callout-heading','font_family_alert_title'),
+                        self::get_element_font_weight('.module-callout .callout-heading','font_weight_alert_title'),
+                        self::get_color('.module-callout .callout-heading','font_color_alert_title',__('Font Color', 'themify')),
+                        self::get_color('.module-callout .callout-heading:hover','font_color_alert_title_hover',__('Color Hover', 'themify')),
+                        self::get_font_size('.module-callout .callout-heading','font_size_alert_title'),
+                        self::get_line_height('.module-callout .callout-heading','line_height_alert_title'),
+                        self::get_letter_spacing('.module-callout .callout-heading', 'letter_spacing_alert_title'),
+                        self::get_text_transform('.module-callout .callout-heading', 'text_transform_title'),
+                        self::get_font_style('.module-callout .callout-heading', 'font_style_title','font_title_bold')
+		);
+
 		$callout_button = array(
 			// Background
                         self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
                         self::get_color('.module-callout .callout-button a', 'background_color_button',__( 'Background Color', 'themify' ),'background-color'),
-			self::get_color('.module-callout .callout-button a:hover', 'background_color_button_hover',__( 'Background Color', 'themify' ),'background-color'),
+						self::get_color('.module-callout .callout-button a:hover', 'b_c_b_h',__( 'Hover Background Color', 'themify' ),'background-color'),
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family('.module-callout .callout-button a','font_family_button'),
+                        self::get_element_font_weight('.module-callout .callout-button a','font_weight_button'),
                         self::get_color('.module-callout .callout-button a','font_color_button',__('Font Color', 'themify')),
                         self::get_color('.module-callout .callout-button a:hover','font_color_button_hover',__('Color Hover', 'themify')),
                         self::get_font_size('.module-callout .callout-button a','font_size_button'),
@@ -228,12 +253,16 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 				'id' => 'module-styling',
 				'tabs' => array(
 					'general' => array(
-                                            'label' => __('General', 'themify'),
-                                            'fields' => $general
+						'label' => __('General', 'themify'),
+						'fields' => $general
 					),
-                                        'module-title' => array(
+					'module-title' => array(
 						'label' => __( 'Module Title', 'themify' ),
 						'fields' => $this->module_title_custom_style()
+					),
+					'callout_title' => array(
+						'label' => __('Callout Title', 'themify'),
+						'fields' => $callout_title
 					),
 					'button' => array(
 						'label' => __('Callout Button', 'themify'),
@@ -248,7 +277,8 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 	protected function _visual_template() {
 		$module_args = $this->get_module_args(); ?>
 		<div class="module module-<?php echo $this->slug ; ?> ui {{ data.layout_callout }} {{ data.color_callout }} {{ data.css_callout }} {{ data.background_repeat }} <# ! _.isUndefined( data.appearance_callout ) ? print( data.appearance_callout.split('|').join(' ') ) : ''; #>">
-			<# if ( data.mod_title_callout ) { #>
+			<!--insert-->
+                        <# if ( data.mod_title_callout ) { #>
 			<?php echo $module_args['before_title']; ?>{{{ data.mod_title_callout }}}<?php echo $module_args['after_title']; ?>
 			<# } #>
 			
@@ -263,7 +293,7 @@ class TB_Callout_Module extends Themify_Builder_Component_Module {
 						<a href="{{ data.action_btn_link_callout }}" class="ui builder_button {{ data.action_btn_color_callout }} <# ! _.isUndefined( data.action_btn_appearance_callout ) ? print( data.action_btn_appearance_callout.split('|').join(' ') ) : ''; #>">
 							{{{ data.action_btn_text_callout }}}
 						</a>
-					</div>
+                                </div>
 				<# } #>
 			</div>			
 		</div>

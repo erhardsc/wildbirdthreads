@@ -31,12 +31,15 @@ $ThemifyBuilder->in_the_loop = true;
 ?>
 <!-- module template_part -->
 <div <?php echo self::get_element_attributes($container_props); ?>>
-    <?php if ($fields_args['mod_title_layout_part'] !== ''): ?>
-        <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_layout_part'], $fields_args). $fields_args['after_title']; ?>
-    <?php endif; ?>
-    <?php if ($fields_args['selected_layout_part'] !== ''): ?>
-        <?php echo do_shortcode('[themify_layout_part slug="' . $fields_args['selected_layout_part'] . '"]'); ?>
-    <?php endif; ?>
+    <!--insert-->
+    <?php 
+    if ($fields_args['mod_title_layout_part'] !== ''){
+        echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_layout_part'], $fields_args). $fields_args['after_title']; 
+    }
+    if ($fields_args['selected_layout_part'] !== ''){
+        echo do_shortcode('[themify_layout_part slug="' . $fields_args['selected_layout_part'] . '"]'); 
+    }
+    ?>
 </div>
 <!-- /module template_part -->
 <?php

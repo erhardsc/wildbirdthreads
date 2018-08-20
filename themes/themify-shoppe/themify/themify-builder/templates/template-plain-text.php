@@ -29,6 +29,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module plain text -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
+        <!--insert-->
         <?php echo $fields_args['plain_text'] !== '' ? do_shortcode($fields_args['plain_text']) : ''; ?>
     </div>
     <!-- /module plain text -->

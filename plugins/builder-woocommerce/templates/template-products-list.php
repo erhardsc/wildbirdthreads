@@ -27,7 +27,7 @@ if($animation_effect!==''){
 	<div class="woocommerce">
 
 		<?php if ( $settings['mod_title_products'] !== '' ): ?>
-			<?php echo $settings['before_title'] . apply_filters( 'themify_builder_module_title', $settings['mod_title_products'], $fields_args ) . $settings['after_title']; ?>
+			<?php echo $settings['before_title'] . apply_filters( 'themify_builder_module_title', $settings['mod_title_products'], $settings ) . $settings['after_title']; ?>
 		<?php endif; ?>
 
 		<?php do_action( 'themify_builder_before_template_content_render' ); ?>
@@ -97,7 +97,7 @@ if($animation_effect!==''){
 						} // product add to cart
 						?>
 
-						<?php edit_post_link(__('Edit', 'themify'), '[', ']'); ?>
+						<?php edit_post_link(__('Edit', 'themify'), '<span class="edit-button">[', ']</span>'); ?>
 
 					</div><!-- /.post-content -->
 					

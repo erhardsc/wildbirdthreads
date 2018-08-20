@@ -6,6 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 	function __construct() {
+                self::$texts['title_service_menu'] = __('Menu Title', 'themify');
+                self::$texts['description_service_menu'] =  __('Description', 'themify');
+                self::$texts['price_service_menu'] =  __('Price', 'themify');
+                self::$texts['highlight_text_service_menu'] = __('Highlight Text', 'themify');
 		parent::__construct(array(
 			'name' => __('Service Menu', 'themify'),
 			'slug' => 'service-menu'
@@ -23,17 +27,18 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'label' => __('Menu Style', 'themify'),
                                 'mode'=>'sprite',
 				'options' => array(
-					array('img' => 'image-top', 'value' => 'image-top', 'label' => __('Image Top', 'themify')),
-					array('img' => 'image-left', 'value' => 'image-left', 'label' => __('Image Left', 'themify')),
-					array('img' => 'image-right', 'value' => 'image-right', 'label' => __('Image Right', 'themify')),
-					array('img' => 'image-overlay', 'value' => 'image-overlay', 'label' => __('Image Overlay', 'themify')),
-					array('img' => 'image-center', 'value' => 'image-center', 'label' => __('Centered Image', 'themify'))
+					array('img' => 'image_top', 'value' => 'image-top', 'label' => __('Image Top', 'themify')),
+					array('img' => 'image_left', 'value' => 'image-left', 'label' => __('Image Left', 'themify')),
+					array('img' => 'image_center', 'value' => 'image-center', 'label' => __('Image Center', 'themify')),
+					array('img' => 'image_right', 'value' => 'image-right', 'label' => __('Image Right', 'themify')),
+					array('img' => 'image_overlay', 'value' => 'image-overlay', 'label' => __('Image Overlay', 'themify')),
+					array('img' => 'image_horizontal', 'value' => 'image-horizontal', 'label' => __('Horizontal Image', 'themify'))
 				)
 			),
 			array(
 				'id' => 'title_service_menu',
 				'type' => 'text',
-				'label' => __('Menu Title', 'themify'),
+				'label' => self::$texts['title_service_menu'],
 				'class' => 'large',
                                 'render_callback' => array(
                                     'live-selector'=>'.tb-menu-title'
@@ -42,7 +47,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'description_service_menu',
 				'type' => 'textarea',
-				'label' => __('Description', 'themify'),
+				'label' =>self::$texts['description_service_menu'],
 				'class' => 'fullwidth',
                                 'render_callback' => array(
                                     'live-selector'=>'.tb-menu-description'
@@ -51,7 +56,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 			array(
 				'id' => 'price_service_menu',
 				'type' => 'text',
-				'label' => __('price', 'themify'),
+				'label' => self::$texts['price_service_menu'],
 				'class' => 'small',
                                 'render_callback' => array(
                                     'live-selector'=>'.tb-menu-price'
@@ -133,7 +138,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'options' => array(
 					array( 'name' => 'zoom', 'value' => __( 'Show zoom icon', 'themify' ) )
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-lightbox tb-group-element-newtab'
+				'wrap_with_class' => 'tb_group_element tb_group_element_lightbox tb_group_element_newtab'
 			),
 			array(
 				'id' => 'lightbox_size',
@@ -173,7 +178,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 						'default' => 'pixels'
 					)
 				),
-				'wrap_with_class' => 'tb-group-element tb-group-element-lightbox'
+				'wrap_with_class' => 'tb_group_element tb_group_element_lightbox'
 			),
 
 			array(
@@ -196,7 +201,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'id' => 'highlight_text_service_menu',
 				'type' => 'text',
 				'label' => '&nbsp;',
-				'after' => __('Highlight Text', 'themify'),
+				'after' => self::$texts['highlight_text_service_menu'],
 				'class' => 'large',
                                 'render_callback' => array(
                                     'live-selector'=>'.tb-highlight-text'
@@ -207,7 +212,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'type' => 'layout',
 				'label' => '&nbsp;',
                                 'mode'=>'sprite',
-                                'class'=>'tb-colors',
+                                'class'=>'tb_colors',
 				'options' => $colors
 			),
 			// Additional CSS
@@ -220,7 +225,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'type' => 'text',
 				'label' => __('Additional CSS Class', 'themify'),
 				'class' => 'large exclude-from-reset-field',
-				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling', 'themify' ) )
+				'help' => sprintf( '<br/><small>%s</small>', __( 'Add additional CSS class(es) for custom styling (<a href="https://themify.me/docs/builder#additional-css-class" target="_blank">learn more</a>).', 'themify' ) )
 			)
 		);
 	}
@@ -248,6 +253,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify')),
                         self::get_font_family(array( '.module-service-menu .tb-image-content', '.module-service-menu .tb-image-title', '.module-service-menu .tb-image-title a' )),
+                        self::get_element_font_weight(array( '.module-service-menu .tb-image-content', '.module-service-menu .tb-image-title', '.module-service-menu .tb-image-title a' )),
                         self::get_color(array( '.module-service-menu .tb-image-content', '.module-service-menu .tb-image-title', '.module-service-menu .tb-image-title a', '.module-service-menu h1', '.module-service-menu h2', '.module-service-menu h3:not(.module-title)', '.module-service-menu h4', '.module-service-menu h5', '.module-service-menu h6' ),'font_color',__('Font Color', 'themify')),
                         self::get_font_size('.module-service-menu .tb-image-content'),
                         self::get_line_height('.module-service-menu .tb-image-content'),
@@ -255,6 +261,7 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
                         self::get_text_align('.module-service-menu .tb-image-content'),
                         self::get_text_transform('.module-service-menu .tb-image-content'),
                         self::get_font_style('.module-service-menu .tb-image-content'),
+                        self::get_text_decoration('.module-service-menu .tb-image-content','text_decoration_regular'),
 			// Link
                         self::get_seperator('link',__('Link', 'themify')),
                         self::get_color( '.module-service-menu a','link_color'),
@@ -275,16 +282,20 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-service-menu .tb-menu-title','font_family_title'),
+                        self::get_element_font_weight('.module-service-menu .tb-menu-title','font_weight_title'),
                         self::get_color('.module-service-menu .tb-menu-title','font_color_title',__('Font Color', 'themify')),
-                        self::get_color('.module-service-menu .tb-menu-title:hover','font_color_title_hover',__('Color Hover', 'themify')),
                         self::get_font_size('.module-service-menu .tb-menu-title','font_size_title'),
-                        self::get_line_height('.module-service-menu .tb-menu-title','line_height_title')
+                        self::get_line_height('.module-service-menu .tb-menu-title','line_height_title'),
+						self::get_letter_spacing('.module-service-menu .tb-menu-title', 'letter_spacing_title'),
+						self::get_text_transform('.module-service-menu .tb-menu-title', 'text_transform_title'),
+						self::get_font_style('.module-service-menu .tb-menu-title', 'font_style_title','font_title_bold'),
 		);
 
 		$menu_description = array(
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-service-menu .tb-menu-description','font_family_description'),
+                        self::get_element_font_weight('.module-service-menu .tb-menu-description','font_weight_description'),
                         self::get_color('.module-service-menu .tb-menu-description','font_color_description',__('Font Color', 'themify')),
                         self::get_font_size('.module-service-menu .tb-menu-description','font_size_description'),
                         self::get_line_height('.module-service-menu .tb-menu-description','line_height_description')
@@ -294,18 +305,32 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-service-menu .tb-menu-price','font_family_price'),
+                        self::get_element_font_weight('.module-service-menu .tb-menu-price','font_weight_price'),
                         self::get_color('.module-service-menu .tb-menu-price','font_color_price',__('Font Color', 'themify')),
                         self::get_font_size('.module-service-menu .tb-menu-price','font_size_price'),
-                        self::get_line_height('.module-service-menu .tb-menu-price','line_height_price')
+                        self::get_line_height('.module-service-menu .tb-menu-price','line_height_price'),
+			// Margin
+						self::get_heading_margin_multi_field( '.module-service-menu .tb-menu-price','', 'top','t_price' ),
+						self::get_heading_margin_multi_field( '.module-service-menu .tb-menu-price','', 'bottom','b_price' ),
 		);
 
 		$highlight_text = array(
+			// Background
+                        self::get_seperator('image_bacground',__( 'Background', 'themify' ),false),
+                        self::get_color('.module-service-menu .tb-highlight-text', 'background_color_highlight_text',__( 'Background Color', 'themify' ),'background-color'),
 			// Font
                         self::get_seperator('font',__('Font', 'themify'),false),
                         self::get_font_family('.module-service-menu .tb-highlight-text','font_family_highlight_text'),
+                        self::get_element_font_weight('.module-service-menu .tb-highlight-text','font_weight_highlight_text'),
                         self::get_color('.module-service-menu .tb-highlight-text','font_color_highlight_text',__('Font Color', 'themify')),
                         self::get_font_size('.module-service-menu .tb-highlight-text','font_size_highlight_text'),
-                        self::get_line_height('.module-service-menu .tb-highlight-text','line_height_highlight_text')
+                        self::get_line_height('.module-service-menu .tb-highlight-text','line_height_highlight_text'),
+            // Padding
+						self::get_seperator('padding', __('Padding', 'builder-masked-image')),
+						self::get_padding('.module-service-menu .tb-highlight-text', 'h_t_p'),
+            // Margin
+						self::get_seperator('margin', __('Margin', 'builder-masked-image')),
+						self::get_margin('.module-service-menu .tb-highlight-text', 'h_t_m'),
 		);
 
 		return array(
@@ -314,8 +339,8 @@ class TB_Service_Menu_Module extends Themify_Builder_Component_Module {
 				'id' => 'module-styling',
 				'tabs' => array(
 					'general' => array(
-                                            'label' => __('General', 'themify'),
-                                            'fields' => $general
+						'label' => __('General', 'themify'),
+						'fields' => $general
 					),
 					'title' => array(
 						'label' => __('Menu Title', 'themify'),

@@ -46,7 +46,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
     ?>
     <!-- module accordion -->
     <div <?php echo self::get_element_attributes($container_props); ?>>
-
+        <!--insert-->
         <?php if ($fields_args['mod_title_accordion'] !== ''): ?>
             <?php echo $fields_args['before_title'] . apply_filters('themify_builder_module_title', $fields_args['mod_title_accordion'], $fields_args) . $fields_args['after_title']; ?>
         <?php endif; ?>
@@ -71,7 +71,7 @@ if (TFCache::start_cache($mod_name, self::$post_id, array('ID' => $module_ID))):
                     </div>
                     <div class="accordion-content clearfix <?php if ($content['default_accordion'] !== 'open'): ?> default-closed<?php endif; ?>">
                         <?php
-                        if (!empty($content['text_accordion'])) {
+                        if ($content['text_accordion']!=='') {
                             echo apply_filters('themify_builder_module_content', $content['text_accordion']);
                         }
                         ?>

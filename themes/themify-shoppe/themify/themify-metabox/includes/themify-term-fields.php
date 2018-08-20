@@ -57,7 +57,7 @@ class Themify_Term_Meta {
 			if ( isset( $field['hide'] ) ) {
 				$data_hide = is_array( $field['hide'] ) ? implode( ' ', $field['hide'] ) : $field['hide'];
 			}
-			if( isset($field['default_toggle']) && $field['default_toggle'] == 'hidden' ){
+			if( isset($field['default_toggle']) && $field['default_toggle'] === 'hidden' ){
 				$ext_attr = 'style="display:none;"';
 			}
 			if( isset($field['enable_toggle']) && $field['enable_toggle'] == true ) {

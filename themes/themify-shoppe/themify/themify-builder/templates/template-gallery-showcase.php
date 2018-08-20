@@ -29,11 +29,11 @@ if ( is_object( $settings['gallery_images'][0] ) ) :
 				<div class="gallery-showcase-title">
 					<?php
 						! empty( $settings['gallery_image_title'] )
-							&& printf( '<strong id="gallery-showcase-title">%s</strong>'
+							&& printf( '<strong class="gallery-showcase-title">%s</strong>'
 								, esc_attr( $title ) );
-
+					
 						$settings['gallery_exclude_caption'] !== 'yes'
-							&& printf( '<span id="gallery-showcase-caption">%s</span>'
+							&& printf( '<span class="gallery-showcase-caption">%s</span>'
 								, esc_attr( $caption ) );
 					?>
 				</div>

@@ -5,11 +5,59 @@ class Themify_Builder_Component_Subrow extends Themify_Builder_Component_Base {
 		return 'subrow';
 	}
         
-        public function get_label(){
-            return __('Sub Row Styling', 'themify');
-        }
-        
-        
+    public function get_label(){
+        return __('Sub Row Styling', 'themify');
+    }
+
+	private function get_form_settings() {
+		$row_form_settings = array(
+			'styling' => array(
+				'name' => esc_html__( 'Sub Row Styling', 'themify' ),
+				'options' => $this->get_styling()
+			)
+		);
+		return apply_filters( 'themify_builder_subrow_lightbox_form_settings', $row_form_settings );
+	}
+
+	protected function _form_template() {
+		$subrow_form_settings = $this->get_form_settings();
+		?>
+        <form id="tb_<?php echo $this->get_name() ?>_settings">
+            <div id="tb_lightbox_options_tab_items">
+				<?php foreach( $subrow_form_settings as $setting_key => $setting ): ?>
+                    <li <?php if($setting_key==='setting'):?>class="current"<?php endif;?>>
+                        <a href="#tb_options_<?php  echo esc_attr( $setting_key ); ?>">
+							<?php  echo $setting['name']; ?>
+                        </a>
+                    </li>
+				<?php endforeach; ?>
+            </div>
+			<?php $this->get_save_btn( esc_html__( 'Done', 'themify' ) ); ?>
+			<?php foreach( $subrow_form_settings as $setting_key => $setting ): ?>
+                <div id="tb_options_<?php echo $setting_key; ?>" class="tb_options_tab_wrapper">
+					<?php
+					if ( 'styling' === $setting_key ){
+						self::get_breakpoint_switcher();
+					}
+					?>
+                    <div class="tb_options_tab_content">
+						<?php
+						themify_render_styling_settings( $setting['options'] );
+						if ('styling' === $setting_key):
+							?>
+                            <p>
+                                <a href="#" class="reset-styling">
+                                    <i class="ti-close"></i>
+									<?php _e('Reset Styling', 'themify') ?>
+                                </a>
+                            </p>
+						<?php endif; ?>
+                    </div>
+                </div>
+			<?php endforeach; ?>
+        </form>
+		<?php
+	}
 
 	/**
 	 * Get template Sub-Row.
@@ -43,9 +91,8 @@ class Themify_Builder_Component_Subrow extends Themify_Builder_Component_Base {
                     if (!empty($mod['gutter']) && $mod['gutter']!=='gutter-default') {
                         $row_content_classes[] = $mod['gutter'];
                     }
-                    if(!empty($mod['column_alignment'])){
-                        $row_content_classes[] = $mod['column_alignment'] ;
-                    }
+                    $row_content_classes[] =!empty($mod['column_alignment'])? $mod['column_alignment']:(function_exists('themify_theme_is_fullpage_scroll') && themify_theme_is_fullpage_scroll()?'col_align_middle':'col_align_top');
+                  
                     if($count>0){
                         $row_content_attr = self::get_directions_data($mod,$count);
                         $order_classes = self::get_order($count);
@@ -75,8 +122,10 @@ class Themify_Builder_Component_Subrow extends Themify_Builder_Component_Base {
                     
                     $row_content_classes = implode(' ',$row_content_classes);
                 }
+		$print_sub_row_classes = apply_filters('themify_builder_subrow_classes', $print_sub_row_classes, $mod, $builder_id);
 		$print_sub_row_classes = implode(' ', $print_sub_row_classes);
-		
+
+
 		// background video
                 $video_data = $is_styling && Themify_Builder_Model::is_premium()?Themify_Builder_Include::get_video_background($mod['styling']):'';
 
@@ -93,7 +142,7 @@ class Themify_Builder_Component_Subrow extends Themify_Builder_Component_Base {
                             $mod['row_order'] = $index;
                             $sub_row_order = $rows . '-' . $cols . '-' . $index;
                             do_action('themify_builder_background_styling',$builder_id,$mod,$sub_row_order,'subrow');
-                           
+                           self::show_frame($mod['styling']);
 			}
 		?>
                     <div class="subrow_inner<?php if(!Themify_Builder::$frontedit_active):?> <?php echo $row_content_classes?><?php endif;?>" <?php if(!empty($row_content_attr)):?> <?php echo self::get_element_attributes($row_content_attr)?><?php endif;?>>
